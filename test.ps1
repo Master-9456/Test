@@ -25,7 +25,7 @@ $form.Controls.Add($cancelButton)
 $label = New-Object System.Windows.Forms.Label
 $label.Location = New-Object System.Drawing.Point(10,20)
 $label.Size = New-Object System.Drawing.Size(280,20)
-$label.Text = 'Please enter the information in the space below:'
+$label.Text = 'Пожалуйста введите информацию:'
 $form.Controls.Add($label)
 
 $textBox = New-Object System.Windows.Forms.TextBox
