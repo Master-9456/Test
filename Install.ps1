@@ -1,1 +1,1 @@
-Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned –Force
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned –Force
