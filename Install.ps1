@@ -240,7 +240,7 @@ if ($ch -eq 'y') {
         New-Item -Path $env:LOCALAPPDATA\Spotify\ -Name "Update" -ItemType "file" -Value "STOPIT" | Out-Null
         $file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update
         $file.Attributes = "ReadOnly", "System"
-        Write-Host "Updates blocked successfully" -ForegroundColor Green
+        Write-Host "Обновления успешно заблокированы" -ForegroundColor Green
     }
     If ($migrator_exe -and $migrator_bak) {
         Remove-item $env:APPDATA\Spotify\SpotifyMigrator.bak -Recurse -Force
