@@ -11,7 +11,7 @@ if (!($tsl_check -match '^tls12$' )) {
 Write-Host "*****************"
 Write-Host "Автор: " -NoNewline
 Write-Host "@Nuzair46" -ForegroundColor DarkYellow
-Write-Host "Модификация: " -NoNewline
+Write-Host "Модифицировано: " -NoNewline
 Write-Host  "@Amd64fox" -ForegroundColor DarkYellow
 Write-Host "*****************"
 
@@ -148,7 +148,7 @@ if (!(test-path $SpotifyDirectory/chrome_elf.dll.bak)) {
     move $SpotifyDirectory\chrome_elf.dll $SpotifyDirectory\chrome_elf.dll.bak >$null 2>&1
 }
 
-Write-Host 'Patching Spotify...'
+Write-Host 'Модифицируем Spotify...'
 $patchFiles = "$PWD\chrome_elf.dll", "$PWD\config.ini"
 Copy-Item -LiteralPath $patchFiles -Destination "$SpotifyDirectory"
 
