@@ -337,15 +337,15 @@ if ($ch -eq 'y') {
 
     # cache-spotify.ps1
     New-Item -Path $env:APPDATA\Spotify\ -Name "cache-spotify.ps1" -ItemType "file" | Out-Null
-    add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '# Launch Spotify.exe and wait for the process to stop' -passthru | Out-Null
+    add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '# Запуск Spotify.exe и ожидание завершения процесса' -passthru | Out-Null
     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value 'Start-Process -FilePath $env:APPDATA\Spotify\Spotify.exe; wait-process -name Spotify' -passthru | Out-Null
     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '' -passthru | Out-Null
-    add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '# This block deletes files by the last access time to it, files that have not been changed and have not been opened for more than the number of days you have selected will be deleted. (number of days = seven)' -passthru | Out-Null
+    add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '# Этот блок удаляет файлы кэша по времени последнего доступа к нему, тоесть файлы которые не были изменены и не открывались больше указанного вами количества дней, будут удалены. (количество дней = seven)' -passthru | Out-Null
     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value 'If(Test-Path -Path $env:LOCALAPPDATA\Spotify\Data){' -passthru | Out-Null
     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value 'dir $env:LOCALAPPDATA\Spotify\Data -File -Recurse |? lastaccesstime -lt (get-date).AddDays(-7) |del' -passthru | Out-Null
     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '}' -passthru | Out-Null
     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '' -passthru | Out-Null
-    add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '# Delete the file mercury.db if its size exceeds 100 MB.' -passthru | Out-Null
+    add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '# Удаляем файл mercury.db если его размер привышает 100 MB.' -passthru | Out-Null
     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value 'If(Test-Path -Path $env:LOCALAPPDATA\Spotify\mercury.db){' -passthru | Out-Null
     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '$file_mercury = Get-Item "$env:LOCALAPPDATA\Spotify\mercury.db"' -passthru | Out-Null
     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value 'if ($file_mercury.length -gt 100MB) {dir $env:LOCALAPPDATA\Spotify\mercury.db -File -Recurse|del}' -passthru | Out-Null
