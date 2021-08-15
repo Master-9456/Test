@@ -1,6 +1,8 @@
 # Ignore errors from `Stop-Process`
 $PSDefaultParameterValues['Stop-Process:ErrorAction'] = 'SilentlyContinue'
 
+$PSDefaultParameterValues['*:Encoding'] = 'utf8'
+
 # Check Tls12
 $tsl_check = [Net.ServicePointManager]::SecurityProtocol 
 if (!($tsl_check -match '^tls12$' )) {
@@ -337,23 +339,21 @@ if ($ch -eq 'y') {
 
     # cache-spotify.ps1
     New-Item -Path $env:APPDATA\Spotify\ -Name "cache-spotify.ps1" -ItemType "file" | Out-Null
-    '# тварина Spotify.exe and wait for the process to stop' | Out-File $env:APPDATA\Spotify\cache-spotify.ps1 -Append -encoding default
-    #'# тварина Spotify.exe and wait for the process to stop' | Out-File $env:APPDATA\Spotify\cache-spotify.ps1 -Append -Encoding ASCII
-    # add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value 'Start-Process -FilePath $env:APPDATA\Spotify\Spotify.exe; wait-process -name Spotify' -passthru | Out-Null
-    # add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '' -passthru | Out-Null
-    # add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '# Этот блок удаляет файлы кэша по времени последнего доступа к нему, тоесть файлы которые не были изменены и не открывались больше указанного вами количества дней, будут удалены. (количество дней = seven)' -passthru | Out-Null
-    # add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value 'If(Test-Path -Path $env:LOCALAPPDATA\Spotify\Data){' -passthru | Out-Null
-    # add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value 'dir $env:LOCALAPPDATA\Spotify\Data -File -Recurse |? lastaccesstime -lt (get-date).AddDays(-7) |del' -passthru | Out-Null
-    # add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '}' -passthru | Out-Null
-    # add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '' -passthru | Out-Null
-    # add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '# Удаляем файл mercury.db если его размер привышает 100 MB.' -passthru | Out-Null
-    # add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value 'If(Test-Path -Path $env:LOCALAPPDATA\Spotify\mercury.db){' -passthru | Out-Null
-    # add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '$file_mercury = Get-Item "$env:LOCALAPPDATA\Spotify\mercury.db"' -passthru | Out-Null
-    # add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value 'if ($file_mercury.length -gt 100MB) {dir $env:LOCALAPPDATA\Spotify\mercury.db -File -Recurse|del}' -passthru | Out-Null
-    # add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '}' -passthru | Out-Null
-    # $cache_spotify = [System.IO.File]::ReadAllText("$env:APPDATA\Spotify\cache-spotify.ps1")
-    # $cache_spotify = $cache_spotify.Trim()
-    # [System.IO.File]::WriteAllText("$env:APPDATA\Spotify\cache-spotify.ps1", $cache_spotify)
+     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value 'Start-Process -FilePath $env:APPDATA\Spotify\Spotify.exe; wait-process -name Spotify' -passthru | Out-Null
+     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '' -passthru | Out-Null
+     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '# Этот блок удаляет файлы кэша по времени последнего доступа к нему, тоесть файлы которые не были изменены и не открывались больше указанного вами количества дней, будут удалены. (количество дней = seven)' -passthru | Out-Null
+     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value 'If(Test-Path -Path $env:LOCALAPPDATA\Spotify\Data){' -passthru | Out-Null
+     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value 'dir $env:LOCALAPPDATA\Spotify\Data -File -Recurse |? lastaccesstime -lt (get-date).AddDays(-7) |del' -passthru | Out-Null
+     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '}' -passthru | Out-Null
+     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '' -passthru | Out-Null
+     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '# Удаляем файл mercury.db если его размер привышает 100 MB.' -passthru | Out-Null
+     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value 'If(Test-Path -Path $env:LOCALAPPDATA\Spotify\mercury.db){' -passthru | Out-Null
+     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '$file_mercury = Get-Item "$env:LOCALAPPDATA\Spotify\mercury.db"' -passthru | Out-Null
+     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value 'if ($file_mercury.length -gt 100MB) {dir $env:LOCALAPPDATA\Spotify\mercury.db -File -Recurse|del}' -passthru | Out-Null
+     add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '}' -passthru | Out-Null
+     $cache_spotify = [System.IO.File]::ReadAllText("$env:APPDATA\Spotify\cache-spotify.ps1")
+     $cache_spotify = $cache_spotify.Trim()
+     [System.IO.File]::WriteAllText("$env:APPDATA\Spotify\cache-spotify.ps1", $cache_spotify)
 
     # Spotify.vbs
     New-Item -Path $env:APPDATA\Spotify\ -Name "Spotify.vbs" -ItemType "file" | Out-Null
