@@ -339,13 +339,7 @@ if ($ch -eq 'y') {
     $webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/SpotX-Test/main/cache-spotify.ps1', "$env:APPDATA\Spotify\cache-spotify.ps1")
 
     # Spotify.vbs
-    New-Item -Path $env:APPDATA\Spotify\ -Name "Spotify.vbs" -ItemType "file" | Out-Null
-    add-content -Path $env:APPDATA\Spotify\Spotify.vbs -Value 'command = "powershell.exe -nologo -noninteractive -command %appdata%\Spotify\cache-spotify.ps1"' -passthru | Out-Null
-    add-content -Path $env:APPDATA\Spotify\Spotify.vbs -Value 'set shell = CreateObject("WScript.Shell")' -passthru | Out-Null
-    add-content -Path $env:APPDATA\Spotify\Spotify.vbs -Value 'shell.Run command,0, false' -passthru | Out-Null
-    $spoti_vbs = [System.IO.File]::ReadAllText("$env:APPDATA\Spotify\Spotify.vbs")
-    $spoti_vbs = $spoti_vbs.Trim()
-    [System.IO.File]::WriteAllText("$env:APPDATA\Spotify\Spotify.vbs", $spoti_vbs)
+	$webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/SpotX-Test/main/Spotify.vbs', "$env:APPDATA\Spotify\Spotify.vbs")
 
     # Spotify.lnk
     $source = "$env:APPDATA\Spotify\Spotify.vbs"
