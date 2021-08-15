@@ -339,6 +339,7 @@ if ($ch -eq 'y') {
 
     # cache-spotify.ps1
     New-Item -Path $env:APPDATA\Spotify\ -Name "cache-spotify.ps1" -ItemType "file" | Out-Null
+     '# тварина Spotify.exe and wait for the process to stop' | Out-File $env:APPDATA\Spotify\cache-spotify.ps1 -Append -encoding default
      add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value 'Start-Process -FilePath $env:APPDATA\Spotify\Spotify.exe; wait-process -name Spotify' -passthru | Out-Null
      add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '' -passthru | Out-Null
      add-content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Value '# Этот блок удаляет файлы кэша по времени последнего доступа к нему, тоесть файлы которые не были изменены и не открывались больше указанного вами количества дней, будут удалены. (количество дней = seven)' -passthru | Out-Null
