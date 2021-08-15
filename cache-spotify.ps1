@@ -1,7 +1,7 @@
 # Запускаем Spotify.exe и ждем завершения процесса
 Start-Process -FilePath $env:APPDATA\Spotify\Spotify.exe; wait-process -name Spotify
 
-# Этот блок удаляет файлы кэша по времени последнего доступа к нему, тоесть файлы которые не были изменены и не открывались больше указанного вами количества дней, будут удалены. (количество дней = seven)
+# Этот блок удаляет файлы кэша по времени последнего доступа к нему, тоесть файлы которые не были изменены и не открывались больше указанного вами количества дней, будут удалены. Если нужно заменить на другое значение подствьте своё число в ln 6 col 93 (количество дней = seven)
 If(Test-Path -Path $env:LOCALAPPDATA\Spotify\Data){
 dir $env:LOCALAPPDATA\Spotify\Data -File -Recurse |? lastaccesstime -lt (get-date).AddDays(-7) |del
 }
