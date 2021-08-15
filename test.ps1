@@ -402,7 +402,7 @@ if ($ch -eq 'y') {
         }
         else {
             Write-Host "Снова неудачно" -ForegroundColor Red
-            Write-Host 'Пожалуйста, откройте файл cache-spotify.ps1 по этому пути "AppData\Роуминг\Spotify" и введите своё кол-во дней вручную'
+            Write-Host 'Пожалуйста, откройте файл cache-spotify.ps1 по этому пути "AppData\Roaming\Spotify" и введите своё кол-во дней вручную'
             Write-Host "Установка завершена" -ForegroundColor Green
             exit
         }
