@@ -8,12 +8,12 @@ if (!($tsl_check -match '^tls12$' )) {
 }
 
 
-Write-Host "*****************"
+Write-Host "********************"
 Write-Host "Автор: " -NoNewline
 Write-Host "@Nuzair46" -ForegroundColor DarkYellow
 Write-Host "Модификация: " -NoNewline
 Write-Host  "@Amd64fox" -ForegroundColor DarkYellow
-Write-Host "*****************"
+Write-Host "********************"
 
 
 $SpotifyDirectory = "$env:APPDATA\Spotify"
@@ -219,7 +219,7 @@ $migrator_bak = Test-Path -Path $env:APPDATA\Spotify\SpotifyMigrator.bak
 $migrator_exe = Test-Path -Path $env:APPDATA\Spotify\SpotifyMigrator.exe
 $Check_folder_file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update | SELECT Attributes 
 
-$ch = Read-Host -Prompt "Хотите заблокировать обновления ? (Y/N), Хочу опять разблокировать (U)"
+$ch = Read-Host -Prompt "Хотите заблокировать обновления ? (Y/N), Хочу разблокировать (U)"
 if ($ch -eq 'y') {
 
 
@@ -319,7 +319,7 @@ elseif (!($ch -eq 'n' -or $ch -eq 'y' -or $ch -eq 'u')) {
 # automatic cache clearing
 
 
-$ch = Read-Host -Prompt "Хотите установить автоматическую очистку кеша ? (Y/N) Удалить скрипт (U)"
+$ch = Read-Host -Prompt "Хотите установить автоматическую очистку кеша ? (Y/N) Хочу удалить (U)"
 if ($ch -eq 'y') {
 
 
@@ -351,7 +351,7 @@ if ($ch -eq 'y') {
     $Shortcut.Save()
 
     $ch = Read-Host -Prompt "Файлы кэша, которые не использовались более XX дней, будут удалены.
-    Введите количество дней от 1 до 100"
+    Пожалуйста, введите количество дней от 1 до 100"
     if ($ch -match "^[1-9][0-9]?$|^100$") {
         $file_cache_spotify_ps1 = Get-Content $env:APPDATA\Spotify\cache-spotify.ps1 -Raw
         $new_file_cache_spotify_ps1 = $file_cache_spotify_ps1 -replace 'seven', $ch -replace '-7', - $ch
@@ -359,14 +359,14 @@ if ($ch -eq 'y') {
         $contentcache_spotify_ps1 = [System.IO.File]::ReadAllText("$env:APPDATA\Spotify\cache-spotify.ps1")
         $contentcache_spotify_ps1 = $contentcache_spotify_ps1.Trim()
         [System.IO.File]::WriteAllText("$env:APPDATA\Spotify\cache-spotify.ps1", $contentcache_spotify_ps1)
-        Write-Host "Скрипт по очистки кэша был успешно установлен" -ForegroundColor Green
+        Write-Host "Скрипт для очистки кэша был успешно установлен" -ForegroundColor Green
         Write-Host "Установка завершена" -ForegroundColor Green
         exit
     }
     if (!($ch -match "^[1-9][0-9]?$|^100$")) {
         $ch = Read-Host -Prompt "Ой, неудачно, давайте попробуем еще раз
         Файлы кэша, которые не использовались более XX дней, будут удалены.
-    Введите количество дней от 1 до 100"
+    Пожалуйста, введите количество дней от 1 до 100"
         if ($ch -match "^[1-9][0-9]?$|^100$") {
             $file_cache_spotify_ps1 = Get-Content $env:APPDATA\Spotify\cache-spotify.ps1 -Raw
             $new_file_cache_spotify_ps1 = $file_cache_spotify_ps1 -replace 'seven', $ch -replace '-7', - $ch
@@ -374,7 +374,7 @@ if ($ch -eq 'y') {
             $contentcache_spotify_ps1 = [System.IO.File]::ReadAllText("$env:APPDATA\Spotify\cache-spotify.ps1")
             $contentcache_spotify_ps1 = $contentcache_spotify_ps1.Trim()
             [System.IO.File]::WriteAllText("$env:APPDATA\Spotify\cache-spotify.ps1", $contentcache_spotify_ps1)
-            Write-Host "Скрипт по очистки кэша был успешно установлен" -ForegroundColor Green
+            Write-Host "Скрипт для очистки кэша был успешно установлен" -ForegroundColor Green
             Write-Host "Установка завершена" -ForegroundColor Green
             exit
         }
