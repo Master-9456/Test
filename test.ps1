@@ -132,10 +132,11 @@ if (-not $spotifyInstalled) {
 
     $ErrorActionPreference = 'SilentlyContinue'  # Команда гасит легкие ошибки
 
-    if ($win7) {
+  # Удалить инсталятор после установки
+    if ($win8 -or $win7) {
         get-childitem -path "$env:LOCALAPPDATA\Microsoft\Windows\Temporary Internet Files\" -Recurse -Force -Filter  "SpotifyFullSetup*" | remove-item  -Force
     }
-    if ($win10) {
+    if ($win11 -or $win10 -or $win8_1) {
         get-childitem -path "$env:LOCALAPPDATA\Microsoft\Windows\INetCache\" -Recurse -Force -Filter  "SpotifyFullSetup*" | remove-item  -Force
     
     }
@@ -197,17 +198,6 @@ If (!($file_css -match 'patched by spotx')) {
 
 Rename-Item -path $env:APPDATA\Spotify\Apps\xpui.zip -NewName $env:APPDATA\Spotify\Apps\xpui.spa
 Remove-item $env:APPDATA\Spotify\Apps\temporary -Recurse
-
-# Shortcut bug
-If (!(Test-Path $env:USERPROFILE\Desktop\Spotify.lnk)) {
-    $source = "$env:APPDATA\Spotify\Spotify.exe"
-    $target = "$env:USERPROFILE\Desktop\Spotify.lnk"
-    $WshShell = New-Object -comObject WScript.Shell
-    $Shortcut = $WshShell.CreateShortcut($target)
-    $Shortcut.TargetPath = $source
-    $Shortcut.Save()
-} 
-
 
 
 
@@ -319,7 +309,6 @@ elseif (!($ch -eq 'n' -or $ch -eq 'y' -or $ch -eq 'u')) {
 
 
 
-
 # automatic cache clearing
 
 
@@ -354,6 +343,11 @@ if ($ch -eq 'y') {
     $Shortcut.IconLocation = "$env:APPDATA\Spotify\Spotify.exe"
     $Shortcut.TargetPath = $source
     $Shortcut.Save()
+
+
+
+
+
 
     $ch = Read-Host -Prompt "Cache files that have not been used for more than XX days will be deleted.
     Enter the number of days from 1 to 100"
@@ -421,6 +415,9 @@ if ($ch -eq 'u') {
         Write-Host "Installation completed" -ForegroundColor Green
         exit
     }
+    
+   
+    
     If (!($test_cache_spotify_ps -and $test_spotify_vbs)) {
         Write-Host "Oops, no cache clearing script found" 
         Write-Host "Installation completed" -ForegroundColor Green
