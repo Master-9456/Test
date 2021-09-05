@@ -169,9 +169,13 @@ Expand-Archive $env:APPDATA\Spotify\Apps\xpui.zip -DestinationPath $env:APPDATA\
 
 
 $xpui_js_last_write_time = dir $env:APPDATA\Spotify\Apps\temporary\xpui.js -File -Recurse
-$xpui_manifest_last_write_time = dir $env:APPDATA\Spotify\Apps\temporary\manifest.json -File -Recurse
+$xpui_licenses_last_write_time = dir $env:APPDATA\Spotify\Apps\temporary\licenses.html -File -Recurse
 
-if ($xpui_manifest_last_write_time.LastWriteTime -eq $xpui_js_last_write_time.LastWriteTime) {
+if ($xpui_licenses_last_write_time.LastWriteTime -eq $xpui_js_last_write_time.LastWriteTime) {
+
+if (test-path $env:APPDATA\Spotify\Apps\xpui.bak) {
+Remove-item $env:APPDATA\Spotify\Apps\xpui.bak -Recurse
+}
     Copy $env:APPDATA\Spotify\Apps\xpui.zip $env:APPDATA\Spotify\Apps\xpui.bak
 }
 
