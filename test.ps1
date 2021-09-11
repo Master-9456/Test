@@ -1,3 +1,4 @@
+
 # Ignore errors from `Stop-Process`
 $PSDefaultParameterValues['Stop-Process:ErrorAction'] = 'SilentlyContinue'
 
@@ -10,9 +11,7 @@ if (!($tsl_check -match '^tls12$' )) {
 
 Write-Host "*****************"
 Write-Host "Author: " -NoNewline
-Write-Host "@Nuzair46" -ForegroundColor DarkYellow
-Write-Host "Modified: " -NoNewline
-Write-Host  "@Amd64fox" -ForegroundColor DarkYellow
+Write-Host "@amd64fox" -ForegroundColor DarkYellow
 Write-Host "*****************"
 
 
@@ -161,25 +160,36 @@ Remove-Item -Recurse -LiteralPath $tempDirectory
 
 
 
+
 # Removing an empty block, "Upgrade button", "Upgrade to premium" menu
-   
 
 Rename-Item -path $env:APPDATA\Spotify\Apps\xpui.spa -NewName $env:APPDATA\Spotify\Apps\xpui.zip
-Expand-Archive $env:APPDATA\Spotify\Apps\xpui.zip -DestinationPath $env:APPDATA\Spotify\Apps\temporary
+if (Test-Path $env:APPDATA\Spotify\Apps\temporary) {
+    Remove-item $env:APPDATA\Spotify\Apps\temporary -Recurse
+}
+New-Item -Path $env:APPDATA\Spotify\Apps\temporary -ItemType Directory | Out-Null
+
+# Достаем из архива 2 файла
+$shell = New-Object -Com Shell.Application 
+$shell.NameSpace("$(resolve-path $env:APPDATA\Spotify\Apps\xpui.zip)").Items() | where Name -eq "xpui.js" | ? {
+    $shell.NameSpace("$env:APPDATA\Spotify\Apps\temporary").copyhere($_) } 
+$shell.NameSpace("$(resolve-path $env:APPDATA\Spotify\Apps\xpui.zip)").Items() | where Name -eq "xpui-routes-offline-browse.css" | ? {
+    $shell.NameSpace("$env:APPDATA\Spotify\Apps\temporary").copyhere($_) } 
 
 
+
+# Делает резервную копию xpui.spa, также если бейкап устарел то заменяет старую на новую версию
 $xpui_js_last_write_time = dir $env:APPDATA\Spotify\Apps\temporary\xpui.js -File -Recurse
-$xpui_licenses_last_write_time = dir $env:APPDATA\Spotify\Apps\temporary\licenses.html -File -Recurse
+$xpui_licenses_last_write_time = dir $env:APPDATA\Spotify\Apps\temporary\xpui-routes-offline-browse.css -File -Recurse
 
 if ($xpui_licenses_last_write_time.LastWriteTime -eq $xpui_js_last_write_time.LastWriteTime) {
 
-if (test-path $env:APPDATA\Spotify\Apps\xpui.bak) {
-Remove-item $env:APPDATA\Spotify\Apps\xpui.bak -Recurse
-}
+    if (test-path $env:APPDATA\Spotify\Apps\xpui.bak) {
+        Remove-item $env:APPDATA\Spotify\Apps\xpui.bak -Recurse
+    }
     Copy $env:APPDATA\Spotify\Apps\xpui.zip $env:APPDATA\Spotify\Apps\xpui.bak
 }
 
-    
 
 $file_js = Get-Content $env:APPDATA\Spotify\Apps\temporary\xpui.js -Raw
 If (!($file_js -match 'patched by spotx')) {
@@ -194,22 +204,10 @@ If (!($file_js -match 'patched by spotx')) {
     Compress-Archive -Path $env:APPDATA\Spotify\Apps\temporary\xpui.js -Update -DestinationPath $env:APPDATA\Spotify\Apps\xpui.zip
 }
 
-<#
-# Удаление меню (РЕЗЕРВНЫЙ)
-$file_css = Get-Content $env:APPDATA\Spotify\Apps\temporary\xpui.css -Raw
-If (!($file_css -match 'patched by spotx')) {
-    $new_css = $file_css -replace 'table{border-collapse:collapse;border-spacing:0}', 'table{border-collapse:collapse;border-spacing:0}[target="_blank"]{display:none !important;}'
-    Set-Content -Path $env:APPDATA\Spotify\Apps\temporary\xpui.css -Force -Value $new_css
-    add-content -Path $env:APPDATA\Spotify\Apps\temporary\xpui.css -Value '/* Patched by SpotX */' -passthru | Out-Null
-    $contentcss = [System.IO.File]::ReadAllText("$env:APPDATA\Spotify\Apps\temporary\xpui.css")
-    $contentcss = $contentcss.Trim()
-    [System.IO.File]::WriteAllText("$env:APPDATA\Spotify\Apps\temporary\xpui.css", $contentcss)
-    Compress-Archive -Path $env:APPDATA\Spotify\Apps\temporary\xpui.css -Update -DestinationPath $env:APPDATA\Spotify\Apps\xpui.zip
-}
-#>
-
 Rename-Item -path $env:APPDATA\Spotify\Apps\xpui.zip -NewName $env:APPDATA\Spotify\Apps\xpui.spa
 Remove-item $env:APPDATA\Spotify\Apps\temporary -Recurse
+
+
 
 
 # Shortcut bug
@@ -487,3 +485,5 @@ else {
 }
 
 exit
+
+
