@@ -87,7 +87,7 @@ try {
 }
 catch {
     Write-Output ''
-    Sleep
+    Start-Sleep
 }
 
 Expand-Archive -Force -LiteralPath "$PWD\chrome_elf.zip" -DestinationPath $PWD
@@ -142,7 +142,7 @@ if (-not $spotifyInstalled) {
 }
 
 if (!(test-path $SpotifyDirectory/chrome_elf.dll.bak)) {
-    move $SpotifyDirectory\chrome_elf.dll $SpotifyDirectory\chrome_elf.dll.bak >$null 2>&1
+    Move-Item $SpotifyDirectory\chrome_elf.dll $SpotifyDirectory\chrome_elf.dll.bak >$null 2>&1
 }
 
 Write-Host 'Patching Spotify...'
@@ -153,9 +153,8 @@ $tempDirectory = $PWD
 Pop-Location
 
 
-sleep -Milliseconds 200
+Start-Sleep -Milliseconds 200
 Remove-Item -Recurse -LiteralPath $tempDirectory 
-
 
 
 
@@ -170,23 +169,23 @@ New-Item -Path $env:APPDATA\Spotify\Apps\temporary -ItemType Directory | Out-Nul
 
 # Достаем из архива 2 файла
 $shell = New-Object -Com Shell.Application 
-$shell.NameSpace("$(resolve-path $env:APPDATA\Spotify\Apps\xpui.zip)").Items() | where Name -eq "xpui.js" | ? {
+$shell.NameSpace("$(resolve-path $env:APPDATA\Spotify\Apps\xpui.zip)").Items() | Where-Object Name -eq "xpui.js" | Where-Object {
     $shell.NameSpace("$env:APPDATA\Spotify\Apps\temporary").copyhere($_) } 
-$shell.NameSpace("$(resolve-path $env:APPDATA\Spotify\Apps\xpui.zip)").Items() | where Name -eq "xpui-routes-offline-browse.css" | ? {
+$shell.NameSpace("$(resolve-path $env:APPDATA\Spotify\Apps\xpui.zip)").Items() | Where-Object Name -eq "xpui-routes-offline-browse.css" | Where-Object {
     $shell.NameSpace("$env:APPDATA\Spotify\Apps\temporary").copyhere($_) } 
 
 
 
 # Делает резервную копию xpui.spa, также если бейкап устарел то заменяет старую на новую версию
-$xpui_js_last_write_time = dir $env:APPDATA\Spotify\Apps\temporary\xpui.js -File -Recurse
-$xpui_licenses_last_write_time = dir $env:APPDATA\Spotify\Apps\temporary\xpui-routes-offline-browse.css -File -Recurse
+$xpui_js_last_write_time = Get-ChildItem $env:APPDATA\Spotify\Apps\temporary\xpui.js -File -Recurse
+$xpui_licenses_last_write_time = Get-ChildItem $env:APPDATA\Spotify\Apps\temporary\xpui-routes-offline-browse.css -File -Recurse
 
 if ($xpui_licenses_last_write_time.LastWriteTime -eq $xpui_js_last_write_time.LastWriteTime) {
 
     if (test-path $env:APPDATA\Spotify\Apps\xpui.bak) {
         Remove-item $env:APPDATA\Spotify\Apps\xpui.bak -Recurse
     }
-    Copy $env:APPDATA\Spotify\Apps\xpui.zip $env:APPDATA\Spotify\Apps\xpui.bak
+    Copy-Item $env:APPDATA\Spotify\Apps\xpui.zip $env:APPDATA\Spotify\Apps\xpui.bak
 }
 
 
@@ -224,7 +223,6 @@ Remove-item $env:APPDATA\Spotify\Apps\temporary -Recurse
 
 
 
-
 # Shortcut bug
 $ErrorActionPreference = 'SilentlyContinue' 
 
@@ -243,7 +241,6 @@ If (!(Test-Path $env:USERPROFILE\Desktop\Spotify.lnk)) {
 
 
 
-
 # Block updates
 
 $ErrorActionPreference = 'SilentlyContinue'  # Команда гасит легкие ошибки
@@ -254,7 +251,7 @@ $update_directory = Test-Path -Path $env:LOCALAPPDATA\Spotify
 $update_directory_file = Test-Path -Path $env:LOCALAPPDATA\Spotify\Update
 $migrator_bak = Test-Path -Path $env:APPDATA\Spotify\SpotifyMigrator.bak  
 $migrator_exe = Test-Path -Path $env:APPDATA\Spotify\SpotifyMigrator.exe
-$Check_folder_file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update | SELECT Attributes 
+$Check_folder_file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update | Select-Object Attributes 
 
 $ch = Read-Host -Prompt "Want to block updates ? (Y/N), Unlock updates (U)"
 if ($ch -eq 'y') {
@@ -367,7 +364,7 @@ if ($ch -eq 'y') {
 
     $test_cache_spotify_ps = Test-Path -Path $env:APPDATA\Spotify\cache-spotify.ps1
     $test_spotify_vbs = Test-Path -Path $env:APPDATA\Spotify\Spotify.vbs
-    $desktop_folder = Get-ItemProperty -Path $env:USERPROFILE\Desktop | SELECT Attributes 
+    $desktop_folder = Get-ItemProperty -Path $env:USERPROFILE\Desktop | Select-Object Attributes 
     
 
     # Если папки по умолчанию Dekstop не существует, то установку кэша отменить.
@@ -381,7 +378,7 @@ if ($ch -eq 'y') {
         If ($test_spotify_vbs) {
             Remove-item $env:APPDATA\Spotify\Spotify.vbs -Recurse -Force
         }
-        sleep -Milliseconds 200
+        Start-Sleep -Milliseconds 200
 
 
         # cache-spotify.ps1
@@ -389,7 +386,6 @@ if ($ch -eq 'y') {
 
         # Spotify.vbs
         $webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/SpotX/main/Spotify.vbs', "$env:APPDATA\Spotify\Spotify.vbs")
-
 
 
         # Spotify.lnk
@@ -402,9 +398,6 @@ if ($ch -eq 'y') {
         $Shortcut2.IconLocation = "$env:APPDATA\Spotify\Spotify.exe"
         $Shortcut2.TargetPath = $source2
         $Shortcut2.Save()
-
-
-
 
 
         $ch = Read-Host -Prompt "Cache files that have not been used for more than XX days will be deleted.
@@ -484,9 +477,6 @@ if ($ch -eq 'u') {
 
 
 
-
-
-
     If (!($test_cache_spotify_ps -and $test_spotify_vbs)) {
         Write-Host "Oops, no cache clearing script found" 
         Write-Host "Installation completed" -ForegroundColor Green
@@ -500,5 +490,3 @@ else {
 }
 
 exit
-
-
