@@ -10,7 +10,7 @@ if (!($tsl_check -match '^tls12$' )) {
 
 Write-Host "*****************"
 Write-Host "Author: " -NoNewline
-Write-Host "@amd64fox" -ForegroundColor DarkYellow
+Write-Host "@Amd64fox" -ForegroundColor DarkYellow
 Write-Host "*****************"
 
 
@@ -131,10 +131,10 @@ if (-not $spotifyInstalled) {
     $ErrorActionPreference = 'SilentlyContinue'  # Команда гасит легкие ошибки
 
     # Удалить инсталятор после установки
-    if ($win8 -or $win7) {
+    if (test-path $env:LOCALAPPDATA\Microsoft\Windows\Temporary Internet Files\) {
         get-childitem -path "$env:LOCALAPPDATA\Microsoft\Windows\Temporary Internet Files\" -Recurse -Force -Filter  "SpotifyFullSetup*" | remove-item  -Force
     }
-    if ($win11 -or $win10 -or $win8_1) {
+    if (test-path $env:LOCALAPPDATA\Microsoft\Windows\INetCache\) {
         get-childitem -path "$env:LOCALAPPDATA\Microsoft\Windows\INetCache\" -Recurse -Force -Filter  "SpotifyFullSetup*" | remove-item  -Force
     
     }
@@ -161,28 +161,33 @@ Remove-Item -Recurse -LiteralPath $tempDirectory
 
 # Removing an empty block, "Upgrade button", "Upgrade to premium" menu
 
+$zipFilePath = "$env:APPDATA\Spotify\Apps\xpui.zip"
+$extractPath = "$env:APPDATA\Spotify\Apps\temporary"
+$file1 = "$env:APPDATA\Spotify\Apps\temporary\xpui.js"
+
 Rename-Item -path $env:APPDATA\Spotify\Apps\xpui.spa -NewName $env:APPDATA\Spotify\Apps\xpui.zip
+
+Add-Type -Assembly 'System.IO.Compression.FileSystem'
+
+
 if (Test-Path $env:APPDATA\Spotify\Apps\temporary) {
     Remove-item $env:APPDATA\Spotify\Apps\temporary -Recurse
 }
 New-Item -Path $env:APPDATA\Spotify\Apps\temporary -ItemType Directory | Out-Null
 
-# Достаем из архива 2 файла
-$shell = New-Object -Com Shell.Application 
-$shell.NameSpace("$(resolve-path $env:APPDATA\Spotify\Apps\xpui.zip)").Items() | Where-Object Name -eq "xpui.js" | Where-Object {
-    $shell.NameSpace("$env:APPDATA\Spotify\Apps\temporary").copyhere($_) } 
-$shell.NameSpace("$(resolve-path $env:APPDATA\Spotify\Apps\xpui.zip)").Items() | Where-Object Name -eq "xpui-routes-offline-browse.css" | Where-Object {
-    $shell.NameSpace("$env:APPDATA\Spotify\Apps\temporary").copyhere($_) } 
 
-
+$zip = [System.IO.Compression.ZipFile]::Open($zipFilePath, 'read')
+$zip.Entries | Where-Object Name -like xpui.js | ForEach-Object{[System.IO.Compression.ZipFileExtensions]::ExtractToFile($_, "$extractPath\$($_.Name)", $true)}
+$zip.Entries | Where-Object Name -like xpui-routes-offline-browse.css | ForEach-Object{[System.IO.Compression.ZipFileExtensions]::ExtractToFile($_, "$extractPath\$($_.Name)", $true)}
+$zip.Dispose()
 
 # Делает резервную копию xpui.spa, также если бейкап устарел то заменяет старую на новую версию
 $xpui_js_last_write_time = Get-ChildItem $env:APPDATA\Spotify\Apps\temporary\xpui.js -File -Recurse
-$xpui_licenses_last_write_time = Get-ChildItem $env:APPDATA\Spotify\Apps\temporary\xpui-routes-offline-browse.css -File -Recurse
+$xpui_routes_offline_browse_last_write_time = Get-ChildItem $env:APPDATA\Spotify\Apps\temporary\xpui-routes-offline-browse.css -File -Recurse
 
-if ($xpui_licenses_last_write_time.LastWriteTime -eq $xpui_js_last_write_time.LastWriteTime) {
+if ($xpui_routes_offline_browse_last_write_time.LastWriteTime -eq $xpui_js_last_write_time.LastWriteTime) {
 
-    if (test-path $env:APPDATA\Spotify\Apps\xpui.bak) {
+if (test-path $env:APPDATA\Spotify\Apps\xpui.bak) {
         Remove-item $env:APPDATA\Spotify\Apps\xpui.bak -Recurse
     }
     Copy-Item $env:APPDATA\Spotify\Apps\xpui.zip $env:APPDATA\Spotify\Apps\xpui.bak
@@ -204,7 +209,7 @@ If (!($file_js -match 'patched by spotx')) {
 
 
 <#
-# Удаление меню (РЕЗЕРВНЫЙ)
+# Удаление меню через css (РЕЗЕРВНЫЙ)
 $file_css = Get-Content $env:APPDATA\Spotify\Apps\temporary\xpui.css -Raw
 If (!($file_css -match 'patched by spotx')) {
     $new_css = $file_css -replace 'table{border-collapse:collapse;border-spacing:0}', 'table{border-collapse:collapse;border-spacing:0}[target="_blank"]{display:none !important;}'
