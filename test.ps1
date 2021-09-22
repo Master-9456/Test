@@ -177,8 +177,8 @@ New-Item -Path $env:APPDATA\Spotify\Apps\temporary -ItemType Directory | Out-Nul
 
 
 $zip = [System.IO.Compression.ZipFile]::Open($zipFilePath, 'read')
-$zip.Entries | Where-Object Name -like xpui.js | ForEach-Object{[System.IO.Compression.ZipFileExtensions]::ExtractToFile($_, "$extractPath\$($_.Name)", $true)}
-$zip.Entries | Where-Object Name -like xpui-routes-offline-browse.css | ForEach-Object{[System.IO.Compression.ZipFileExtensions]::ExtractToFile($_, "$extractPath\$($_.Name)", $true)}
+$zip.Entries | Where-Object Name -eq xpui.js | ForEach-Object{[System.IO.Compression.ZipFileExtensions]::ExtractToFile($_, "$extractPath\$($_.Name)", $true)}
+$zip.Entries | Where-Object Name -eq xpui-routes-offline-browse.css | ForEach-Object{[System.IO.Compression.ZipFileExtensions]::ExtractToFile($_, "$extractPath\$($_.Name)", $true)}
 $zip.Dispose()
 
 # Делает резервную копию xpui.spa, также если бейкап устарел то заменяет старую на новую версию
