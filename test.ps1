@@ -222,6 +222,24 @@ Rename-Item -path $env:APPDATA\Spotify\Apps\xpui.zip -NewName $env:APPDATA\Spoti
 Remove-item $env:APPDATA\Spotify\Apps\temporary -Recurse
 
 
+# Если папки по умолчанию Dekstop не существует, то найти её через реестр.
+$ErrorActionPreference = 'SilentlyContinue' 
+
+$desktop_folder = "$env:USERPROFILE\Desktop"
+$desktop_folderif = Get-ItemProperty -Path $env:USERPROFILE\Desktop | Select-Object Attributes 
+
+if (!($desktop_folderif -match '\bDirectory\b')) {  
+
+
+    $desktop_folder_HKCU = Get-ItemProperty –Path “HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"
+    $desktop_folder = $desktop_folder_HKCU.'{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}'
+
+}
+
+
+
+
+
 
 # Shortcut bug
 $ErrorActionPreference = 'SilentlyContinue' 
@@ -229,7 +247,7 @@ $ErrorActionPreference = 'SilentlyContinue'
 If (!(Test-Path $env:USERPROFILE\Desktop\Spotify.lnk)) {
   
     $source = "$env:APPDATA\Spotify\Spotify.exe"
-    $target = "$env:USERPROFILE\Desktop\Spotify.lnk"
+    $target = "$desktop_folder\Desktop\Spotify.lnk"
     $WorkingDir = "$env:APPDATA\Spotify"
     $WshShell = New-Object -comObject WScript.Shell
     $Shortcut = $WshShell.CreateShortcut($target)
@@ -425,7 +443,7 @@ if ($ch -eq 'y') {
 
         # Spotify.lnk
         $source2 = "$env:APPDATA\Spotify\Spotify.vbs"
-        $target2 = "$env:USERPROFILE\Desktop\Spotify.lnk"
+        $target2 = "$desktop_folder\Desktop\Spotify.lnk"
         $WorkingDir2 = "$env:APPDATA\Spotify"
         $WshShell2 = New-Object -comObject WScript.Shell
         $Shortcut2 = $WshShell2.CreateShortcut($target2)
@@ -497,7 +515,7 @@ if ($ch -eq 'u') {
         Remove-item $env:APPDATA\Spotify\Spotify.vbs -Recurse -Force
 
         $source3 = "$env:APPDATA\Spotify\Spotify.exe"
-        $target3 = "$env:USERPROFILE\Desktop\Spotify.lnk"
+        $target3 = "$desktop_folder\Desktop\Spotify.lnk"
         $WorkingDir3 = "$env:APPDATA\Spotify"
         $WshShell3 = New-Object -comObject WScript.Shell
         $Shortcut3 = $WshShell3.CreateShortcut($target3)
