@@ -248,7 +248,7 @@ $ErrorActionPreference = 'SilentlyContinue'
 If (!(Test-Path $env:USERPROFILE\Desktop\Spotify.lnk)) {
   
     $source = "$env:APPDATA\Spotify\Spotify.exe"
-    $target = "$desktop_folder\Desktop\Spotify.lnk"
+    $target = "$desktop_folder\Spotify.lnk"
     $WorkingDir = "$env:APPDATA\Spotify"
     $WshShell = New-Object -comObject WScript.Shell
     $Shortcut = $WshShell.CreateShortcut($target)
@@ -444,7 +444,7 @@ if ($ch -eq 'y') {
 
     # Spotify.lnk
     $source2 = "$env:APPDATA\Spotify\Spotify.vbs"
-    $target2 = "$desktop_folder\Desktop\Spotify.lnk"
+    $target2 = "$desktop_folder\Spotify.lnk"
     $WorkingDir2 = "$env:APPDATA\Spotify"
     $WshShell2 = New-Object -comObject WScript.Shell
     $Shortcut2 = $WshShell2.CreateShortcut($target2)
@@ -511,7 +511,7 @@ if ($ch -eq 'u') {
         Remove-item $env:APPDATA\Spotify\Spotify.vbs -Recurse -Force
 
         $source3 = "$env:APPDATA\Spotify\Spotify.exe"
-        $target3 = "$desktop_folder\Desktop\Spotify.lnk"
+        $target3 = "$desktop_folder\Spotify.lnk"
         $WorkingDir3 = "$env:APPDATA\Spotify"
         $WshShell3 = New-Object -comObject WScript.Shell
         $Shortcut3 = $WshShell3.CreateShortcut($target3)
