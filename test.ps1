@@ -419,7 +419,7 @@ if ($ch -eq 'y') {
 
     $test_cache_spotify_ps = Test-Path -Path $env:APPDATA\Spotify\cache-spotify.ps1
     $test_spotify_vbs = Test-Path -Path $env:APPDATA\Spotify\Spotify.vbs
-    $desktop_folder = Get-ItemProperty -Path $env:USERPROFILE\Desktop | Select-Object Attributes 
+    
     
 
    
