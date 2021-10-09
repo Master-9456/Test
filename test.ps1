@@ -245,7 +245,7 @@ if (!(Test-Path $desktop_folder)) {
 # Shortcut bug
 $ErrorActionPreference = 'SilentlyContinue' 
 
-If (!(Test-Path $env:USERPROFILE\Desktop\Spotify.lnk)) {
+If (!(Test-Path $desktop_folder\Spotify.lnk)) {
   
     $source = "$env:APPDATA\Spotify\Spotify.exe"
     $target = "$desktop_folder\Spotify.lnk"
