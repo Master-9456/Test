@@ -233,8 +233,11 @@ $ErrorActionPreference = 'SilentlyContinue'
 
     $desktop_folder = "$env:USERPROFILE\Desktop"
 }
-else {
-    $regedit_desktop_folder = Get-ItemProperty –Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"
+
+$regedit_desktop_folder = Get-ItemProperty –Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"
+ 
+ 
+If (Test-Path $regedit_desktop_folder.'{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}') {
     $desktop_folder = $regedit_desktop_folder.'{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}'
 }
 
