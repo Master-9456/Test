@@ -224,13 +224,13 @@ Remove-item $env:APPDATA\Spotify\Apps\temporary -Recurse
 
 
 
-# Если папки по умолчанию Dekstop не существует, то установку кэша отменить.
+# Если папки по умолчанию Dekstop не существует, то найти её через ключ реестра.
 $ErrorActionPreference = 'SilentlyContinue' 
 
 $desktop_folder = "$env:USERPROFILE\Desktop"
 $desktop_folderif = Get-ItemProperty -Path $env:USERPROFILE\Desktop | Select-Object Attributes 
 
-if (!($desktop_folderif -match '\bDirectory\b')) {  
+if (!(Test-Path $desktop_folder)) {  
 
 
     $HKCU_desktop_folder = Get-ItemProperty –Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"
