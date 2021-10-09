@@ -240,7 +240,7 @@ else {
 
 
 
-Write-Host $desktop_folder
+Write-Host "TEST" $desktop_folder
 
 # Shortcut bug
 $ErrorActionPreference = 'SilentlyContinue' 
