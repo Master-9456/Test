@@ -228,7 +228,7 @@ Remove-item $env:APPDATA\Spotify\Apps\temporary -Recurse
 $ErrorActionPreference = 'SilentlyContinue' 
 
 $desktop_folder = "$env:USERPROFILE\Desktop"
-$desktop_folderif = Get-ItemProperty -Path $env:USERPROFILE\Desktop | Select-Object Attributes 
+
 
 if (!(Test-Path $desktop_folder)) {  
 
