@@ -227,10 +227,9 @@ Remove-item $env:APPDATA\Spotify\Apps\temporary -Recurse
 # Если папки по умолчанию Dekstop не существует, то найти её через ключ реестра.
 $ErrorActionPreference = 'SilentlyContinue' 
 
-$desktop_folder = "$env:USERPROFILE\Desktop"
 
 
-if (!(Test-Path $desktop_folder)) {  
+if (!(Test-Path "$env:USERPROFILE\Desktop")) {  
 
 
     $HKCU_desktop_folder = Get-ItemProperty –Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"
@@ -239,6 +238,8 @@ if (!(Test-Path $desktop_folder)) {
 }
 
 
+
+$desktop_folder = "$env:USERPROFILE\Desktop"
 
 
 
