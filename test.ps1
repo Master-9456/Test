@@ -229,17 +229,16 @@ $ErrorActionPreference = 'SilentlyContinue'
 
 
 
-if (Test-Path "$env:USERPROFILE\Desktop") {  
+     if (Test-Path "$env:USERPROFILE\Desktop") {  
 
     $desktop_folder = "$env:USERPROFILE\Desktop"
 }
 else {
-    $HKCU_desktop_folder = Get-ItemProperty –Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"
-    $desktop_folder = $HKCU_desktop_folder.'{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}'
+    $regedit_desktop_folder = Get-ItemProperty –Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"
+    $desktop_folder = $regedit_desktop_folder.Desktop
 }
 
 
-$desktop_folder = "$env:USERPROFILE\Desktop"
 
 
 
@@ -257,7 +256,6 @@ If (!(Test-Path $desktop_folder\Spotify.lnk)) {
     $Shortcut.TargetPath = $source
     $Shortcut.Save()      
 }
-
 
 
 # Block updates
