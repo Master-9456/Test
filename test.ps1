@@ -7,7 +7,7 @@
 $regedit_desktop_folder = Get-ItemProperty –Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"
 $regedit_desktop = $regedit_desktop_folder.'{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}'
  
-If (Test-Path $regedit_desktop) {
+If (!(Test-Path "$env:USERPROFILE\Desktop")) {
     $desktop_folder = $regedit_desktop_folder.'{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}'
     '2'
 }
