@@ -255,7 +255,7 @@ If ($ch -eq 'r') {
 
 
 Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup
-"`n" 
+
 
 Stop-Process -Name Spotify >$null 2>&1
 Stop-Process -Name SpotifyWebHelper >$null 2>&1
