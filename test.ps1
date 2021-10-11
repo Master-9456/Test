@@ -223,11 +223,17 @@ Write-Host "Downloading Spotify"
 Write-Host "Please wait..."
 "`n" 
 
+try {
 
     Start-BitsTransfer -Source  $result2.Matches.Value[0] -Destination "$PWD\SpotifySetup.exe"  -DisplayName "Downloading Spotify" -Description "$vernew "
+    )
+}
 
-
-
+}
+catch {
+    Write-Output ''
+    Start-Sleep
+}
 
 
 mkdir $SpotifyDirectory >$null 2>&1
