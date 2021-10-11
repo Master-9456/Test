@@ -219,9 +219,9 @@ Remove-Item -LiteralPath "$PWD\chrome_elf.zip"
 
     
 Write-Host "Downloading and install Spotify"
-"`n" 
+
 Write-Host "Please wait..."
-"`n" 
+
 
 try {
 
