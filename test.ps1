@@ -7,7 +7,7 @@ if (!($tsl_check -match '^tls12$' )) {
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 }
 
-
+Import-Module BitsTransfer
 
 
 
