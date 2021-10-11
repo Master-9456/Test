@@ -7,9 +7,6 @@ if (!($tsl_check -match '^tls12$' )) {
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 }
 
-Import-Module BitsTransfer
-
-
 
 
 Write-Host "*****************" -ForegroundColor DarkYellow
@@ -217,7 +214,7 @@ Remove-Item -LiteralPath "$PWD\chrome_elf.zip"
 
 
 
-    
+Import-Module BitsTransfer
 Write-Host "Downloading Spotify"
 "`n" 
 Write-Host "Please wait..."
