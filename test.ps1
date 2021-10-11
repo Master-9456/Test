@@ -254,7 +254,7 @@ If ($ch -eq 'r') {
 
 
 
-Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup;  Write-Host "Installing Spotify..."
+Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup; Write-Host "Installing Spotify..."
 "`n" 
 
 Stop-Process -Name Spotify >$null 2>&1
@@ -394,70 +394,70 @@ $folder_update_access = Get-Acl $env:LOCALAPPDATA\Spotify\Update
 
 
 
-    # Если была установка клиента 
-    if (!($update_directory)) {
+# Если была установка клиента 
+if (!($update_directory)) {
 
-        # Создать папку Spotify в Local
-        New-Item -Path $env:LOCALAPPDATA -Name "Spotify" -ItemType "directory" | Out-Null
+    # Создать папку Spotify в Local
+    New-Item -Path $env:LOCALAPPDATA -Name "Spotify" -ItemType "directory" | Out-Null
 
-        #Создать файл Update
+    #Создать файл Update
+    New-Item -Path $env:LOCALAPPDATA\Spotify\ -Name "Update" -ItemType "file" -Value "STOPIT" | Out-Null
+    $file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update
+    $file.Attributes = "ReadOnly", "System"
+      
+    # Если оба файлав мигратора существуют то .bak удалить, а .exe переименовать в .bak
+    If ($migrator_exe -and $migrator_bak) {
+        Remove-item $env:APPDATA\Spotify\SpotifyMigrator.bak -Recurse -Force
+        Rename-Item -path $env:APPDATA\Spotify\SpotifyMigrator.exe -NewName $env:APPDATA\Spotify\SpotifyMigrator.bak
+    }
+
+    # Если есть только мигратор .exe то переименовать его в .bak
+    if ($migrator_exe) {
+        Rename-Item -path $env:APPDATA\Spotify\SpotifyMigrator.exe -NewName $env:APPDATA\Spotify\SpotifyMigrator.bak
+    }
+
+}
+
+
+# Если клиент уже был 
+If ($update_directory) {
+
+
+    #Удалить папку Update если она есть
+    if ($Check_folder_file -match '\bDirectory\b') {  
+
+        #Если у папки Update заблокированы права то разблокировать 
+        if ($folder_update_access.AccessToString -match 'Deny') {
+
+        ($ACL = Get-Acl $env:LOCALAPPDATA\Spotify\Update).access | ForEach-Object {
+                $Users = $_.IdentityReference 
+                $ACL.PurgeAccessRules($Users) }
+            $ACL | Set-Acl $env:LOCALAPPDATA\Spotify\Update
+        }
+        Remove-item $env:LOCALAPPDATA\Spotify\Update -Recurse -Force
+    } 
+
+    #Создать файл Update если его нет
+    if (!($Check_folder_file -match '\bSystem\b|' -and $Check_folder_file -match '\bReadOnly\b')) {  
         New-Item -Path $env:LOCALAPPDATA\Spotify\ -Name "Update" -ItemType "file" -Value "STOPIT" | Out-Null
         $file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update
         $file.Attributes = "ReadOnly", "System"
-      
-        # Если оба файлав мигратора существуют то .bak удалить, а .exe переименовать в .bak
-        If ($migrator_exe -and $migrator_bak) {
-            Remove-item $env:APPDATA\Spotify\SpotifyMigrator.bak -Recurse -Force
-            Rename-Item -path $env:APPDATA\Spotify\SpotifyMigrator.exe -NewName $env:APPDATA\Spotify\SpotifyMigrator.bak
-        }
-
-        # Если есть только мигратор .exe то переименовать его в .bak
-        if ($migrator_exe) {
-            Rename-Item -path $env:APPDATA\Spotify\SpotifyMigrator.exe -NewName $env:APPDATA\Spotify\SpotifyMigrator.bak
-        }
-
+    }
+    # Если оба файлав мигратора существуют то .bak удалить, а .exe переименовать в .bak
+    If ($migrator_exe -and $migrator_bak) {
+        Remove-item $env:APPDATA\Spotify\SpotifyMigrator.bak -Recurse -Force
+        Rename-Item -path $env:APPDATA\Spotify\SpotifyMigrator.exe -NewName $env:APPDATA\Spotify\SpotifyMigrator.bak
     }
 
-
-    # Если клиент уже был 
-    If ($update_directory) {
-
-
-        #Удалить папку Update если она есть
-        if ($Check_folder_file -match '\bDirectory\b') {  
-
-            #Если у папки Update заблокированы права то разблокировать 
-            if ($folder_update_access.AccessToString -match 'Deny') {
-
-        ($ACL = Get-Acl $env:LOCALAPPDATA\Spotify\Update).access | ForEach-Object {
-                    $Users = $_.IdentityReference 
-                    $ACL.PurgeAccessRules($Users) }
-                $ACL | Set-Acl $env:LOCALAPPDATA\Spotify\Update
-            }
-            Remove-item $env:LOCALAPPDATA\Spotify\Update -Recurse -Force
-        } 
-
-        #Создать файл Update если его нет
-        if (!($Check_folder_file -match '\bSystem\b|' -and $Check_folder_file -match '\bReadOnly\b')) {  
-            New-Item -Path $env:LOCALAPPDATA\Spotify\ -Name "Update" -ItemType "file" -Value "STOPIT" | Out-Null
-            $file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update
-            $file.Attributes = "ReadOnly", "System"
-        }
-        # Если оба файлав мигратора существуют то .bak удалить, а .exe переименовать в .bak
-        If ($migrator_exe -and $migrator_bak) {
-            Remove-item $env:APPDATA\Spotify\SpotifyMigrator.bak -Recurse -Force
-            Rename-Item -path $env:APPDATA\Spotify\SpotifyMigrator.exe -NewName $env:APPDATA\Spotify\SpotifyMigrator.bak
-        }
-
-        # Если есть только мигратор .exe то переименовать его в .bak
-        if ($migrator_exe) {
-            Rename-Item -path $env:APPDATA\Spotify\SpotifyMigrator.exe -NewName $env:APPDATA\Spotify\SpotifyMigrator.bak
-        }
-
+    # Если есть только мигратор .exe то переименовать его в .bak
+    if ($migrator_exe) {
+        Rename-Item -path $env:APPDATA\Spotify\SpotifyMigrator.exe -NewName $env:APPDATA\Spotify\SpotifyMigrator.bak
     }
+
+}
 
   
-    Write-Host "Updates blocked successfully" -ForegroundColor Green
+Write-Host "Updates blocked successfully" -ForegroundColor Green
 
 
 
