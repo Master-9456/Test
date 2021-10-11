@@ -224,7 +224,7 @@ Write-Host "Please wait..."
 "`n" 
 
 
-    Start-BitsTransfer –Source  "https://upgrade.scdn.co/upgrade/client/win32-x86/spotify_installer-1.1.69.612.gb7409abc-16.exe" -Destination "$PWD\SpotifySetup.exe"  -DisplayName "Downloading Spotify" -Description "$vernew "
+    Start-BitsTransfer -Source  $result2.Matches.Value[0] -Destination "$PWD\SpotifySetup.exe"  -DisplayName "Downloading Spotify" -Description "$vernew "
 
 
 
