@@ -262,7 +262,7 @@ Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup
 
 Stop-Process -Name Spotify >$null 2>&1
 Stop-Process -Name SpotifyWebHelper >$null 2>&1
-Stop-Process -Name SpotifyFullSetup >$null 2>&1
+Stop-Process -Name SpotifySetup >$null 2>&1
 
 
 
