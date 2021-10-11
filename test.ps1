@@ -9,6 +9,9 @@ if (!($tsl_check -match '^tls12$' )) {
 
 
 
+
+
+
 Write-Host "*****************" -ForegroundColor DarkYellow
 Write-Host "Rollback Spotify" -ForegroundColor DarkYellow
 Write-Host "*****************" -ForegroundColor DarkYellow
@@ -214,21 +217,16 @@ Remove-Item -LiteralPath "$PWD\chrome_elf.zip"
 
 
 
-Import-Module BitsTransfer
+    
 Write-Host "Downloading Spotify"
 "`n" 
 Write-Host "Please wait..."
 "`n" 
-try {
 
-    Start-BitsTransfer –Source  $result2.Matches.Value[0] -Destination $PWD\SpotifySetup.exe  -DisplayName "Downloading Spotify" -Description $vernew
 
-}
-catch {
-    Write-Output ''
-    Pause
-    exit
-}
+    Start-BitsTransfer –source  $result2.Matches.Value[0] -destination "$PWD\SpotifySetup.exe"  -DisplayName "Downloading Spotify" -Description "$vernew "
+
+
 
 
 
