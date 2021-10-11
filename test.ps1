@@ -218,9 +218,9 @@ Remove-Item -LiteralPath "$PWD\chrome_elf.zip"
 
 
     
-Write-Host "Downloading and install Spotify"
+Write-Host 'Downloading and install Spotify'
 
-Write-Host "Please wait..."
+Write-Host 'Please wait...'`n
 
 
 try {
@@ -246,8 +246,8 @@ If ($ch -eq 'r') {
     if ($vernew -lt $verlast) {
 
 
-        Write-Host "Please confirm reinstallation"
-        "`n"
+        Write-Host 'Please confirm reinstallation'`n
+        
     }
 }
 
@@ -268,8 +268,8 @@ if (!(test-path $SpotifyDirectory/chrome_elf.dll.bak)) {
     Move-Item $SpotifyDirectory\chrome_elf.dll $SpotifyDirectory\chrome_elf.dll.bak >$null 2>&1
 }
 
-Write-Host 'Patching Spotify...'
-"`n"
+Write-Host 'Patching Spotify...'`n
+
 $patchFiles = "$PWD\chrome_elf.dll", "$PWD\config.ini"
 Copy-Item -LiteralPath $patchFiles -Destination "$SpotifyDirectory"
 
