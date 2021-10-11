@@ -218,19 +218,13 @@ Remove-Item -LiteralPath "$PWD\chrome_elf.zip"
 
 
     
-Write-Host "Downloading and installing Spotify"
+Write-Host "Downloading Spotify"
 "`n" 
 Write-Host "Please wait..."
 "`n" 
 try {
 
-    $webClient.DownloadFile(
-        # Remote file URL
-        $result2.Matches.Value[0],
-        # Local file path
-        "$PWD\SpotifySetup.exe"
-
-    )
+    Start-BitsTransfer –source  $result2.Matches.Value[0] -destination $PWD\SpotifySetup.exe  -DisplayName "Downloading Spotify" -Description "$vernew "
 
 }
 catch {
@@ -257,8 +251,10 @@ If ($ch -eq 'r') {
 }
 
 
-Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup
 
+
+Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup;  Write-Host "Installing Spotify..."
+"`n" 
 
 Stop-Process -Name Spotify >$null 2>&1
 Stop-Process -Name SpotifyWebHelper >$null 2>&1
@@ -395,27 +391,8 @@ $migrator_exe = Test-Path -Path $env:APPDATA\Spotify\SpotifyMigrator.exe
 $Check_folder_file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update | Select-Object Attributes 
 $folder_update_access = Get-Acl $env:LOCALAPPDATA\Spotify\Update
 
-do {
-    $ch = Read-Host -Prompt "Want to block updates ? (Y/N), Unlock updates (U)"
-
-    if (!($ch -eq 'n' -or $ch -eq 'y' -or $ch -eq 'u')) {
-    
-        Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
-        Write-Host "enter again through..." -NoNewline
-        Start-Sleep -Milliseconds 1000
-        Write-Host "3" -NoNewline
-        Start-Sleep -Milliseconds 1000
-        Write-Host ".2" -NoNewline
-        Start-Sleep -Milliseconds 1000
-        Write-Host ".1"
-        Start-Sleep -Milliseconds 1000     
-        Clear-Host
-    }
-}
-while ($ch -notmatch '^y$|^n$|^u$')
 
 
-if ($ch -eq 'y') {
 
     # Если была установка клиента 
     if (!($update_directory)) {
@@ -482,36 +459,6 @@ if ($ch -eq 'y') {
   
     Write-Host "Updates blocked successfully" -ForegroundColor Green
 
-}
-
-
-if ($ch -eq 'n') {
-    Write-Host "Left unchanged" 
-}
-
-
-
-if ($ch -eq 'u') {
-    If ($migrator_bak -or $Check_folder_file -match '\bSystem\b|\bReadOnly\b') {
-       
-    
-        If ($update_directory_file) {
-            Remove-item $env:LOCALAPPDATA\Spotify\Update -Recurse -Force
-        } 
-        If ($migrator_bak -and $migrator_exe ) {
-            Remove-item $env:APPDATA\Spotify\SpotifyMigrator.bak -Recurse -Force
-        }
-        if ($migrator_bak) {
-            Rename-Item -path $env:APPDATA\Spotify\SpotifyMigrator.bak -NewName $env:APPDATA\Spotify\SpotifyMigrator.exe
-        }
-        Write-Host "Updates unlocked" -ForegroundColor Green
-    }
-
-
-    If (!($migrator_bak -or $Check_folder_file -match '\bSystem\b|\bReadOnly\b')) {
-        Write-Host "Oops, updates are not blocked" 
-    }  
-}
 
 
 
