@@ -8,14 +8,22 @@ if (!($tsl_check -match '^tls12$' )) {
 }
 
 
-Write-Host "*****************"
-Write-Host "Author: " -NoNewline
-Write-Host "@Amd64fox" -ForegroundColor DarkYellow
-Write-Host "*****************"
 
 
+
+
+Write-Host "*****************" -ForegroundColor DarkYellow
+Write-Host "Rollback Spotify" -ForegroundColor DarkYellow
+Write-Host "*****************" -ForegroundColor DarkYellow
+
+
+
+
+
+
+$SpotifyexePatch = "$env:APPDATA\Spotify\Spotify.exe"
 $SpotifyDirectory = "$env:APPDATA\Spotify"
-$SpotifyExecutable = "$SpotifyDirectory\Spotify.exe"
+
 
 
 Stop-Process -Name Spotify
@@ -58,6 +66,118 @@ Exiting...
 }
 
 
+
+
+
+
+
+if (Test-Path $SpotifyexePatch) {
+    do {
+        $verlast = (Get-Item $SpotifyexePatch).VersionInfo.FileVersion
+        Write-Host "Client was found"
+        "`n"
+        Write-Host "You have version installed " -NoNewline
+        Write-Host  $verlast -ForegroundColor Green
+        "`n"
+
+
+        $ch = Read-Host -Prompt "Want to remove (y) or replace (r) ? "
+        "`n"
+        if (!($ch -eq 'y' -or $ch -eq 'r')) {
+    
+            Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
+            Write-Host "enter again through..." -NoNewline
+            Start-Sleep -Milliseconds 1000
+            Write-Host "3" -NoNewline
+            Start-Sleep -Milliseconds 1000
+            Write-Host ".2" -NoNewline
+            Start-Sleep -Milliseconds 1000
+            Write-Host ".1"
+            Start-Sleep -Milliseconds 1000     
+            Clear-Host
+        }
+    }
+    while ($ch -notmatch '^y$|^r$')
+
+}
+
+If ($ch -eq 'y') {
+    "`n"
+    Write-Host "Click Ok to delete Spotify"
+    "`n"
+    Start-Process -FilePath $SpotifyexePatch /UNINSTALL
+    Start-Sleep -Milliseconds 1500
+    wait-process -Name SpotifyUninstall
+    Start-Sleep -Milliseconds 1100
+
+ 
+}
+ 
+
+
+ 
+$wget = Invoke-WebRequest -UseBasicParsing -Uri https://docs.google.com/spreadsheets/d/1wztO1L4zvNykBRw7X4jxP8pvo11oQjT0O5DvZ_-S4Ok/edit#gid=0
+$result = $wget.RawContent | Select-String "1.\d.\d{1,2}.\d{1,5}.g[0-9a-z][0-9a-z][0-9a-z][0-9a-z][0-9a-z][0-9a-z][0-9a-z][0-9a-z]" -AllMatches
+$version1 = $result.Matches.Value[3]
+$version2 = $result.Matches.Value[5]
+$version3 = $result.Matches.Value[7]
+$version4 = $result.Matches.Value[9]
+$version5 = $result.Matches.Value[11]
+
+
+
+do {
+    $ch2 = Read-Host -Prompt "1) $version1
+2) $version2
+3) $version3
+4) $version4
+5) $version5
+
+Select the version to rollback"
+    "`n"
+
+    if (!($ch2 -match '^1$|^2$|^3$|^4$|^5$')) {
+    
+        Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
+        Write-Host "enter again through..." -NoNewline
+        Start-Sleep -Milliseconds 1000
+        Write-Host "3" -NoNewline
+        Start-Sleep -Milliseconds 1000
+        Write-Host ".2" -NoNewline
+        Start-Sleep -Milliseconds 1000
+        Write-Host ".1"
+        Start-Sleep -Milliseconds 1000     
+        Clear-Host
+    
+    }
+
+}
+while ($ch2 -notmatch '^1$|^2$|^3$|^4$|^5$')
+
+if ($ch2 -eq 1) {
+    $result2 = $wget.RawContent | Select-String "https:[/][/]upgrade.scdn.co[/]upgrade[/]client[/]win32-x86[/]spotify_installer-$version1-\d{1,3}.exe" -AllMatches
+    $vernew = $version1
+}
+if ($ch2 -eq 2) {
+    $result2 = $wget.RawContent | Select-String "https:[/][/]upgrade.scdn.co[/]upgrade[/]client[/]win32-x86[/]spotify_installer-$version2-\d{1,3}.exe" -AllMatches
+    $vernew = $version2
+}
+if ($ch2 -eq 3) {
+    $result2 = $wget.RawContent | Select-String "https:[/][/]upgrade.scdn.co[/]upgrade[/]client[/]win32-x86[/]spotify_installer-$version3-\d{1,3}.exe" -AllMatches
+    $vernew = $version3
+}
+if ($ch2 -eq 4) {
+    $result2 = $wget.RawContent | Select-String "https:[/][/]upgrade.scdn.co[/]upgrade[/]client[/]win32-x86[/]spotify_installer-$version4-\d{1,3}.exe" -AllMatches
+    $vernew = $version4
+}
+if ($ch2 -eq 5) {
+    $result2 = $wget.RawContent | Select-String "https:[/][/]upgrade.scdn.co[/]upgrade[/]client[/]win32-x86[/]spotify_installer-$version5-\d{1,3}.exe" -AllMatches
+    $vernew = $version5
+}
+
+
+
+
 Push-Location -LiteralPath $env:TEMP
 try {
     # Unique directory name based on time
@@ -92,59 +212,67 @@ catch {
 Expand-Archive -Force -LiteralPath "$PWD\chrome_elf.zip" -DestinationPath $PWD
 Remove-Item -LiteralPath "$PWD\chrome_elf.zip"
 
-$spotifyInstalled = (Test-Path -LiteralPath $SpotifyExecutable)
-if (-not $spotifyInstalled) {
-    
-    try {
-        $webClient.DownloadFile(
-            # Remote file URL
-            'https://download.scdn.co/SpotifySetup.exe',
-            # Local file path
-            "$PWD\SpotifySetup.exe"
-        )
-    }
-    catch {
-        Write-Output ''
-        Pause
-        exit
-    }
-    mkdir $SpotifyDirectory >$null 2>&1
 
-    # Check version Spotify
-    $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
-    $version_client = $version_client_check -split '.\w\w\w\w\w\w\w\w\w'
    
-    Write-Host "Downloading and installing Spotify " -NoNewline
-    Write-Host  $version_client -ForegroundColor Green
-    Write-Host "Please wait..."
-
-    Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup
-
-  
-  
-    Stop-Process -Name Spotify >$null 2>&1
-    Stop-Process -Name SpotifyWebHelper >$null 2>&1
-    Stop-Process -Name SpotifyFullSetup >$null 2>&1
 
 
-    $ErrorActionPreference = 'SilentlyContinue'  # Команда гасит легкие ошибки
 
-    # Удалить инсталятор после установки
-    if (test-path "$env:LOCALAPPDATA\Microsoft\Windows\Temporary Internet Files\") {
-        get-childitem -path "$env:LOCALAPPDATA\Microsoft\Windows\Temporary Internet Files\" -Recurse -Force -Filter  "SpotifyFullSetup*" | remove-item  -Force
-    }
-    if (test-path $env:LOCALAPPDATA\Microsoft\Windows\INetCache\) {
-        get-childitem -path "$env:LOCALAPPDATA\Microsoft\Windows\INetCache\" -Recurse -Force -Filter  "SpotifyFullSetup*" | remove-item  -Force
     
-    }
-    
+Write-Host "Downloading and installing Spotify"
+"`n" 
+Write-Host "Please wait..."
+"`n" 
+try {
+
+    $webClient.DownloadFile(
+        # Remote file URL
+        $result2.Matches.Value[0],
+        # Local file path
+        "$PWD\SpotifySetup.exe"
+
+    )
+
 }
+catch {
+    Write-Output ''
+    Pause
+    exit
+}
+
+
+
+mkdir $SpotifyDirectory >$null 2>&1
+
+
+
+
+If ($ch -eq 'r') {
+
+    if ($vernew -lt $verlast) {
+
+
+        Write-Host "Please confirm reinstallation"
+        "`n"
+    }
+}
+
+
+Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup
+
+
+Stop-Process -Name Spotify >$null 2>&1
+Stop-Process -Name SpotifyWebHelper >$null 2>&1
+Stop-Process -Name SpotifyFullSetup >$null 2>&1
+
+
+
 
 if (!(test-path $SpotifyDirectory/chrome_elf.dll.bak)) {
     Move-Item $SpotifyDirectory\chrome_elf.dll $SpotifyDirectory\chrome_elf.dll.bak >$null 2>&1
 }
 
 Write-Host 'Patching Spotify...'
+"`n"
 $patchFiles = "$PWD\chrome_elf.dll", "$PWD\config.ini"
 Copy-Item -LiteralPath $patchFiles -Destination "$SpotifyDirectory"
 
@@ -154,8 +282,6 @@ Pop-Location
 
 Start-Sleep -Milliseconds 200
 Remove-Item -Recurse -LiteralPath $tempDirectory 
-
-
 
 
 # Removing an empty block, "Upgrade button", "Upgrade to premium" menu
@@ -222,7 +348,8 @@ Rename-Item -path $env:APPDATA\Spotify\Apps\xpui.zip -NewName $env:APPDATA\Spoti
 Remove-item $env:APPDATA\Spotify\Apps\temporary -Recurse
 
 
-# Если папки по умолчанию Dekstop не существует, то найти её через реестр.
+
+# Если папки по умолчанию Dekstop не существует, то попытаться найти её через реестр.
 $ErrorActionPreference = 'SilentlyContinue' 
 
 if (Test-Path "$env:USERPROFILE\Desktop") {  
@@ -255,7 +382,6 @@ If (!(Test-Path $env:USERPROFILE\Desktop\Spotify.lnk)) {
     $Shortcut.TargetPath = $source
     $Shortcut.Save()      
 }
-
 
 # Block updates
 
@@ -389,143 +515,10 @@ if ($ch -eq 'u') {
 
 
 
-# automatic cache clearing
-
-do {
-    $ch = Read-Host -Prompt "Want to set up automatic cache cleanup? (Y/N) Delete script (U)"
-
-    if (!($ch -eq 'n' -or $ch -eq 'y' -or $ch -eq 'u')) {
-
-        Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
-        Write-Host "enter again through..." -NoNewline
-        Start-Sleep -Milliseconds 1000
-        Write-Host "3" -NoNewline
-        Start-Sleep -Milliseconds 1000
-        Write-Host ".2" -NoNewline
-        Start-Sleep -Milliseconds 1000
-        Write-Host ".1"
-        Start-Sleep -Milliseconds 1000     
-        Clear-Host
-    }
-}
-while ($ch -notmatch '^y$|^n$|^u$')
 
 
+Write-Host "Rollback completed" -ForegroundColor Green
 
-if ($ch -eq 'y') {
+ 
 
-    
-    $test_cache_spotify_ps = Test-Path -Path $env:APPDATA\Spotify\cache-spotify.ps1
-    $test_spotify_vbs = Test-Path -Path $env:APPDATA\Spotify\Spotify.vbs
-
-
-
-
-    If ($test_cache_spotify_ps) {
-        Remove-item $env:APPDATA\Spotify\cache-spotify.ps1 -Recurse -Force
-    }
-    If ($test_spotify_vbs) {
-        Remove-item $env:APPDATA\Spotify\Spotify.vbs -Recurse -Force
-    }
-    Start-Sleep -Milliseconds 200
-
-
-    # cache-spotify.ps1
-    $webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/SpotX/main/cache-spotify.ps1', "$env:APPDATA\Spotify\cache-spotify.ps1")
-
-    # Spotify.vbs
-    $webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/SpotX/main/Spotify.vbs', "$env:APPDATA\Spotify\Spotify.vbs")
-
-
-    # Spotify.lnk
-    $source2 = "$env:APPDATA\Spotify\Spotify.vbs"
-    $target2 = "$desktop_folder\Spotify.lnk"
-    $WorkingDir2 = "$env:APPDATA\Spotify"
-    $WshShell2 = New-Object -comObject WScript.Shell
-    $Shortcut2 = $WshShell2.CreateShortcut($target2)
-    $Shortcut2.WorkingDirectory = $WorkingDir2
-    $Shortcut2.IconLocation = "$env:APPDATA\Spotify\Spotify.exe"
-    $Shortcut2.TargetPath = $source2
-    $Shortcut2.Save()
-
-
-
-
-
-    do {
-        $ch = Read-Host -Prompt "Cache files that have not been used for more than XX days will be deleted.
-    Enter the number of days from 1 to 100"
-
-        if (!($ch -match "^[1-9][0-9]?$|^100$")) {
-
-            Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
-            Write-Host "enter again through..." -NoNewline
-            Start-Sleep -Milliseconds 1000
-            Write-Host "3" -NoNewline
-            Start-Sleep -Milliseconds 1000
-            Write-Host ".2" -NoNewline
-            Start-Sleep -Milliseconds 1000
-            Write-Host ".1"
-            Start-Sleep -Milliseconds 1000     
-            Clear-Host
-        }
-    }
-    while ($ch -notmatch '^[1-9][0-9]?$|^100$')
-
-
-    if ($ch -match "^[1-9][0-9]?$|^100$") {
-        $file_cache_spotify_ps1 = Get-Content $env:APPDATA\Spotify\cache-spotify.ps1 -Raw
-        $new_file_cache_spotify_ps1 = $file_cache_spotify_ps1 -replace 'seven', $ch -replace '-7', - $ch
-        Set-Content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Force -Value $new_file_cache_spotify_ps1
-        $contentcache_spotify_ps1 = [System.IO.File]::ReadAllText("$env:APPDATA\Spotify\cache-spotify.ps1")
-        $contentcache_spotify_ps1 = $contentcache_spotify_ps1.Trim()
-        [System.IO.File]::WriteAllText("$env:APPDATA\Spotify\cache-spotify.ps1", $contentcache_spotify_ps1)
-        Write-Host "Clearing the cache has been successfully installed" -ForegroundColor Green
-        Write-Host "installation completed" -ForegroundColor Green
-        exit
-    }
-       
-    
-
-
-}
-
-if ($ch -eq 'n') {
-
-    Write-Host "installation completed" -ForegroundColor Green
-
-    exit
-}
-if ($ch -eq 'u') {
-
-    $test_cache_spotify_ps = Test-Path -Path $env:APPDATA\Spotify\cache-spotify.ps1
-    $test_spotify_vbs = Test-Path -Path $env:APPDATA\Spotify\Spotify.vbs
-
-    If ($test_cache_spotify_ps -and $test_spotify_vbs) {
-        Remove-item $env:APPDATA\Spotify\cache-spotify.ps1 -Recurse -Force
-        Remove-item $env:APPDATA\Spotify\Spotify.vbs -Recurse -Force
-
-        $source3 = "$env:APPDATA\Spotify\Spotify.exe"
-        $target3 = "$desktop_folder\Spotify.lnk"
-        $WorkingDir3 = "$env:APPDATA\Spotify"
-        $WshShell3 = New-Object -comObject WScript.Shell
-        $Shortcut3 = $WshShell3.CreateShortcut($target3)
-        $Shortcut3.WorkingDirectory = $WorkingDir3
-        $Shortcut3.IconLocation = "$env:APPDATA\Spotify\Spotify.exe"
-        $Shortcut3.TargetPath = $source3
-        $Shortcut3.Save()
-        Write-Host "Cache cleanup script removed" -ForegroundColor Green
-        Write-Host "Installation completed" -ForegroundColor Green
-        exit
-    }
-
-
-
-    If (!($test_cache_spotify_ps -and $test_spotify_vbs)) {
-        Write-Host "Oops, no cache clearing script found" 
-        Write-Host "Installation completed" -ForegroundColor Green
-        exit
-    }
-}
-
-exit
+ 
