@@ -226,10 +226,10 @@ Write-Host "Please wait..."
 try {
 
     Start-BitsTransfer -Source  $result2.Matches.Value[0] -Destination "$PWD\SpotifySetup.exe"  -DisplayName "Downloading Spotify" -Description "$vernew "
-    )
+    
 }
 
-}
+
 catch {
     Write-Output ''
     Start-Sleep
