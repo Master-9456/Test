@@ -218,7 +218,7 @@ Remove-Item -LiteralPath "$PWD\chrome_elf.zip"
 
 
     
-Write-Host "Downloading Spotify"
+Write-Host "Downloading and install Spotify"
 "`n" 
 Write-Host "Please wait..."
 "`n" 
@@ -254,7 +254,7 @@ If ($ch -eq 'r') {
 
 
 
-Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup; Write-Host "Installing Spotify..."
+Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup
 "`n" 
 
 Stop-Process -Name Spotify >$null 2>&1
