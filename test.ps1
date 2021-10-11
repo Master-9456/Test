@@ -386,7 +386,6 @@ $ErrorActionPreference = 'SilentlyContinue'  # Команда гасит лег�
 
 
 $update_directory = Test-Path -Path $env:LOCALAPPDATA\Spotify 
-$update_directory_file = Test-Path -Path $env:LOCALAPPDATA\Spotify\Update
 $migrator_bak = Test-Path -Path $env:APPDATA\Spotify\SpotifyMigrator.bak  
 $migrator_exe = Test-Path -Path $env:APPDATA\Spotify\SpotifyMigrator.exe
 $Check_folder_file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update | Select-Object Attributes 
