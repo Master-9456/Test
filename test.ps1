@@ -183,8 +183,8 @@ If (!($patched_by_spotx -match 'patched by spotx')) {
 
     # Делаем резервную копию xpui.spa если он оригинальный
     If (!($patched_by_spotx -match 'patched by spotx')) {
-        Copy-Item $xpui_spa $env:APPDATA\Spotify\Apps\xpui.bak
         $zip.Dispose()
+        Copy-Item $xpui_spa $env:APPDATA\Spotify\Apps\xpui.bak
     }
 
 
