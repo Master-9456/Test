@@ -210,6 +210,7 @@ If (!($patched_by_spotx -match 'patched by spotx')) {
     $writer = New-Object System.IO.StreamWriter($entry_xpui.Open())
     $writer.BaseStream.SetLength(0)
     $writer.Write($xpuiContents)
+    $writer.Write([System.Environment]::NewLine + '// Patched by SpotX')
     $writer.Close()
 
 
