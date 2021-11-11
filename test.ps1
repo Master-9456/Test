@@ -173,20 +173,28 @@ Add-Type -Assembly 'System.IO.Compression.FileSystem'
 $zip = [System.IO.Compression.ZipFile]::Open($xpuiBundlePath, 'update')
 
 
-# xpui.js
-$entry_xpui = $zip.GetEntry('xpui.js')
-
-# Extract xpui.js from zip to memory
-$reader = New-Object System.IO.StreamReader($entry_xpui.Open())
-$xpuiContents = $reader.ReadToEnd()
+$entry = $zip.GetEntry('xpui.js')
+$reader = New-Object System.IO.StreamReader($entry.Open())
+$patched_by_spotx = $reader.ReadToEnd()
 $reader.Close()
 
-If (!($file_js -match 'patched by spotx')) {
+
+If (!($patched_by_spotx -match 'patched by spotx')) {
 
     # Делаем резервную копию xpui.spa если он оригинальный
-    If (!($xpuiContent -match 'patched by spotx')) {
+    If (!($patched_by_spotx -match 'patched by spotx')) {
         Copy-Item $xpui_spa $env:APPDATA\Spotify\Apps\xpui.bak
+        $zip.Dispose()
     }
+
+
+    # xpui.js
+    $entry_xpui = $zip.GetEntry('xpui.js')
+
+    # Extract xpui.js from zip to memory
+    $reader = New-Object System.IO.StreamReader($entry_xpui.Open())
+    $xpuiContents = $reader.ReadToEnd()
+    $reader.Close()
 
     $xpuiContents -match 'visible:!e}[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.' | Out-Null
     $menu_split_js = $Matches[0] -split 'createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.'
