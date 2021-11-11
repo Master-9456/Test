@@ -159,89 +159,101 @@ Remove-Item -Recurse -LiteralPath $tempDirectory
 
 
 # Removing an empty block, "Upgrade button", "Upgrade to premium" menu
+
 $xpui_spa = "$env:APPDATA\Spotify\Apps\xpui.spa"
-$zipFilePath = "$env:APPDATA\Spotify\Apps\xpui.zip"
-$extractPath = "$env:APPDATA\Spotify\Apps\temporary"
-$extractPath_removeRTL = "$env:APPDATA\Spotify\Apps\temporary\removeRTL"
 
-Rename-Item -path $xpui_spa -NewName $zipFilePath
-
-if (Test-Path $extractPath) {
-    Remove-item $extractPath -Recurse
-}
-New-Item -Path $extractPath -ItemType Directory | Out-Null
-New-Item -Path $extractPath_removeRTL -ItemType Directory | Out-Null
-
-# Достаем из архива xpui.zip файлы js
-Add-Type -Assembly 'System.IO.Compression.FileSystem'
-$zip = [System.IO.Compression.ZipFile]::Open($zipFilePath, 'read')
-$zip.Entries | Where-Object Name -eq xpui.js | ForEach-Object { [System.IO.Compression.ZipFileExtensions]::ExtractToFile($_, "$extractPath\$($_.Name)", $true) }
-$zip.Entries | Where-Object Name -eq vendor~xpui.js | ForEach-Object { [System.IO.Compression.ZipFileExtensions]::ExtractToFile($_, "$extractPath\$($_.Name)", $true) }
-# Достаем из архива xpui.zip файлы css
-$zip.Entries | Where-Object Name -like *.css | ForEach-Object { [System.IO.Compression.ZipFileExtensions]::ExtractToFile($_, "$extractPath_removeRTL\$($_.Name)", $true) }
-$zip.Dispose()
-
-# Делает резервную копию xpui.spa
-
-$xpui_js = Get-Content $extractPath\xpui.js -Raw
-$vendor_xpui_js = Get-Content $extractPath\vendor~xpui.js -Raw
-    
-If (!($xpui_js -match 'patched by spotx')) {
-    Copy-Item $zipFilePath $env:APPDATA\Spotify\Apps\xpui.bak
-}
 
    
 # Мофифицируем и кладем обратно в архив файлы 
 
+$xpuiBundlePath = $xpui_spa
+
+Add-Type -Assembly 'System.IO.Compression.FileSystem'
+
+$zip = [System.IO.Compression.ZipFile]::Open($xpuiBundlePath, 'update')
+
+
+# xpui.js
+$entry_xpui = $zip.GetEntry('xpui.js')
+
+# Extract xpui.js from zip to memory
+$reader = New-Object System.IO.StreamReader($entry_xpui.Open())
+$xpuiContents = $reader.ReadToEnd()
+$reader.Close()
+
 If (!($file_js -match 'patched by spotx')) {
-	
-    # Js
-    $xpui_js -match 'visible:!e}[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.' | Out-Null
-    $menu_split_js = $Matches[0] -split 'createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.'
-    $new_js = $xpui_js <# Removing "Upgrade button" #> -replace "[.]{1}createElement[(]{1}..[,]{1}[{]{1}onClick[:]{1}.[,]{1}className[:]{1}..[.]{1}.[.]{1}UpgradeButton[}]{1}[)]{1}[,]{1}.[(]{1}[)]{1}", "" <# Removing an empty block #> -replace 'adsEnabled:!0', 'adsEnabled:!1' <# Removing "Upgrade to premium" menu #> -replace 'visible:!e}[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.', $menu_split_js <# Disabling a playlist sponsor #> -replace "allSponsorships", "" <# Disable Logging #> -replace "sp://logging/v3/\w+", "" 
-    Set-Content -Path $extractPath\xpui.js -Force -Value $new_js
-    add-content -Path $extractPath\xpui.js -Value '// Patched by SpotX' -passthru | Out-Null
-    $contentjs = [System.IO.File]::ReadAllText("$extractPath\xpui.js")
-    $contentjs = $contentjs.Trim()
-    [System.IO.File]::WriteAllText("$extractPath\xpui.js", $contentjs)
 
-    $new_js = $vendor_xpui_js <# Disable Sentry" #> -replace "prototype\.bindClient=function\(\w+\)\{", '${0}return;'
-    Set-Content -Path $extractPath\vendor~xpui.js -Force -Value $new_js
-    $contentjs = [System.IO.File]::ReadAllText("$extractPath\vendor~xpui.js")
-    $contentjs = $contentjs.Trim()
-    [System.IO.File]::WriteAllText("$extractPath\vendor~xpui.js", $contentjs)
-
-    # Css
-    Get-ChildItem -Path $extractPath_removeRTL\*.css | ForEach-Object {
-
-        $Path = $_.FullName; (Get-Content $Path) -replace "}\[dir=ltr\]\s?", "} " -replace "html\[dir=ltr\]", "html" -replace ",\s?\[dir=rtl\].+?(\{.+?\})", '$1' -replace "[\w\-\.]+\[dir=rtl\].+?\{.+?\}", "" -replace "\}\[lang=ar\].+?\{.+?\}", "}" -replace "\}\[dir=rtl\].+?\{.+?\}", "}" -replace "\}html\[dir=rtl\].+?\{.+?\}", "}" -replace "\}html\[lang=ar\].+?\{.+?\}", "}" -replace "\[lang=ar\].+?\{.+?\}", "" -replace "html\[dir=rtl\].+?\{.+?\}", "" -replace "html\[lang=ar\].+?\{.+?\}", "" -replace "\[dir=rtl\].+?\{.+?\}", "" | Set-Content $Path # Remove RTL
+    # Делаем резервную копию xpui.spa если он оригинальный
+    If (!($xpuiContent -match 'patched by spotx')) {
+        Copy-Item $xpui_spa $env:APPDATA\Spotify\Apps\xpui.bak
     }
 
-    Compress-Archive -Path $extractPath\*.js -Update -DestinationPath $zipFilePath
-    Compress-Archive -Path $extractPath_removeRTL\*.css -Update -DestinationPath $zipFilePath
+    $xpuiContents -match 'visible:!e}[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.' | Out-Null
+    $menu_split_js = $Matches[0] -split 'createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.'
+    $xpuiContents = $xpuiContents `
+        <# Removing "Upgrade button" #> -replace "[.]{1}createElement[(]{1}..[,]{1}[{]{1}onClick[:]{1}.[,]{1}className[:]{1}..[.]{1}.[.]{1}UpgradeButton[}]{1}[)]{1}[,]{1}.[(]{1}[)]{1}", "" `
+        <# Removing an empty block #> -replace 'adsEnabled:!0', 'adsEnabled:!1' `
+        <# Removing "Upgrade to premium" menu #> -replace 'visible:!e}[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.', $menu_split_js `
+        <# Disabling a playlist sponsor #> -replace "allSponsorships", "" `
+        <# Disable Logging #> -replace "sp://logging/v3/\w+", ""
+
+    $writer = New-Object System.IO.StreamWriter($entry_xpui.Open())
+    $writer.BaseStream.SetLength(0)
+    $writer.Write($xpuiContents)
+    $writer.Close()
+
+
+    # *.Css
+    $zip.Entries | Where-Object FullName -like '*.css' | ForEach-Object {
+        $readercss = New-Object System.IO.StreamReader($_.Open())
+        $xpuiContents_css = $readercss.ReadToEnd()
+        $readercss.Close()
+
+        # Remove RTL
+        $xpuiContents_css = $xpuiContents_css `
+            -replace "}\[dir=ltr\]\s?", "} " `
+            -replace "html\[dir=ltr\]", "html" `
+            -replace ",\s?\[dir=rtl\].+?(\{.+?\})", '$1' `
+            -replace "[\w\-\.]+\[dir=rtl\].+?\{.+?\}", "" `
+            -replace "\}\[lang=ar\].+?\{.+?\}", "}" `
+            -replace "\}\[dir=rtl\].+?\{.+?\}", "}" `
+            -replace "\}html\[dir=rtl\].+?\{.+?\}", "}" `
+            -replace "\}html\[lang=ar\].+?\{.+?\}", "}" `
+            -replace "\[lang=ar\].+?\{.+?\}", "" `
+            -replace "html\[dir=rtl\].+?\{.+?\}", "" `
+            -replace "html\[lang=ar\].+?\{.+?\}", "" `
+            -replace "\[dir=rtl\].+?\{.+?\}", ""
+    
+        $writer = New-Object System.IO.StreamWriter($_.Open())
+        $writer.BaseStream.SetLength(0)
+        $writer.Write($xpuiContents_css)
+        $writer.Close()
+
+    }
+
+
+    # vendor~xpui.js
+    $entry_vendor_xpui = $zip.GetEntry('vendor~xpui.js')
+
+    # Extract xpui.js from zip to memory
+    $reader = New-Object System.IO.StreamReader($entry_vendor_xpui.Open())
+    $xpuiContents_vendor = $reader.ReadToEnd()
+    $reader.Close()
+
+    $xpuiContents_vendor = $xpuiContents_vendor `
+        <# Disable Sentry" #> -replace "prototype\.bindClient=function\(\w+\)\{", '${0}return;'
+
+    # Rewrite it to the zip
+    $writer = New-Object System.IO.StreamWriter($entry_vendor_xpui.Open())
+    $writer.BaseStream.SetLength(0)
+    $writer.Write($xpuiContents_vendor)
+    $writer.Close()
+        
+    $zip.Dispose()
 }
 else {
-    "Xpui.js is already patched"
+    "Spotify is already patched"
 }
-
-
-<#
-# Удаление меню через css (РЕЗЕРВНЫЙ)
-$file_css = Get-Content $env:APPDATA\Spotify\Apps\temporary\xpui.css -Raw
-If (!($file_css -match 'patched by spotx')) {
-    $new_css = $file_css -replace 'table{border-collapse:collapse;border-spacing:0}', 'table{border-collapse:collapse;border-spacing:0}[target="_blank"]{display:none !important;}'
-    Set-Content -Path $env:APPDATA\Spotify\Apps\temporary\xpui.css -Force -Value $new_css
-    add-content -Path $env:APPDATA\Spotify\Apps\temporary\xpui.css -Value '/* Patched by SpotX */' -passthru | Out-Null
-    $contentcss = [System.IO.File]::ReadAllText("$env:APPDATA\Spotify\Apps\temporary\xpui.css")
-    $contentcss = $contentcss.Trim()
-    [System.IO.File]::WriteAllText("$env:APPDATA\Spotify\Apps\temporary\xpui.css", $contentcss)
-    Compress-Archive -Path $env:APPDATA\Spotify\Apps\temporary\xpui.css -Update -DestinationPath $env:APPDATA\Spotify\Apps\xpui.zip
-}
-#>
-
-
-Rename-Item -path $zipFilePath -NewName $xpui_spa
-Remove-item $extractPath -Recurse
 
 
 # Если папки по умолчанию Dekstop не существует, то попытаться найти её через реестр.
