@@ -182,11 +182,11 @@ If (Test-Path $xpui_js_patch) {
         <# Disabling a playlist sponsor #> -replace "allSponsorships", "" `
         <# Disable Logging #> -replace "sp://logging/v3/\w+", "" 
 
-    Set-Content -Path $extractPath\xpui.js -Force -Value $new_js
-    add-content -Path $extractPath\xpui.js -Value '// Patched by SpotX' -passthru | Out-Null
-    $contentjs = [System.IO.File]::ReadAllText("$extractPath\xpui.js")
+    Set-Content -Path $xpui_js_patch -Force -Value $new_js
+    add-content -Path $xpui_js_patch -Value '// Patched by SpotX' -passthru | Out-Null
+    $contentjs = [System.IO.File]::ReadAllText($xpui_js_patch)
     $contentjs = $contentjs.Trim()
-    [System.IO.File]::WriteAllText("$extractPath\xpui.js", $contentjs)
+    [System.IO.File]::WriteAllText($xpui_js_patch, $contentjs)
 
 }
 
