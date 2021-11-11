@@ -187,7 +187,9 @@ If (!($patched_by_spotx -match 'patched by spotx')) {
         Copy-Item $xpui_spa $env:APPDATA\Spotify\Apps\xpui.bak
     }
 
-
+    Add-Type -Assembly 'System.IO.Compression.FileSystem'
+    $zip = [System.IO.Compression.ZipFile]::Open($xpuiBundlePath, 'update')
+    
     # xpui.js
     $entry_xpui = $zip.GetEntry('xpui.js')
 
