@@ -164,36 +164,40 @@ $xpui_spa_patch = "$env:APPDATA\Spotify\Apps\xpui.spa"
 $xpui_js_patch = "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
 
 If (Test-Path $xpui_js_patch) {
+    "Spicetify detected" 
     $xpui_js = Get-Content $xpui_js_patch -Raw
     
-        
     If (!($xpui_js -match 'patched by spotx')) {
+        
+    
         Copy-Item $xpui_js_patch "$xpui_js_patch.bak"
+    
+
+
+        $xpui_js -match 'visible:!e}[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.' | Out-Null
+        $menu_split_js = $Matches[0] -split 'createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.'
+        $new_js = $xpui_js `
+            <# Removing "Upgrade button" #> -replace "[.]{1}createElement[(]{1}..[,]{1}[{]{1}onClick[:]{1}.[,]{1}className[:]{1}..[.]{1}.[.]{1}UpgradeButton[}]{1}[)]{1}[,]{1}.[(]{1}[)]{1}", "" `
+            <# Removing an empty block #> -replace 'adsEnabled:!0', 'adsEnabled:!1' `
+            <# Removing "Upgrade to premium" menu #> -replace 'visible:!e}[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.', $menu_split_js `
+            <# Disabling a playlist sponsor #> -replace "allSponsorships", ""
+
+        Set-Content -Path $xpui_js_patch -Force -Value $new_js
+        add-content -Path $xpui_js_patch -Value '// Patched by SpotX' -passthru | Out-Null
+        $contentjs = [System.IO.File]::ReadAllText($xpui_js_patch)
+        $contentjs = $contentjs.Trim()
+        [System.IO.File]::WriteAllText($xpui_js_patch, $contentjs)
+
     }
-
-
-    $xpui_js -match 'visible:!e}[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.' | Out-Null
-    $menu_split_js = $Matches[0] -split 'createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.'
-    $new_js = $xpui_js `
-        <# Removing "Upgrade button" #> -replace "[.]{1}createElement[(]{1}..[,]{1}[{]{1}onClick[:]{1}.[,]{1}className[:]{1}..[.]{1}.[.]{1}UpgradeButton[}]{1}[)]{1}[,]{1}.[(]{1}[)]{1}", "" `
-        <# Removing an empty block #> -replace 'adsEnabled:!0', 'adsEnabled:!1' `
-        <# Removing "Upgrade to premium" menu #> -replace 'visible:!e}[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.', $menu_split_js `
-        <# Disabling a playlist sponsor #> -replace "allSponsorships", ""
-
-    Set-Content -Path $xpui_js_patch -Force -Value $new_js
-    add-content -Path $xpui_js_patch -Value '// Patched by SpotX' -passthru | Out-Null
-    $contentjs = [System.IO.File]::ReadAllText($xpui_js_patch)
-    $contentjs = $contentjs.Trim()
-    [System.IO.File]::WriteAllText($xpui_js_patch, $contentjs)
-
+    else {
+        "Spotify is already patched" 
+    }
 }
 
 If (Test-Path $xpui_spa_patch) {
     Add-Type -Assembly 'System.IO.Compression.FileSystem'
 
     $zip = [System.IO.Compression.ZipFile]::Open($xpui_spa_patch, 'update')
-
-
     $entry = $zip.GetEntry('xpui.js')
     $reader = New-Object System.IO.StreamReader($entry.Open())
     $patched_by_spotx = $reader.ReadToEnd()
@@ -203,10 +207,10 @@ If (Test-Path $xpui_spa_patch) {
     If (!($patched_by_spotx -match 'patched by spotx')) {
 
         # Делаем резервную копию xpui.spa если он оригинальный
-        If (!($patched_by_spotx -match 'patched by spotx')) {
-            $zip.Dispose()
-            Copy-Item $xpui_spa_patch $env:APPDATA\Spotify\Apps\xpui.bak
-        }
+        
+        $zip.Dispose()
+        Copy-Item $xpui_spa_patch $env:APPDATA\Spotify\Apps\xpui.bak
+        
 
         Add-Type -Assembly 'System.IO.Compression.FileSystem'
         $zip = [System.IO.Compression.ZipFile]::Open($xpui_spa_patch, 'update')
@@ -238,7 +242,7 @@ If (Test-Path $xpui_spa_patch) {
         # vendor~xpui.js
         $entry_vendor_xpui = $zip.GetEntry('vendor~xpui.js')
 
-        # Extract xpui.js from zip to memory
+        # Extract vendor~xpui.js from zip to memory
         $reader = New-Object System.IO.StreamReader($entry_vendor_xpui.Open())
         $xpuiContents_vendor = $reader.ReadToEnd()
         $reader.Close()
