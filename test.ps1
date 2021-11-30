@@ -178,7 +178,7 @@ do {
     }
 }
 while ($ch -notmatch '^y$|^n$')
-if($ch -eq 'y'){$Podcasts_off = $true}
+if ($ch -eq 'y') { $Podcasts_off = $true }
 
 
 # Мофифицируем файлы 
@@ -204,6 +204,12 @@ If (Test-Path $xpui_js_patch) {
             <# Removing an empty block #> -replace 'adsEnabled:!0', 'adsEnabled:!1' `
             <# Removing "Upgrade to premium" menu #> -replace 'visible:!e}[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.', $menu_split_js `
             <# Disabling a playlist sponsor #> -replace "allSponsorships", ""
+
+        # Disable Podcast
+        if ($Podcasts_off) {
+            $xpui_js = $xpui_js `
+                -replace '"album,playlist,artist,show,station,episode"', '"album,playlist,artist,station"' -replace ',this[.]enableShows=[a-z]', ""
+        }
 
         Set-Content -Path $xpui_js_patch -Force -Value $new_js
         add-content -Path $xpui_js_patch -Value '// Patched by SpotX' -passthru | Out-Null
@@ -255,11 +261,11 @@ If (Test-Path $xpui_spa_patch) {
             <# Disabling a playlist sponsor #> -replace "allSponsorships", "" `
             <# Disable Logging #> -replace "sp://logging/v3/\w+", "" 
 
-            # Disable Podcast
-            if($Podcasts_off){
+        # Disable Podcast
+        if ($Podcasts_off) {
             $xpuiContents = $xpuiContents `
-            -replace '"album,playlist,artist,show,station,episode"', '"album,playlist,artist,station"' -replace ',this[.]enableShows=[a-z]', ""
-            }
+                -replace '"album,playlist,artist,show,station,episode"', '"album,playlist,artist,station"' -replace ',this[.]enableShows=[a-z]', ""
+        }
 
         $writer = New-Object System.IO.StreamWriter($entry_xpui.Open())
         $writer.BaseStream.SetLength(0)
