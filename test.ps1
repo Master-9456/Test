@@ -207,7 +207,7 @@ If (Test-Path $xpui_js_patch) {
 
         # Disable Podcast
         if ($Podcasts_off) {
-            $xpui_js = $xpui_js `
+            $new_js = $new_js `
                 -replace '"album,playlist,artist,show,station,episode"', '"album,playlist,artist,station"' -replace ',this[.]enableShows=[a-z]', ""
         }
 
