@@ -111,7 +111,7 @@ if (-not $spotifyInstalled) {
    
     Write-Host "Downloading and installing Spotify " -NoNewline
     Write-Host  $version_client -ForegroundColor Green
-    Write-Host "Please wait..."
+    Write-Host "Please wait..."`n
     
     Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup
 
@@ -139,7 +139,7 @@ if (!(test-path $SpotifyDirectory/chrome_elf_bak.dll)) {
     Move-Item $SpotifyDirectory\chrome_elf.dll $SpotifyDirectory\chrome_elf_bak.dll 
 }
 
-Write-Host 'Patching Spotify...'
+Write-Host 'Patching Spotify...'`n
 $patchFiles = "$PWD\chrome_elf.dll", "$PWD\config.ini"
 Copy-Item -LiteralPath $patchFiles -Destination "$SpotifyDirectory"
 
@@ -156,7 +156,7 @@ Remove-Item -Recurse -LiteralPath $tempDirectory
 
 
 do {
-    $ch = Read-Host -Prompt "Want to turn off podcasts ? (Y/N)"
+    $ch = Read-Host -Prompt "Want to turn off podcasts ? (Y/N)"`n
     if (!($ch -eq 'n' -or $ch -eq 'y')) {
     
         Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
