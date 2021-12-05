@@ -156,7 +156,8 @@ Remove-Item -Recurse -LiteralPath $tempDirectory
 
 
 do {
-    $ch = Read-Host -Prompt "Want to turn off podcasts ? (Y/N)"`n
+    $ch = Read-Host -Prompt "Want to turn off podcasts ? (Y/N)"
+    Write-Host ""
     if (!($ch -eq 'n' -or $ch -eq 'y')) {
     
         Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
