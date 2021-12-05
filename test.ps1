@@ -179,7 +179,8 @@ $xpui_spa_patch = "$env:APPDATA\Spotify\Apps\xpui.spa"
 $xpui_js_patch = "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
 
 If (Test-Path $xpui_js_patch) {
-    "Обнаружен Spicetify"`n
+    Write-Host "Обнаружен Spicetify"`n
+
      $xpui_js = Get-Content $xpui_js_patch -Raw
     
     If (!($xpui_js -match 'patched by spotx')) {
@@ -211,7 +212,7 @@ If (Test-Path $xpui_js_patch) {
 
     }
     else {
-        "Spotify уже был пропатчен"`n 
+        Write-Host "Spotify уже был пропатчен"`n 
     }
 }
 
@@ -316,7 +317,7 @@ If (Test-Path $xpui_spa_patch) {
     }
     else {
         $zip.Dispose()
-        "Spotify уже был пропатчен"`n 
+        Write-Host "Spotify уже был пропатчен"`n 
     }
 }
 
