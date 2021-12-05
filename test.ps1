@@ -103,7 +103,7 @@ if (-not $spotifyInstalled) {
         Pause
         exit
     }
-    mkdir $SpotifyDirectory
+    mkdir $SpotifyDirectory | Out-Null
 
     # Check version Spotify
     $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
