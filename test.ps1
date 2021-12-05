@@ -255,7 +255,7 @@ If (Test-Path $xpui_spa_patch) {
         $xpuiContents -match 'visible:!e}[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.' | Out-Null
         $menu_split_js = $Matches[0] -split 'createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.'
         $xpuiContents = $xpuiContents `
-            <# Removing "Upgrade button" #> -replace "[.]{1}createElement[(]{1}..[,]{1}[{]{1}onClick[:]{1}.[,]{1}className[:]{1}..[.]{1}.[.]{1}UpgradeButton[}]{1}[)]{1}[,]{1}.[(]{1}[)]{1}", "" `
+            <# Removing "Upgrade button" #> -replace ">=1024&&", ">=100024&&" `
             <# Removing an empty block #> -replace 'adsEnabled:!0', 'adsEnabled:!1' `
             <# Removing "Upgrade to premium" menu #> -replace 'visible:!e}[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.', $menu_split_js `
             <# Disabling a playlist sponsor #> -replace "allSponsorships", "" `
