@@ -41,7 +41,7 @@ if ($win11 -or $win10 -or $win8_1 -or $win8) {
         Write-Host 'The Microsoft Store version of Spotify has been detected which is not supported.'`n
         $ch = Read-Host -Prompt "Uninstall Spotify Windows Store edition (Y/N) "
         if ($ch -eq 'y') {
-            Write-Host 'Uninstalling Spotify...'`n
+            Write-Host 'Uninstalling Spotify.'`n
             Get-AppxPackage -Name SpotifyAB.SpotifyMusic | Remove-AppxPackage
         }
         else {
@@ -182,7 +182,7 @@ $xpui_spa_patch = "$env:APPDATA\Spotify\Apps\xpui.spa"
 $xpui_js_patch = "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
 
 If (Test-Path $xpui_js_patch) {
-    "Spicetify detected" 
+    Write-Host "Spicetify detected"`n 
     $xpui_js = Get-Content $xpui_js_patch -Raw
     
     If (!($xpui_js -match 'patched by spotx')) {
@@ -195,15 +195,15 @@ If (Test-Path $xpui_js_patch) {
         $xpui_js -match 'visible:!e}[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.' | Out-Null
         $menu_split_js = $Matches[0] -split 'createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.'
         $new_js = $xpui_js `
-            <# Removing "Upgrade button" #> -replace "[.]{1}createElement[(]{1}..[,]{1}[{]{1}onClick[:]{1}.[,]{1}className[:]{1}..[.]{1}.[.]{1}UpgradeButton[}]{1}[)]{1}[,]{1}.[(]{1}[)]{1}", "" `
+            <# Removing "Upgrade button" #> -replace ">=1024", ">=1000024" `
             <# Removing an empty block #> -replace 'adsEnabled:!0', 'adsEnabled:!1' `
             <# Removing "Upgrade to premium" menu #> -replace 'visible:!e}[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.', $menu_split_js `
             <# Disabling a playlist sponsor #> -replace "allSponsorships", ""
 
-        # Disable Podcast
+        # Disable podcasts on the homepage
         if ($Podcasts_off) {
             $new_js = $new_js `
-                -replace '"album,playlist,artist,show,station,episode"', '"album,playlist,artist,station"' -replace ',this[.]enableShows=[a-z]', ""
+                -replace '"album,playlist,artist,show,station,episode"', '"album,playlist,artist,station"'
         }
 
         Set-Content -Path $xpui_js_patch -Force -Value $new_js
@@ -214,7 +214,7 @@ If (Test-Path $xpui_js_patch) {
 
     }
     else {
-        "Spotify is already patched" 
+        Write-Host "Spotify is already patched"`n 
     }
 }
 
@@ -250,13 +250,13 @@ If (Test-Path $xpui_spa_patch) {
         $xpuiContents -match 'visible:!e}[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.' | Out-Null
         $menu_split_js = $Matches[0] -split 'createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.'
         $xpuiContents = $xpuiContents `
-            <# Removing "Upgrade button" #> -replace ">=1024&&", ">=100024&&" `
+            <# Removing "Upgrade button" #> -replace ">=1024", ">=1000024" `
             <# Removing an empty block #> -replace 'adsEnabled:!0', 'adsEnabled:!1' `
             <# Removing "Upgrade to premium" menu #> -replace 'visible:!e}[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.createElement[(]{1}[A-Za-z]{2}[,]{1}null[)]{1}[,]{1}[A-Za-z]{1}[(]{1}[)]{1}.', $menu_split_js `
             <# Disabling a playlist sponsor #> -replace "allSponsorships", "" `
             <# Disable Logging #> -replace "sp://logging/v3/\w+", "" 
 
-        # Disable Podcast
+        # Disable podcasts on the homepage
         if ($Podcasts_off) {
             $xpuiContents = $xpuiContents `
                 -replace '"album,playlist,artist,show,station,episode"', '"album,playlist,artist,station"'
@@ -319,7 +319,7 @@ If (Test-Path $xpui_spa_patch) {
     }
     else {
         $zip.Dispose()
-        "Spotify is already patched"
+        Write-Host "Spotify is already patched"`n
     }
 }
 
@@ -460,13 +460,13 @@ if ($ch -eq 'y') {
     }
 
   
-    Write-Host "Updates blocked successfully" -ForegroundColor Green
+    Write-Host "Updates blocked successfully"`n -ForegroundColor Green
 
 }
 
 
 if ($ch -eq 'n') {
-    Write-Host "Left unchanged" 
+    Write-Host "Left unchanged"`n
 }
 
 
@@ -484,12 +484,12 @@ if ($ch -eq 'u') {
         if ($migrator_bak) {
             Rename-Item -path $env:APPDATA\Spotify\SpotifyMigrator.bak -NewName $env:APPDATA\Spotify\SpotifyMigrator.exe
         }
-        Write-Host "Updates unlocked" -ForegroundColor Green
+        Write-Host "Updates unlocked"`n -ForegroundColor Green
     }
 
 
     If (!($migrator_bak -or $Check_folder_file -match '\bSystem\b|\bReadOnly\b')) {
-        Write-Host "Oops, updates are not blocked" 
+        Write-Host "Oops, updates are not blocked"`n 
     }  
 }
     
@@ -499,7 +499,7 @@ if ($ch -eq 'u') {
 
 do {
     $ch = Read-Host -Prompt "Want to set up automatic cache cleanup? (Y/N) Delete script (U)"
-
+    Write-Host ""
     if (!($ch -eq 'n' -or $ch -eq 'y' -or $ch -eq 'u')) {
         Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
         Write-Host "enter again through..." -NoNewline
@@ -559,7 +559,7 @@ if ($ch -eq 'y') {
     do {
         $ch = Read-Host -Prompt "Cache files that have not been used for more than XX days will be deleted.
     Enter the number of days from 1 to 100"
-    
+        Write-Host ""
         if (!($ch -match "^[1-9][0-9]?$|^100$")) {
             Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
             Write-Host "enter again through..." -NoNewline
@@ -584,7 +584,7 @@ if ($ch -eq 'y') {
         $contentcache_spotify_ps1 = [System.IO.File]::ReadAllText("$env:APPDATA\Spotify\cache-spotify.ps1")
         $contentcache_spotify_ps1 = $contentcache_spotify_ps1.Trim()
         [System.IO.File]::WriteAllText("$env:APPDATA\Spotify\cache-spotify.ps1", $contentcache_spotify_ps1)
-        Write-Host "Clearing the cache has been successfully installed" -ForegroundColor Green
+        Write-Host "Clearing the cache has been successfully installed"`n -ForegroundColor Green
         Write-Host "installation completed" -ForegroundColor Green
         exit
     }
@@ -615,14 +615,14 @@ if ($ch -eq 'u') {
         $Shortcut3.IconLocation = "$env:APPDATA\Spotify\Spotify.exe"
         $Shortcut3.TargetPath = $source3
         $Shortcut3.Save()
-        Write-Host "Cache cleanup script removed" -ForegroundColor Green
+        Write-Host "Cache cleanup script removed"`n -ForegroundColor Green
         Write-Host "Installation completed" -ForegroundColor Green
         exit
     }
 
 
     If (!($test_cache_spotify_ps -and $test_spotify_vbs)) {
-        Write-Host "Oops, no cache clearing script found" 
+        Write-Host "Oops, no cache clearing script found"`n 
         Write-Host "Installation completed" -ForegroundColor Green
         exit
     }
