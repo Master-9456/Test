@@ -38,20 +38,14 @@ if ($win11 -or $win10 -or $win8_1 -or $win8) {
 
     # Check and del Windows Store
     if (Get-AppxPackage -Name SpotifyAB.SpotifyMusic) {
-        Write-Host @'
-The Microsoft Store version of Spotify has been detected which is not supported.
-'@`n
+        Write-Host 'The Microsoft Store version of Spotify has been detected which is not supported.'`n
         $ch = Read-Host -Prompt "Uninstall Spotify Windows Store edition (Y/N) "
         if ($ch -eq 'y') {
-            Write-Host @'
-Uninstalling Spotify.
-'@`n
+            Write-Host 'Uninstalling Spotify...'`n
             Get-AppxPackage -Name SpotifyAB.SpotifyMusic | Remove-AppxPackage
         }
         else {
-            Write-Host @'
-Exiting...
-'@`n
+            Write-Host 'Exiting...'`n
             Pause 
             exit
         }
@@ -123,9 +117,9 @@ if (-not $spotifyInstalled) {
 
   
   
-    Stop-Process -Name Spotify >$null 2>&1
-    Stop-Process -Name SpotifyWebHelper >$null 2>&1
-    Stop-Process -Name SpotifyFullSetup >$null 2>&1
+    Stop-Process -Name Spotify 
+    Stop-Process -Name SpotifyWebHelper 
+    Stop-Process -Name SpotifyFullSetup 
 
 
     $ErrorActionPreference = 'SilentlyContinue'  # Команда гасит легкие ошибки
@@ -142,7 +136,7 @@ if (-not $spotifyInstalled) {
 }
 
 if (!(test-path $SpotifyDirectory/chrome_elf_bak.dll)) {
-    Move-Item $SpotifyDirectory\chrome_elf.dll $SpotifyDirectory\chrome_elf_bak.dll >$null 2>&1
+    Move-Item $SpotifyDirectory\chrome_elf.dll $SpotifyDirectory\chrome_elf_bak.dll 
 }
 
 Write-Host 'Patching Spotify...'
