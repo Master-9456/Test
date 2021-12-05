@@ -264,7 +264,7 @@ If (Test-Path $xpui_spa_patch) {
         # Disable Podcast
         if ($Podcasts_off) {
             $xpuiContents = $xpuiContents `
-                -replace '"album,playlist,artist,show,station,episode"', '"album,playlist,artist,station"' -replace ',this[.]enableShows=[a-z]', ""
+                -replace '"album,playlist,artist,show,station,episode"', '"album,playlist,artist,station"'
         }
 
         $writer = New-Object System.IO.StreamWriter($entry_xpui.Open())
