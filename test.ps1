@@ -188,9 +188,13 @@ If (Test-Path $xpui_js_patch) {
         Copy-Item $xpui_js_patch "$xpui_js_patch.bak"
 
         $new_js = $xpui_js `
-            <# Removing an empty block #> -replace 'adsEnabled:!0', 'adsEnabled:!1' `
-            <# Full screen mode activation and removing "Upgrade to premium" menu, upgrade button #> -replace ';return"free"', ';return"premium"' -replace ';return"premium"', ';return"free"' `
-            <# Disabling a playlist sponsor #> -replace "allSponsorships", ""
+         <# Removing an empty block #> `
+         -replace 'adsEnabled:!0', 'adsEnabled:!1' `
+         <# Full screen mode activation and removing "Upgrade to premium" menu, upgrade button #> `
+         -replace '(session[,]{1}[a-z]{1}[=]{1}[a-z]{1}[=]{1}[>]{1}[{]{1}var [a-z]{1}[,]{1}[a-z]{1}[,]{1}[a-z]{1}[;]{1}[a-z]{6})(["]{1}free["]{1})', '$1"premium"' `
+         -replace '([a-z]{1}[.]{1}toLowerCase[(]{1}[)]{2}[}]{1}[,]{1}[a-z]{1}[=]{1}[a-z]{1}[=]{1}[>]{1}[{]{1}var [a-z]{1}[,]{1}[a-z]{1}[,]{1}[a-z]{1}[;]{1}return)(["]{1}premium["]{1})', '$1"free"' `
+         <# Disabling a playlist sponsor #>`
+         -replace "allSponsorships", ""
 
         # Disable Podcast
         if ($Podcasts_off) {
@@ -240,10 +244,15 @@ If (Test-Path $xpui_spa_patch) {
         $reader.Close()
 
         $xpuiContents = $xpuiContents `
-            <# Removing an empty block #> -replace 'adsEnabled:!0', 'adsEnabled:!1' `
-            <# Full screen mode activation and removing "Upgrade to premium" menu, upgrade button #> -replace '(session[,]{1}[a-z]{1}[=]{1}[a-z]{1}[=]{1}[>]{1}[{]{1}var [a-z]{1}[,]{1}[a-z]{1}[,]{1}[a-z]{1}[;]{1}[a-z]{6})(["]{1}free["]{1})', '$1"premium"' -replace '([a-z]{1}[.]{1}toLowerCase[(]{1}[)]{2}[}]{1}[,]{1}[a-z]{1}[=]{1}[a-z]{1}[=]{1}[>]{1}[{]{1}var [a-z]{1}[,]{1}[a-z]{1}[,]{1}[a-z]{1}[;]{1}return)(["]{1}premium["]{1})', '$1"free"' `
-            <# Disabling a playlist sponsor #> -replace "allSponsorships", "" `
-            <# Disable Logging #> -replace "sp://logging/v3/\w+", "" 
+            <# Removing an empty block #> `
+            -replace 'adsEnabled:!0', 'adsEnabled:!1' `
+            <# Full screen mode activation and removing "Upgrade to premium" menu, upgrade button #> `
+            -replace '(session[,]{1}[a-z]{1}[=]{1}[a-z]{1}[=]{1}[>]{1}[{]{1}var [a-z]{1}[,]{1}[a-z]{1}[,]{1}[a-z]{1}[;]{1}[a-z]{6})(["]{1}free["]{1})', '$1"premium"' `
+            -replace '([a-z]{1}[.]{1}toLowerCase[(]{1}[)]{2}[}]{1}[,]{1}[a-z]{1}[=]{1}[a-z]{1}[=]{1}[>]{1}[{]{1}var [a-z]{1}[,]{1}[a-z]{1}[,]{1}[a-z]{1}[;]{1}return)(["]{1}premium["]{1})', '$1"free"' `
+            <# Disabling a playlist sponsor #>`
+            -replace "allSponsorships", "" `
+            <# Disable Logging #>`
+            -replace "sp://logging/v3/\w+", "" 
 
         # Disable Podcast
         if ($Podcasts_off) {
