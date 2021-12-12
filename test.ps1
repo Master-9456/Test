@@ -180,21 +180,22 @@ $xpui_js_patch = "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
 
 If (Test-Path $xpui_js_patch) {
     Write-Host "Spicetify detected"`n 
+
     $xpui_js = Get-Content $xpui_js_patch -Raw
     
     If (!($xpui_js -match 'patched by spotx')) {
         
-    
+
         Copy-Item $xpui_js_patch "$xpui_js_patch.bak"
 
         $new_js = $xpui_js `
-         <# Removing an empty block #> `
-         -replace 'adsEnabled:!0', 'adsEnabled:!1' `
-         <# Full screen mode activation and removing "Upgrade to premium" menu, upgrade button #> `
-         -replace '(session[,]{1}[a-z]{1}[=]{1}[a-z]{1}[=]{1}[>]{1}[{]{1}var [a-z]{1}[,]{1}[a-z]{1}[,]{1}[a-z]{1}[;]{1}[a-z]{6})(["]{1}free["]{1})', '$1"premium"' `
-         -replace '([a-z]{1}[.]{1}toLowerCase[(]{1}[)]{2}[}]{1}[,]{1}[a-z]{1}[=]{1}[a-z]{1}[=]{1}[>]{1}[{]{1}var [a-z]{1}[,]{1}[a-z]{1}[,]{1}[a-z]{1}[;]{1}return)(["]{1}premium["]{1})', '$1"free"' `
-         <# Disabling a playlist sponsor #>`
-         -replace "allSponsorships", ""
+            <# Removing an empty block #> `
+            -replace 'adsEnabled:!0', 'adsEnabled:!1' `
+            <# Full screen mode activation and removing "Upgrade to premium" menu, upgrade button #> `
+            -replace '(session[,]{1}[a-z]{1}[=]{1}[a-z]{1}[=]{1}[>]{1}[{]{1}var [a-z]{1}[,]{1}[a-z]{1}[,]{1}[a-z]{1}[;]{1}[a-z]{6})(["]{1}free["]{1})', '$1"premium"' `
+            -replace '([a-z]{1}[.]{1}toLowerCase[(]{1}[)]{2}[}]{1}[,]{1}[a-z]{1}[=]{1}[a-z]{1}[=]{1}[>]{1}[{]{1}var [a-z]{1}[,]{1}[a-z]{1}[,]{1}[a-z]{1}[;]{1}return)(["]{1}premium["]{1})', '$1"free"' `
+            <# Disabling a playlist sponsor #>`
+            -replace "allSponsorships", ""
 
         # Disable Podcast
         if ($Podcasts_off) {
@@ -252,7 +253,17 @@ If (Test-Path $xpui_spa_patch) {
             <# Disabling a playlist sponsor #>`
             -replace "allSponsorships", "" `
             <# Disable Logging #>`
-            -replace "sp://logging/v3/\w+", "" 
+            -replace "sp://logging/v3/\w+", "" `
+	    <# Show "Made For You" entry point in the left sidebar #>`
+	    -replace '(Show "Made For You" entry point in the left sidebar.,default:)(!1)', '$1!0' `
+	    <# Enables the 2021 icons redraw #>`
+	    -replace '(Enables the 2021 icons redraw which loads a different font asset for rendering icon glyphs.",default:)(!1)', '$1!0' `
+	    <# Enable Liked Songs section on Artist page #>`
+	    -replace '(Enable Liked Songs section on Artist page",default:)(!1)', '$1!0' `
+	    <# Enable block users #>`
+	    -replace '(Enable block users feature in clientX",default:)(!1)', '$1!0' `
+	    <# Enables quicksilver in-app messaging modal #>`
+	    -replace '(Enables quicksilver in-app messaging modal",default:)(!0)', '$1!1'
 
         # Disable Podcast
         if ($Podcasts_off) {
