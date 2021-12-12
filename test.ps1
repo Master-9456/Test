@@ -263,7 +263,11 @@ If (Test-Path $xpui_spa_patch) {
 	    <# Enable block users #>`
 	    -replace '(Enable block users feature in clientX",default:)(!1)', '$1!0' `
 	    <# Enables quicksilver in-app messaging modal #>`
-	    -replace '(Enables quicksilver in-app messaging modal",default:)(!0)', '$1!1'
+	    -replace '(Enables quicksilver in-app messaging modal",default:)(!0)', '$1!1' `
+	    <# With this enabled, clients will check whether tracks have lyrics available #>`
+	    -replace '(With this enabled, clients will check whether tracks have lyrics available",default:)(!1)', '$1!0'
+	    
+	    
 
         # Disable Podcast
         if ($Podcasts_off) {
