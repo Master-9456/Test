@@ -30,7 +30,7 @@ $win_os = (get-itemproperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVe
 $win11 = $win_os -match "\windows 11\b"
 $win10 = $win_os -match "\windows 10\b"
 $win8_1 = $win_os -match "\windows 8.1\b"
-$win8 = $win_os -match "\windows 8\b"
+$win8 = $win_os -match "\windows 8\b" 
 
 
 if ($win11 -or $win10 -or $win8_1 -or $win8) {
