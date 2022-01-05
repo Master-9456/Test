@@ -113,8 +113,33 @@ if (-not $spotifyInstalled) {
     Write-Host  $version_client -ForegroundColor Green
     Write-Host "Please wait..."`n
     
-    Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup
 
+  [System.Security.Principal.WindowsPrincipal] $principal = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+  $isUserAdmin = $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
+
+
+   if ($isUserAdmin)
+  {
+    Write-Host
+    Write-Host 'Creating scheduled task...'
+    $apppath = 'powershell.exe'
+    $taskname = 'Spotify install'
+    $action = New-ScheduledTaskAction -Execute $apppath -Argument "-NoLogo -NoProfile -Command & `'$spotifySetupFilePath`'"
+    $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date)
+    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -WakeToRun
+    Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskname -Settings $settings -Force | Write-Verbose
+    Write-Host 'The install task has been scheduled. Starting the task...'
+    Start-ScheduledTask -TaskName $taskname
+    Start-Sleep -Seconds 2
+    Write-Host 'Unregistering the task...'
+    Unregister-ScheduledTask -TaskName $taskname -Confirm:$false
+    Start-Sleep -Seconds 2
+  }
+  else
+  {
+
+    Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup
+    }
   
   
     Stop-Process -Name Spotify 
@@ -195,7 +220,21 @@ If (Test-Path $xpui_js_patch) {
             -replace '(session[,]{1}[a-z]{1}[=]{1}[a-z]{1}[=]{1}[>]{1}[{]{1}var [a-z]{1}[,]{1}[a-z]{1}[,]{1}[a-z]{1}[;]{1}[a-z]{6})(["]{1}free["]{1})', '$1"premium"' `
             -replace '([a-z]{1}[.]{1}toLowerCase[(]{1}[)]{2}[}]{1}[,]{1}[a-z]{1}[=]{1}[a-z]{1}[=]{1}[>]{1}[{]{1}var [a-z]{1}[,]{1}[a-z]{1}[,]{1}[a-z]{1}[;]{1}return)(["]{1}premium["]{1})', '$1"free"' `
             <# Disabling a playlist sponsor #>`
-            -replace "allSponsorships", ""
+            -replace "allSponsorships", "" `
+            <# Show "Made For You" entry point in the left sidebar #>`
+            -replace '(Show "Made For You" entry point in the left sidebar.,default:)(!1)', '$1!0' `
+            <# Enables the 2021 icons redraw #>`
+            -replace '(Enables the 2021 icons redraw which loads a different font asset for rendering icon glyphs.",default:)(!1)', '$1!0' `
+            <# Enable Liked Songs section on Artist page #>`
+            -replace '(Enable Liked Songs section on Artist page",default:)(!1)', '$1!0' `
+            <# Enable block users #>`
+            -replace '(Enable block users feature in clientX",default:)(!1)', '$1!0' `
+            <# Enables quicksilver in-app messaging modal #>`
+            -replace '(Enables quicksilver in-app messaging modal",default:)(!0)', '$1!1' `
+            <# With this enabled, clients will check whether tracks have lyrics available #>`
+            -replace '(With this enabled, clients will check whether tracks have lyrics available",default:)(!1)', '$1!0' `
+            <# Enables new playlist creation flow #>`
+            -replace '(Enables new playlist creation flow in Web Player and DesktopX",default:)(!1)', '$1!0'
 
         # Disable Podcast
         if ($Podcasts_off) {
@@ -254,20 +293,20 @@ If (Test-Path $xpui_spa_patch) {
             -replace "allSponsorships", "" `
             <# Disable Logging #>`
             -replace "sp://logging/v3/\w+", "" `
-	    <# Show "Made For You" entry point in the left sidebar #>`
-	    -replace '(Show "Made For You" entry point in the left sidebar.,default:)(!1)', '$1!0' `
-	    <# Enables the 2021 icons redraw #>`
-	    -replace '(Enables the 2021 icons redraw which loads a different font asset for rendering icon glyphs.",default:)(!1)', '$1!0' `
-	    <# Enable Liked Songs section on Artist page #>`
-	    -replace '(Enable Liked Songs section on Artist page",default:)(!1)', '$1!0' `
-	    <# Enable block users #>`
-	    -replace '(Enable block users feature in clientX",default:)(!1)', '$1!0' `
-	    <# Enables quicksilver in-app messaging modal #>`
-	    -replace '(Enables quicksilver in-app messaging modal",default:)(!0)', '$1!1' `
-	    <# With this enabled, clients will check whether tracks have lyrics available #>`
-	    -replace '(With this enabled, clients will check whether tracks have lyrics available",default:)(!1)', '$1!0'
-	    
-	    
+            <# Show "Made For You" entry point in the left sidebar #>`
+            -replace '(Show "Made For You" entry point in the left sidebar.,default:)(!1)', '$1!0' `
+            <# Enables the 2021 icons redraw #>`
+            -replace '(Enables the 2021 icons redraw which loads a different font asset for rendering icon glyphs.",default:)(!1)', '$1!0' `
+            <# Enable Liked Songs section on Artist page #>`
+            -replace '(Enable Liked Songs section on Artist page",default:)(!1)', '$1!0' `
+            <# Enable block users #>`
+            -replace '(Enable block users feature in clientX",default:)(!1)', '$1!0' `
+            <# Enables quicksilver in-app messaging modal #>`
+            -replace '(Enables quicksilver in-app messaging modal",default:)(!0)', '$1!1' `
+            <# With this enabled, clients will check whether tracks have lyrics available #>`
+            -replace '(With this enabled, clients will check whether tracks have lyrics available",default:)(!1)', '$1!0' `
+            <# Enables new playlist creation flow #>`
+            -replace '(Enables new playlist creation flow in Web Player and DesktopX",default:)(!1)', '$1!0'
 
         # Disable Podcast
         if ($Podcasts_off) {
