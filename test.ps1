@@ -120,8 +120,7 @@ if (-not $spotifyInstalled) {
 
    if ($isUserAdmin)
   {
-    Write-Host
-    Write-Host 'Startup detected with administrator rights'
+    Write-Host 'Startup detected with administrator rights'`n
     $apppath = 'powershell.exe'
     $taskname = 'Spotify install'
     $action = New-ScheduledTaskAction -Execute $apppath -Argument "-NoLogo -NoProfile -Command & `'$PWD\SpotifySetup.exe`'" 
