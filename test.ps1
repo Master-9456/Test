@@ -122,7 +122,7 @@ if (-not $spotifyInstalled) {
   {
   $spotifySetupFilePath = Join-Path -Path $PWD -ChildPath 'SpotifySetup.exe'
     Write-Host
-    Write-Host 'Creating scheduled task...'
+    Write-Host 'Startup detected with administrator rights'
     $apppath = 'powershell.exe'
     $taskname = 'Spotify install'
     $action = New-ScheduledTaskAction -Execute $apppath -Argument "-NoLogo -NoProfile -Command & `'$spotifySetupFilePath`'" 
