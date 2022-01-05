@@ -120,12 +120,11 @@ if (-not $spotifyInstalled) {
 
    if ($isUserAdmin)
   {
-  $spotifySetupFilePath = Join-Path -Path $PWD -ChildPath 'SpotifySetup.exe'
     Write-Host
     Write-Host 'Startup detected with administrator rights'
     $apppath = 'powershell.exe'
     $taskname = 'Spotify install'
-    $action = New-ScheduledTaskAction -Execute $apppath -Argument "-NoLogo -NoProfile -Command & `'$spotifySetupFilePath`'" 
+    $action = New-ScheduledTaskAction -Execute $apppath -Argument "-NoLogo -NoProfile -Command & `'$PWD\SpotifySetup.exe`'" 
     $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date)
     $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -WakeToRun
     Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskname -Settings $settings -Force | Write-Verbose
