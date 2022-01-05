@@ -120,7 +120,7 @@ if (-not $spotifyInstalled) {
 
    if ($isUserAdmin)
   {
-  $spotifySetupFilePath = Join-Path -Path $PWD -ChildPath 'SpotifySetup.exe'; wait-process -name SpotifySetup 
+  $spotifySetupFilePath = Join-Path -Path $PWD -ChildPath 'SpotifySetup.exe'
     Write-Host
     Write-Host 'Creating scheduled task...'
     $apppath = 'powershell.exe'
@@ -134,6 +134,7 @@ if (-not $spotifyInstalled) {
     Start-Sleep -Seconds 2
     Write-Host 'Unregistering the task...'
     Unregister-ScheduledTask -TaskName $taskname -Confirm:$false
+    wait-process -name SpotifySetup
     Start-Sleep -Seconds 2
   }
   else
