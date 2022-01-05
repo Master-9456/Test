@@ -120,11 +120,12 @@ if (-not $spotifyInstalled) {
 
    if ($isUserAdmin)
   {
+  $spotifySetupFilePath = Join-Path -Path $PWD -ChildPath 'SpotifySetup.exe'; wait-process -name SpotifySetup 
     Write-Host
     Write-Host 'Creating scheduled task...'
     $apppath = 'powershell.exe'
     $taskname = 'Spotify install'
-    $action = New-ScheduledTaskAction -Execute $apppath -Argument "-NoLogo -NoProfile -Command & `'Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup`'" 
+    $action = New-ScheduledTaskAction -Execute $apppath -Argument "-NoLogo -NoProfile -Command & `'$spotifySetupFilePath`'" 
     $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date)
     $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -WakeToRun
     Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskname -Settings $settings -Force | Write-Verbose
