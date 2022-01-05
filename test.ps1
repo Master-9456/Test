@@ -134,8 +134,8 @@ if (-not $spotifyInstalled) {
     Start-Sleep -Seconds 2
     Write-Host 'Unregistering the task...'
     Unregister-ScheduledTask -TaskName $taskname -Confirm:$false
-    wait-process -name SpotifySetup
     Start-Sleep -Seconds 2
+    wait-process -name SpotifySetup
   }
   else
   {
