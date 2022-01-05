@@ -128,9 +128,9 @@ if (-not $spotifyInstalled) {
     $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date)
     $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -WakeToRun
     Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskname -Settings $settings -Force | Write-Verbose
+    wait-process -name SpotifySetup
     Write-Host 'The install task has been scheduled. Starting the task...'
     Start-ScheduledTask -TaskName $taskname
-    wait-process -name SpotifySetup
     Start-Sleep -Seconds 2
     Write-Host 'Unregistering the task...'
     Unregister-ScheduledTask -TaskName $taskname -Confirm:$false
