@@ -130,11 +130,11 @@ if (-not $spotifyInstalled) {
     Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskname -Settings $settings -Force | Write-Verbose
     Write-Host 'The install task has been scheduled. Starting the task...'
     Start-ScheduledTask -TaskName $taskname
+    wait-process -name SpotifySetup
     Start-Sleep -Seconds 2
     Write-Host 'Unregistering the task...'
     Unregister-ScheduledTask -TaskName $taskname -Confirm:$false
     Start-Sleep -Seconds 2
-    wait-process -name SpotifySetup
   }
   else
   {
