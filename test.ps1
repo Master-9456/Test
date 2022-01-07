@@ -105,6 +105,12 @@ Remove-Item -LiteralPath "$PWD\chrome_elf.zip"
     
     
     
+    $spotifyInstalled = (Test-Path -LiteralPath $SpotifyExecutable)
+
+    if ($spotifyInstalled) {
+
+
+
     # Check last version Spotify online
     $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
     $online_version = $version_client_check -split '.\w\w\w\w\w\w\w\w\w'
@@ -139,9 +145,11 @@ if ($ch -eq 'y') { $Upgrade_clien = $true }
 
 
     }
+    }
 
 
-    $spotifyInstalled = (Test-Path -LiteralPath $SpotifyExecutable)
+
+    
 if (-not $spotifyInstalled -or $Upgrade_clien) {
 
 # Check version Spotify
