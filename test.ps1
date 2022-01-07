@@ -1,5 +1,5 @@
-# Ignore errors from `Stop-Process`
-$PSDefaultParameterValues['Stop-Process:ErrorAction'] = 'SilentlyContinue'
+    # Ignore errors from `Stop-Process`
+$PSDefaultParameterValues['Stop-Process:ErrorAction'] = [System.Management.Automation.ActionPreference]::SilentlyContinue
 
 # Check Tls12
 $tsl_check = [Net.ServicePointManager]::SecurityProtocol 
@@ -16,6 +16,7 @@ Write-Host "*****************"`n
 
 $SpotifyDirectory = "$env:APPDATA\Spotify"
 $SpotifyExecutable = "$SpotifyDirectory\Spotify.exe"
+$Upgrade_client = $false
 $Podcasts_off = $false
 
 
@@ -45,8 +46,7 @@ if ($win11 -or $win10 -or $win8_1 -or $win8) {
             Get-AppxPackage -Name SpotifyAB.SpotifyMusic | Remove-AppxPackage
         }
         else {
-            Write-Host 'Exiting...'`n
-            Pause 
+            Read-Host "Exiting...`nPress any key to exit..."
             exit
         }
     }
@@ -61,8 +61,7 @@ try {
   | Set-Location
 }
 catch {
-    Write-Output ''
-    Pause
+    Read-Host 'Press any key to exit...'
     exit
 }
 
@@ -80,15 +79,14 @@ try {
     )
 }
 catch {
-    Write-Output ''
+    Write-Output $_
+    Read-Host "An error occurred while downloading the chrome_elf.zip file`nPress any key to exit..."
     Start-Sleep
 }
 
 Expand-Archive -Force -LiteralPath "$PWD\chrome_elf.zip" -DestinationPath $PWD
 Remove-Item -LiteralPath "$PWD\chrome_elf.zip"
 
-$spotifyInstalled = (Test-Path -LiteralPath $SpotifyExecutable)
-if (-not $spotifyInstalled) {
     
     try {
         $webClient.DownloadFile(
@@ -99,13 +97,54 @@ if (-not $spotifyInstalled) {
         )
     }
     catch {
-        Write-Output ''
-        Pause
+        Write-Output $_
+        Read-Host "An error occurred while downloading the SpotifySetup.exe file`nPress any key to exit..."
         exit
     }
-    mkdir $SpotifyDirectory | Out-Null
+    
+    
+    
+    
+    # Check last version Spotify online
+    $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
+    $online_version = $version_client_check -split '.\w\w\w\w\w\w\w\w\w'
+    
 
-    # Check version Spotify
+    # Check last version Spotify ofline
+    $ofline_version = (Get-Item $SpotifyExecutable).VersionInfo.FileVersion
+    
+
+    if ($online_version -gt $ofline_version){
+    
+
+        do {
+    $ch = Read-Host -Prompt "Ваша верссия Spotify $ofline_version устрела, на данный момент есть более новая версия $online_version `nХотите обновиться ? (Y/N)"
+    Write-Output $_
+    if (!($ch -eq 'n' -or $ch -eq 'y')) {
+    
+        Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
+        Write-Host "enter again through..." -NoNewline
+        Start-Sleep -Milliseconds 1000
+        Write-Host "3" -NoNewline
+        Start-Sleep -Milliseconds 1000
+        Write-Host ".2" -NoNewline
+        Start-Sleep -Milliseconds 1000
+        Write-Host ".1"
+        Start-Sleep -Milliseconds 1000     
+        Clear-Host
+    }
+}
+while ($ch -notmatch '^y$|^n$')
+if ($ch -eq 'y') { $Upgrade_clien = $true }
+
+
+    }
+
+
+    $spotifyInstalled = (Test-Path -LiteralPath $SpotifyExecutable)
+if (-not $spotifyInstalled -or $Upgrade_clien) {
+
+# Check version Spotify
     $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
     $version_client = $version_client_check -split '.\w\w\w\w\w\w\w\w\w'
    
@@ -114,30 +153,31 @@ if (-not $spotifyInstalled) {
     Write-Host "Please wait..."`n
     
 
-  [System.Security.Principal.WindowsPrincipal] $principal = [System.Security.Principal.WindowsIdentity]::GetCurrent()
-  $isUserAdmin = $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
+    # Correcting the error if the spotify installer was launched from the administrator
+    
+    [System.Security.Principal.WindowsPrincipal] $principal = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+    $isUserAdmin = $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
 
 
-   if ($isUserAdmin)
-  {
-    Write-Host 'Startup detected with administrator rights'`n
-    $apppath = 'powershell.exe'
-    $taskname = 'Spotify install'
-    $action = New-ScheduledTaskAction -Execute $apppath -Argument "-NoLogo -NoProfile -Command & `'$PWD\SpotifySetup.exe`'" 
-    $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date)
-    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -WakeToRun
-    Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskname -Settings $settings -Force | Write-Verbose
-    Start-ScheduledTask -TaskName $taskname
-    Start-Sleep -Seconds 2
-    Unregister-ScheduledTask -TaskName $taskname -Confirm:$false
-    Start-Sleep -Seconds 2
-    wait-process -name SpotifySetup
-  }
-  else
-  {
-
-    Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup
+    if ($isUserAdmin) {
+        Write-Host 'Startup detected with administrator rights'`n
+        $apppath = 'powershell.exe'
+        $taskname = 'Spotify install'
+        $action = New-ScheduledTaskAction -Execute $apppath -Argument "-NoLogo -NoProfile -Command & `'$PWD\SpotifySetup.exe`'" 
+        $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date)
+        $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -WakeToRun
+        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskname -Settings $settings -Force | Write-Verbose
+        Start-ScheduledTask -TaskName $taskname
+        Start-Sleep -Seconds 2
+        Unregister-ScheduledTask -TaskName $taskname -Confirm:$false
+        Start-Sleep -Seconds 2
+        wait-process -name SpotifySetup
     }
+    else {
+
+        Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup
+    }
+
   
   
     Stop-Process -Name Spotify 
@@ -172,7 +212,6 @@ Pop-Location
 
 Start-Sleep -Milliseconds 200
 Remove-Item -Recurse -LiteralPath $tempDirectory 
-
 
 
 do {
