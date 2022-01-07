@@ -1,4 +1,4 @@
-    # Ignore errors from `Stop-Process`
+# Ignore errors from `Stop-Process`
 $PSDefaultParameterValues['Stop-Process:ErrorAction'] = [System.Management.Automation.ActionPreference]::SilentlyContinue
 
 # Check Tls12
@@ -14,12 +14,12 @@ Write-Host "@Amd64fox" -ForegroundColor DarkYellow
 Write-Host "*****************"`n
 
 
-$SpotifyDirectory = "$env:APPDATA\Spotify"
-$SpotifyExecutable = "$SpotifyDirectory\Spotify.exe"
-$chrome_elf = "$SpotifyDirectory\chrome_elf.dll"
-$chrome_elf_bak = "$SpotifyDirectory\chrome_elf_bak.dll"
-$Upgrade_client = $false
-$Podcasts_off = $false
+$spotifyDirectory = "$env:APPDATA\Spotify"
+$spotifyExecutable = "$spotifyDirectory\Spotify.exe"
+$chrome_elf = "$spotifyDirectory\chrome_elf.dll"
+$chrome_elf_bak = "$spotifyDirectory\chrome_elf_bak.dll"
+$upgrade_client = $false
+$podcasts_off = $false
 
 
 Stop-Process -Name Spotify
@@ -89,82 +89,82 @@ catch {
 Expand-Archive -Force -LiteralPath "$PWD\chrome_elf.zip" -DestinationPath $PWD
 Remove-Item -LiteralPath "$PWD\chrome_elf.zip"
 
-    
-    try {
-        $webClient.DownloadFile(
-            # Remote file URL
-            'https://download.scdn.co/SpotifySetup.exe',
-            # Local file path
-            "$PWD\SpotifySetup.exe"
-        )
-    }
-    catch {
-        Write-Output $_
-        Read-Host "An error occurred while downloading the SpotifySetup.exe file`nPress any key to exit..."
-        exit
-    }
-    
-    
-    
-    
-    $spotifyInstalled = (Test-Path -LiteralPath $SpotifyExecutable)
 
-    if ($spotifyInstalled) {
+
+try {
+    $webClient.DownloadFile(
+        # Remote file URL
+        'https://download.scdn.co/SpotifySetup.exe',
+        # Local file path
+        "$PWD\SpotifySetup.exe"
+    )
+}
+catch {
+    Write-Output $_
+    Read-Host "An error occurred while downloading the SpotifySetup.exe file`nPress any key to exit..."
+    exit
+}
+
+
+
+$spotifyInstalled = (Test-Path -LiteralPath $spotifyExecutable)
+
+if ($spotifyInstalled) {
 
 
 
     # Check last version Spotify online
     $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
     $online_version = $version_client_check -split '.\w\w\w\w\w\w\w\w\w'
-    
+
 
     # Check last version Spotify ofline
-    $ofline_version = (Get-Item $SpotifyExecutable).VersionInfo.FileVersion
-    
+    $ofline_version = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
 
-    if ($online_version -gt $ofline_version){
-    
+
+    if ($online_version -gt $ofline_version) {
+
 
         do {
-    $ch = Read-Host -Prompt "Ваша верссия Spotify $ofline_version устрела, на данный момент есть более новая версия $online_version `nХотите обновиться ? (Y/N)"
-    Write-Output $_
-    if (!($ch -eq 'n' -or $ch -eq 'y')) {
-    
-        Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
-        Write-Host "enter again through..." -NoNewline
-        Start-Sleep -Milliseconds 1000
-        Write-Host "3" -NoNewline
-        Start-Sleep -Milliseconds 1000
-        Write-Host ".2" -NoNewline
-        Start-Sleep -Milliseconds 1000
-        Write-Host ".1"
-        Start-Sleep -Milliseconds 1000     
-        Clear-Host
+            $ch = Read-Host -Prompt "Your Spotify $ofline_version version is outdated, at the moment there is a newer version $online_version `nWant to update ? (Y/N)"
+            Write-Output $_
+            if (!($ch -eq 'n' -or $ch -eq 'y')) {
+
+                Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
+                Write-Host "enter again through..." -NoNewline
+                Start-Sleep -Milliseconds 1000
+                Write-Host "3" -NoNewline
+                Start-Sleep -Milliseconds 1000
+                Write-Host ".2" -NoNewline
+                Start-Sleep -Milliseconds 1000
+                Write-Host ".1"
+                Start-Sleep -Milliseconds 1000     
+                Clear-Host
+            }
+        }
+        while ($ch -notmatch '^y$|^n$')
+        if ($ch -eq 'y') { $upgrade_client = $true }
+
+
     }
 }
-while ($ch -notmatch '^y$|^n$')
-if ($ch -eq 'y') { $Upgrade_clien = $true }
 
 
-    }
-    }
+# If there is no client or it is outdated, then install
 
+if (-not $spotifyInstalled -or $upgrade_client) {
 
-
-    
-if (-not $spotifyInstalled -or $Upgrade_clien) {
-
-# Check version Spotify
+    # Check version Spotify
     $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
     $version_client = $version_client_check -split '.\w\w\w\w\w\w\w\w\w'
-   
+
     Write-Host "Downloading and installing Spotify " -NoNewline
     Write-Host  $version_client -ForegroundColor Green
     Write-Host "Please wait..."`n
-    
+
 
     # Correcting the error if the spotify installer was launched from the administrator
-    
+
     [System.Security.Principal.WindowsPrincipal] $principal = [System.Security.Principal.WindowsIdentity]::GetCurrent()
     $isUserAdmin = $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
 
@@ -188,8 +188,8 @@ if (-not $spotifyInstalled -or $Upgrade_clien) {
         Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup
     }
 
-  
-  
+
+
     Stop-Process -Name Spotify 
     Stop-Process -Name SpotifyWebHelper 
     Stop-Process -Name SpotifyFullSetup 
@@ -197,29 +197,32 @@ if (-not $spotifyInstalled -or $Upgrade_clien) {
 
     $ErrorActionPreference = 'SilentlyContinue'  # Команда гасит легкие ошибки
 
+    # Update backup chrome_elf.dll
     if (Test-Path -LiteralPath $chrome_elf_bak) {
-    Remove-item $SpotifyDirectory/chrome_elf_bak.dll
-    Move-Item $chrome_elf $chrome_elf_bak 
+        Remove-item $spotifyDirectory/chrome_elf_bak.dll
+        Move-Item $chrome_elf $chrome_elf_bak 
     }
-  
-    # Удалить инсталятор после установки
+
+    # Remove spotify installer after installation
     if (test-path "$env:LOCALAPPDATA\Microsoft\Windows\Temporary Internet Files\") {
         get-childitem -path "$env:LOCALAPPDATA\Microsoft\Windows\Temporary Internet Files\" -Recurse -Force -Filter  "SpotifyFullSetup*" | remove-item  -Force
     }
     if (test-path $env:LOCALAPPDATA\Microsoft\Windows\INetCache\) {
         get-childitem -path "$env:LOCALAPPDATA\Microsoft\Windows\INetCache\" -Recurse -Force -Filter  "SpotifyFullSetup*" | remove-item  -Force
-    
+
     }
-    
+
 }
 
+
+# Create backup chrome_elf.dll
 if (!(Test-Path -LiteralPath $chrome_elf_bak)) {
     Move-Item $chrome_elf $chrome_elf_bak 
 }
 
 Write-Host 'Patching Spotify...'`n
 $patchFiles = "$PWD\chrome_elf.dll", "$PWD\config.ini"
-Copy-Item -LiteralPath $patchFiles -Destination "$SpotifyDirectory"
+Copy-Item -LiteralPath $patchFiles -Destination "$spotifyDirectory"
 
 $tempDirectory = $PWD
 Pop-Location
@@ -227,6 +230,7 @@ Pop-Location
 
 Start-Sleep -Milliseconds 200
 Remove-Item -Recurse -LiteralPath $tempDirectory 
+
 
 
 do {
@@ -247,10 +251,10 @@ do {
     }
 }
 while ($ch -notmatch '^y$|^n$')
-if ($ch -eq 'y') { $Podcasts_off = $true }
+if ($ch -eq 'y') { $podcasts_off = $true }
 
 
-# Мофифицируем файлы 
+# Modify files
 
 $xpui_spa_patch = "$env:APPDATA\Spotify\Apps\xpui.spa"
 $xpui_js_patch = "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
@@ -318,7 +322,7 @@ If (Test-Path $xpui_spa_patch) {
 
     If (!($patched_by_spotx -match 'patched by spotx')) {
 
-        # Делаем резервную копию xpui.spa если он оригинальный
+        # Make a backup copy of xpui.spa if it is original
         
         $zip.Dispose()
         Copy-Item $xpui_spa_patch $env:APPDATA\Spotify\Apps\xpui.bak
@@ -361,7 +365,7 @@ If (Test-Path $xpui_spa_patch) {
             -replace '(Enables new playlist creation flow in Web Player and DesktopX",default:)(!1)', '$1!0'
 
         # Disable Podcast
-        if ($Podcasts_off) {
+        if ($podcasts_off) {
             $xpuiContents = $xpuiContents `
                 -replace '"album,playlist,artist,show,station,episode"', '"album,playlist,artist,station"' -replace ',this[.]enableShows=[a-z]', ""
         }
@@ -428,7 +432,7 @@ If (Test-Path $xpui_spa_patch) {
 }
 
 
-# Если папки по умолчанию Dekstop не существует, то попытаться найти её через реестр.
+# If the default Dekstop folder does not exist, then try to find it through the registry.
 $ErrorActionPreference = 'SilentlyContinue' 
 
 if (Test-Path "$env:USERPROFILE\Desktop") {  
@@ -467,7 +471,7 @@ If (!(Test-Path $env:USERPROFILE\Desktop\Spotify.lnk)) {
 
 # Block updates
 
-$ErrorActionPreference = 'SilentlyContinue'  # Команда гасит легкие ошибки
+$ErrorActionPreference = 'SilentlyContinue'  # The team extinguishes light mistakes
 
 
 
@@ -499,13 +503,13 @@ while ($ch -notmatch '^y$|^n$|^u$')
 
 if ($ch -eq 'y') {
 
-    # Если была установка клиента 
+    # If there was a client installation
     if (!($update_directory)) {
 
-        # Создать папку Spotify в Local
+        # Create Spotify folder in Localappdata
         New-Item -Path $env:LOCALAPPDATA -Name "Spotify" -ItemType "directory" | Out-Null
 
-        #Создать файл Update
+        # Create Update file
         New-Item -Path $env:LOCALAPPDATA\Spotify\ -Name "Update" -ItemType "file" -Value "STOPIT" | Out-Null
         $file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update
         $file.Attributes = "ReadOnly", "System"
@@ -524,14 +528,14 @@ if ($ch -eq 'y') {
     }
 
 
-    # Если клиент уже был 
+    # If the client has already been
     If ($update_directory) {
 
 
-        #Удалить папку Update если она есть
+        # Delete the Update folder if it exists
         if ($Check_folder_file -match '\bDirectory\b') {  
 
-            #Если у папки Update заблокированы права то разблокировать 
+            # If the rights of the Update folder are blocked, then unblock 
             if ($folder_update_access.AccessToString -match 'Deny') {
 
         ($ACL = Get-Acl $env:LOCALAPPDATA\Spotify\Update).access | ForEach-Object {
@@ -542,7 +546,7 @@ if ($ch -eq 'y') {
             Remove-item $env:LOCALAPPDATA\Spotify\Update -Recurse -Force
         } 
 
-        #Создать файл Update если его нет
+        # Create Update file if it doesn't exist
         if (!($Check_folder_file -match '\bSystem\b' -and $Check_folder_file -match '\bReadOnly\b')) {  
             New-Item -Path $env:LOCALAPPDATA\Spotify\ -Name "Update" -ItemType "file" -Value "STOPIT" | Out-Null
             $file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update
@@ -655,8 +659,6 @@ if ($ch -eq 'y') {
     $Shortcut2.IconLocation = "$env:APPDATA\Spotify\Spotify.exe"
     $Shortcut2.TargetPath = $source2
     $Shortcut2.Save()
-
-
 
 
 
