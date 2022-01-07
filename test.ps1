@@ -1,7 +1,7 @@
-# Ignore errors from `Stop-Process`
+# Игнорировать ошибки из `Stop-Process`
 $PSDefaultParameterValues['Stop-Process:ErrorAction'] = [System.Management.Automation.ActionPreference]::SilentlyContinue
 
-# Check Tls12
+# Проверка на наличия сертификата Tls12
 $tsl_check = [Net.ServicePointManager]::SecurityProtocol 
 if (!($tsl_check -match '^tls12$' )) {
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -9,7 +9,7 @@ if (!($tsl_check -match '^tls12$' )) {
 
 
 Write-Host "*****************"
-Write-Host "Author: " -NoNewline
+Write-Host "Автор: " -NoNewline
 Write-Host "@Amd64fox" -ForegroundColor DarkYellow
 Write-Host "*****************"`n
 
@@ -28,7 +28,7 @@ Stop-Process -Name SpotifyWebHelper
 if ($PSVersionTable.PSVersion.Major -ge 7) {
     Import-Module Appx -UseWindowsPowerShell
 }
-# Check version Windows
+# Проверка версии Windows
 $win_os = (get-itemproperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" -Name ProductName).ProductName
 $win11 = $win_os -match "\windows 11\b"
 $win10 = $win_os -match "\windows 10\b"
@@ -39,16 +39,16 @@ $win8 = $win_os -match "\windows 8\b"
 if ($win11 -or $win10 -or $win8_1 -or $win8) {
 
 
-    # Check and del Windows Store
+    # Удалить Spotify Windows Store если он есть
     if (Get-AppxPackage -Name SpotifyAB.SpotifyMusic) {
-        Write-Host 'The Microsoft Store version of Spotify has been detected which is not supported.'`n
-        $ch = Read-Host -Prompt "Uninstall Spotify Windows Store edition (Y/N) "
+        Write-Host 'Обнаружена версия Spotify из Microsoft Store, которая не поддерживается.'`n
+        $ch = Read-Host -Prompt "Хотите удалить Spotify Microsoft Store ? (Y/N) "
         if ($ch -eq 'y') {
-            Write-Host 'Uninstalling Spotify.'`n
+            Write-Host 'Удаление Spotify.'`n
             Get-AppxPackage -Name SpotifyAB.SpotifyMusic | Remove-AppxPackage
         }
         else {
-            Read-Host "Exiting...`nPress any key to exit..."
+            Read-Host "Завершение работы...`nНажмите любую клавишу для выхода..." 
             exit
         }
     }
@@ -63,12 +63,13 @@ try {
   | Set-Location
 }
 catch {
-    Read-Host 'Press any key to exit...'
+    Write-Output $_
+    Read-Host 'Нажмите любую клавишу для выхода...'
     exit
 }
 
 
-Write-Host 'Downloading latest patch BTS...'`n
+Write-Host 'Загружаю последний патч BTS...'`n
 
 $webClient = New-Object -TypeName System.Net.WebClient
 try {
@@ -82,7 +83,7 @@ try {
 }
 catch {
     Write-Output $_
-    Read-Host "An error occurred while downloading the chrome_elf.zip file`nPress any key to exit..."
+    Read-Host "Произошла ошибка во время скачивания файла chrome_elf.zip`nНажмите любую клавишу для выхода..."
     Start-Sleep
 }
 
@@ -101,7 +102,7 @@ try {
 }
 catch {
     Write-Output $_
-    Read-Host "An error occurred while downloading the SpotifySetup.exe file`nPress any key to exit..."
+    Read-Host "Произошла ошибка во время скачивания файла SpotifySetup.exe file`nНажмите любую клавишу для выхода..."
     exit
 }
 
@@ -113,12 +114,12 @@ if ($spotifyInstalled) {
 
 
 
-    # Check last version Spotify online
+    # Проверка последней версии Spotify онлайн
     $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
     $online_version = $version_client_check -split '.\w\w\w\w\w\w\w\w\w'
 
 
-    # Check last version Spotify ofline
+    # Проверка последней версии Spotify офлайн
     $ofline_version = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
 
 
@@ -126,7 +127,7 @@ if ($spotifyInstalled) {
 
 
         do {
-            $ch = Read-Host -Prompt "Your Spotify $ofline_version version is outdated, at the moment there is a newer version $online_version `nWant to update ? (Y/N)"
+            $ch = Read-Host -Prompt "Ваша версия Spotify $ofline_version устарела, рекомендуется обновиться до $online_version `nОбновить ? (Y/N)"
             Write-Output $_
             if (!($ch -eq 'n' -or $ch -eq 'y')) {
 
@@ -150,11 +151,10 @@ if ($spotifyInstalled) {
 }
 
 
-# If there is no client or it is outdated, then install
+# Если клиента нет или он устарел, то начинаем установку
 
 if (-not $spotifyInstalled -or $upgrade_client) {
 
-    # Check version Spotify
     $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
     $version_client = $version_client_check -split '.\w\w\w\w\w\w\w\w\w'
 
@@ -163,7 +163,7 @@ if (-not $spotifyInstalled -or $upgrade_client) {
     Write-Host "Please wait..."`n
 
 
-    # Correcting the error if the spotify installer was launched from the administrator
+    # Исправление ошибки, если установщик Spotify был запущен от имени администратора
 
     [System.Security.Principal.WindowsPrincipal] $principal = [System.Security.Principal.WindowsIdentity]::GetCurrent()
     $isUserAdmin = $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -197,13 +197,13 @@ if (-not $spotifyInstalled -or $upgrade_client) {
 
     $ErrorActionPreference = 'SilentlyContinue'  # Команда гасит легкие ошибки
 
-    # Update backup chrome_elf.dll
+    # Обновить резервную копию chrome_elf.dll
     if (Test-Path -LiteralPath $chrome_elf_bak) {
         Remove-item $spotifyDirectory/chrome_elf_bak.dll
         Move-Item $chrome_elf $chrome_elf_bak 
     }
 
-    # Remove spotify installer after installation
+    # Удалите установщик Spotify
     if (test-path "$env:LOCALAPPDATA\Microsoft\Windows\Temporary Internet Files\") {
         get-childitem -path "$env:LOCALAPPDATA\Microsoft\Windows\Temporary Internet Files\" -Recurse -Force -Filter  "SpotifyFullSetup*" | remove-item  -Force
     }
@@ -215,12 +215,12 @@ if (-not $spotifyInstalled -or $upgrade_client) {
 }
 
 
-# Create backup chrome_elf.dll
+# Создать резервную копию chrome_elf.dll
 if (!(Test-Path -LiteralPath $chrome_elf_bak)) {
     Move-Item $chrome_elf $chrome_elf_bak 
 }
 
-Write-Host 'Patching Spotify...'`n
+Write-Host 'Модифицирую Spotify...'`n
 $patchFiles = "$PWD\chrome_elf.dll", "$PWD\config.ini"
 Copy-Item -LiteralPath $patchFiles -Destination "$spotifyDirectory"
 
@@ -234,12 +234,12 @@ Remove-Item -Recurse -LiteralPath $tempDirectory
 
 
 do {
-    $ch = Read-Host -Prompt "Want to turn off podcasts ? (Y/N)"
+    $ch = Read-Host -Prompt "Хотите отключить подкасты ? (Y/N)"
     Write-Host ""
     if (!($ch -eq 'n' -or $ch -eq 'y')) {
     
-        Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
-        Write-Host "enter again through..." -NoNewline
+        Write-Host "Ой, некорректное значение, " -ForegroundColor Red -NoNewline
+        Write-Host "повторите ввод через..." -NoNewline
         Start-Sleep -Milliseconds 1000
         Write-Host "3" -NoNewline
         Start-Sleep -Milliseconds 1000
@@ -254,21 +254,21 @@ while ($ch -notmatch '^y$|^n$')
 if ($ch -eq 'y') { $podcasts_off = $true }
 
 
-# Modify files
+# Мофифицируем файлы 
 
 $xpui_spa_patch = "$env:APPDATA\Spotify\Apps\xpui.spa"
 $xpui_js_patch = "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
 
 If (Test-Path $xpui_js_patch) {
-    Write-Host "Spicetify detected"`n 
+    Write-Host "Обнаружен Spicetify"`n
 
     $xpui_js = Get-Content $xpui_js_patch -Raw
     
     If (!($xpui_js -match 'patched by spotx')) {
         
-
+    
         Copy-Item $xpui_js_patch "$xpui_js_patch.bak"
-
+  
         $new_js = $xpui_js `
             <# Removing an empty block #> `
             -replace 'adsEnabled:!0', 'adsEnabled:!1' `
@@ -306,7 +306,7 @@ If (Test-Path $xpui_js_patch) {
 
     }
     else {
-        Write-Host "Spotify is already patched"`n 
+        Write-Host "Spotify уже был пропатчен"`n 
     }
 }
 
@@ -322,7 +322,7 @@ If (Test-Path $xpui_spa_patch) {
 
     If (!($patched_by_spotx -match 'patched by spotx')) {
 
-        # Make a backup copy of xpui.spa if it is original
+        # Делаем резервную копию xpui.spa если он оригинальный
         
         $zip.Dispose()
         Copy-Item $xpui_spa_patch $env:APPDATA\Spotify\Apps\xpui.bak
@@ -364,7 +364,7 @@ If (Test-Path $xpui_spa_patch) {
             <# Enables new playlist creation flow #>`
             -replace '(Enables new playlist creation flow in Web Player and DesktopX",default:)(!1)', '$1!0'
 
-        # Disable Podcast
+        # Отключить подкасты
         if ($podcasts_off) {
             $xpuiContents = $xpuiContents `
                 -replace '"album,playlist,artist,show,station,episode"', '"album,playlist,artist,station"' -replace ',this[.]enableShows=[a-z]', ""
@@ -427,12 +427,12 @@ If (Test-Path $xpui_spa_patch) {
     }
     else {
         $zip.Dispose()
-        Write-Host "Spotify is already patched"`n
+        Write-Host "Spotify уже был пропатчен"`n 
     }
 }
 
 
-# If the default Dekstop folder does not exist, then try to find it through the registry.
+# Если папки по умолчанию Dekstop не существует, то попытаться найти её через реестр.
 $ErrorActionPreference = 'SilentlyContinue' 
 
 if (Test-Path "$env:USERPROFILE\Desktop") {  
@@ -451,7 +451,7 @@ if (!(Test-Path "$env:USERPROFILE\Desktop")) {
 
 
 
-# Shortcut bug
+# Испраление бага ярлыка на рабочем столе
 $ErrorActionPreference = 'SilentlyContinue' 
 
 If (!(Test-Path $env:USERPROFILE\Desktop\Spotify.lnk)) {
@@ -469,9 +469,9 @@ If (!(Test-Path $env:USERPROFILE\Desktop\Spotify.lnk)) {
 
 
 
-# Block updates
+# Блокировка обновлений
 
-$ErrorActionPreference = 'SilentlyContinue'  # The team extinguishes light mistakes
+$ErrorActionPreference = 'SilentlyContinue'
 
 
 
@@ -483,11 +483,11 @@ $Check_folder_file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update | S
 $folder_update_access = Get-Acl $env:LOCALAPPDATA\Spotify\Update
 
 do {
-    $ch = Read-Host -Prompt "Want to block updates ? (Y/N), Unlock updates (U)"
+    $ch = Read-Host -Prompt "Хотите заблокировать обновления ? (Y/N), Хочу разблокировать (U)"
     if (!($ch -eq 'n' -or $ch -eq 'y' -or $ch -eq 'u')) {
     
-        Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
-        Write-Host "enter again through..." -NoNewline
+        Write-Host "Ой, некорректное значение, " -ForegroundColor Red -NoNewline
+        Write-Host "повторите ввод через..." -NoNewline
         Start-Sleep -Milliseconds 1000
         Write-Host "3" -NoNewline
         Start-Sleep -Milliseconds 1000
@@ -503,13 +503,13 @@ while ($ch -notmatch '^y$|^n$|^u$')
 
 if ($ch -eq 'y') {
 
-    # If there was a client installation
+    # Если была установка клиента 
     if (!($update_directory)) {
 
-        # Create Spotify folder in Localappdata
+        # Создать папку Spotify в Local
         New-Item -Path $env:LOCALAPPDATA -Name "Spotify" -ItemType "directory" | Out-Null
 
-        # Create Update file
+        #Создать файл Update
         New-Item -Path $env:LOCALAPPDATA\Spotify\ -Name "Update" -ItemType "file" -Value "STOPIT" | Out-Null
         $file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update
         $file.Attributes = "ReadOnly", "System"
@@ -528,14 +528,14 @@ if ($ch -eq 'y') {
     }
 
 
-    # If the client has already been
+    # Если клиент уже был 
     If ($update_directory) {
 
 
-        # Delete the Update folder if it exists
+        #Удалить папку Update если она есть
         if ($Check_folder_file -match '\bDirectory\b') {  
 
-            # If the rights of the Update folder are blocked, then unblock 
+            #Если у папки Update заблокированы права то разблокировать 
             if ($folder_update_access.AccessToString -match 'Deny') {
 
         ($ACL = Get-Acl $env:LOCALAPPDATA\Spotify\Update).access | ForEach-Object {
@@ -546,7 +546,7 @@ if ($ch -eq 'y') {
             Remove-item $env:LOCALAPPDATA\Spotify\Update -Recurse -Force
         } 
 
-        # Create Update file if it doesn't exist
+        #Создать файл Update если его нет
         if (!($Check_folder_file -match '\bSystem\b' -and $Check_folder_file -match '\bReadOnly\b')) {  
             New-Item -Path $env:LOCALAPPDATA\Spotify\ -Name "Update" -ItemType "file" -Value "STOPIT" | Out-Null
             $file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update
@@ -568,13 +568,13 @@ if ($ch -eq 'y') {
     }
 
   
-    Write-Host "Updates blocked successfully"`n -ForegroundColor Green
+    Write-Host "Обновления успешно заблокированы"`n -ForegroundColor Green
 
 }
 
 
 if ($ch -eq 'n') {
-    Write-Host "Left unchanged"`n
+    Write-Host "Оставлено без изменений"`n 
 }
 
 
@@ -592,12 +592,12 @@ if ($ch -eq 'u') {
         if ($migrator_bak) {
             Rename-Item -path $env:APPDATA\Spotify\SpotifyMigrator.bak -NewName $env:APPDATA\Spotify\SpotifyMigrator.exe
         }
-        Write-Host "Updates unlocked"`n -ForegroundColor Green
+        Write-Host "Обновления разблокированы"`n -ForegroundColor Green
     }
 
 
     If (!($migrator_bak -or $Check_folder_file -match '\bSystem\b|\bReadOnly\b')) {
-        Write-Host "Oops, updates are not blocked"`n 
+        Write-Host "Ого, обновления уже были разблокированы"`n 
     }  
 }
     
@@ -606,11 +606,11 @@ if ($ch -eq 'u') {
 # automatic cache clearing
 
 do {
-    $ch = Read-Host -Prompt "Want to set up automatic cache cleanup? (Y/N) Delete script (U)"
+    $ch = Read-Host -Prompt "Хотите установить автоматическую очистку кеша ? (Y/N) Хочу удалить (U)"
     Write-Host ""
     if (!($ch -eq 'n' -or $ch -eq 'y' -or $ch -eq 'u')) {
-        Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
-        Write-Host "enter again through..." -NoNewline
+        Write-Host "Ой, некорректное значение, " -ForegroundColor Red -NoNewline
+        Write-Host "повторите ввод через..." -NoNewline
         Start-Sleep -Milliseconds 1000
         Write-Host "3" -NoNewline
         Start-Sleep -Milliseconds 1000
@@ -643,7 +643,7 @@ if ($ch -eq 'y') {
     Start-Sleep -Milliseconds 200
 
     # cache-spotify.ps1
-    $webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/SpotX/main/cache-spotify.ps1', "$env:APPDATA\Spotify\cache-spotify.ps1")
+    $webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/SpotX/main/cache_spotify_ru.ps1', "$env:APPDATA\Spotify\cache-spotify.ps1")
 
     # Spotify.vbs
     $webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/SpotX/main/Spotify.vbs', "$env:APPDATA\Spotify\Spotify.vbs")
@@ -662,13 +662,15 @@ if ($ch -eq 'y') {
 
 
 
+
+
     do {
-        $ch = Read-Host -Prompt "Cache files that have not been used for more than XX days will be deleted.
-    Enter the number of days from 1 to 100"
+        $ch = Read-Host -Prompt "Файлы кэша, которые не использовались более XX дней, будут удалены.
+    Пожалуйста, введите количество дней от 1 до 100"
 
         if (!($ch -match "^[1-9][0-9]?$|^100$")) {
-            Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
-            Write-Host "enter again through..." -NoNewline
+            Write-Host "Ой, некорректное значение, " -ForegroundColor Red -NoNewline
+            Write-Host "повторите ввод через..." -NoNewline
 		
             Start-Sleep -Milliseconds 1000
             Write-Host "3" -NoNewline
@@ -690,8 +692,8 @@ if ($ch -eq 'y') {
         $contentcache_spotify_ps1 = [System.IO.File]::ReadAllText("$env:APPDATA\Spotify\cache-spotify.ps1")
         $contentcache_spotify_ps1 = $contentcache_spotify_ps1.Trim()
         [System.IO.File]::WriteAllText("$env:APPDATA\Spotify\cache-spotify.ps1", $contentcache_spotify_ps1)
-        Write-Host "Clearing the cache has been successfully installed"`n -ForegroundColor Green
-        Write-Host "installation completed"`n -ForegroundColor Green
+        Write-Host "Скрипт для очистки кэша был успешно установлен"`n -ForegroundColor Green
+        Write-Host "Установка завершена"`n -ForegroundColor Green
         exit
     }
          
@@ -699,7 +701,7 @@ if ($ch -eq 'y') {
 }
 
 if ($ch -eq 'n') {
-    Write-Host "installation completed"`n -ForegroundColor Green
+    Write-Host "Установка завершена"`n -ForegroundColor Green
 
     exit
 }
@@ -721,15 +723,15 @@ if ($ch -eq 'u') {
         $Shortcut3.IconLocation = "$env:APPDATA\Spotify\Spotify.exe"
         $Shortcut3.TargetPath = $source3
         $Shortcut3.Save()
-        Write-Host "Cache cleanup script removed"`n -ForegroundColor Green
-        Write-Host "Installation completed" -ForegroundColor Green
+        Write-Host "Очистка кэша удалена"`n -ForegroundColor Green
+        Write-Host "Установка завершена" -ForegroundColor Green
         exit
     }
 
 
     If (!($test_cache_spotify_ps -and $test_spotify_vbs)) {
-        Write-Host "Oops, no cache clearing script found"`n 
-        Write-Host "Installation completed"`n -ForegroundColor Green
+        Write-Host "Ого, скрипт очистки кэша не найден"`n 
+        Write-Host "Установка завершена"`n -ForegroundColor Green
         exit
     }
 }
