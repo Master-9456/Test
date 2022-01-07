@@ -16,6 +16,8 @@ Write-Host "*****************"`n
 
 $SpotifyDirectory = "$env:APPDATA\Spotify"
 $SpotifyExecutable = "$SpotifyDirectory\Spotify.exe"
+$chrome_elf = "$SpotifyDirectory\chrome_elf.dll"
+$chrome_elf_bak = "$SpotifyDirectory\chrome_elf_bak.dll"
 $Upgrade_client = $false
 $Podcasts_off = $false
 
@@ -195,9 +197,9 @@ if (-not $spotifyInstalled -or $Upgrade_clien) {
 
     $ErrorActionPreference = 'SilentlyContinue'  # Команда гасит легкие ошибки
 
-    if (test-path $SpotifyDirectory/chrome_elf_bak.dll) {
+    if (Test-Path -LiteralPath $chrome_elf_bak) {
     Remove-item $SpotifyDirectory/chrome_elf_bak.dll
-    Move-Item $SpotifyDirectory\chrome_elf.dll $SpotifyDirectory\chrome_elf_bak.dll 
+    Move-Item $chrome_elf $chrome_elf_bak 
     }
   
     # Удалить инсталятор после установки
@@ -211,8 +213,8 @@ if (-not $spotifyInstalled -or $Upgrade_clien) {
     
 }
 
-if (!(test-path $SpotifyDirectory/chrome_elf_bak.dll)) {
-    Move-Item $SpotifyDirectory\chrome_elf.dll $SpotifyDirectory\chrome_elf_bak.dll 
+if (!(Test-Path -LiteralPath $chrome_elf_bak)) {
+    Move-Item $chrome_elf $chrome_elf_bak 
 }
 
 Write-Host 'Patching Spotify...'`n
