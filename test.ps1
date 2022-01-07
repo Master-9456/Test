@@ -196,6 +196,7 @@ if (-not $spotifyInstalled -or $Upgrade_clien) {
     $ErrorActionPreference = 'SilentlyContinue'  # Команда гасит легкие ошибки
 
     if (test-path $SpotifyDirectory/chrome_elf_bak.dll) {
+    Remove-item $SpotifyDirectory/chrome_elf_bak.dll
     Move-Item $SpotifyDirectory\chrome_elf.dll $SpotifyDirectory\chrome_elf_bak.dll 
     }
   
