@@ -1,5 +1,5 @@
 # Ignore errors from `Stop-Process`
-$PSDefaultParameterValues['Stop-Process:ErrorAction'] = 'SilentlyContinue'
+$PSDefaultParameterValues['Stop-Process:ErrorAction'] = [System.Management.Automation.ActionPreference]::SilentlyContinue
 
 # Check Tls12
 $tsl_check = [Net.ServicePointManager]::SecurityProtocol 
@@ -13,7 +13,7 @@ Write-Host "*****************" -ForegroundColor DarkYellow
 Write-Host "Rollback Spotify" -ForegroundColor DarkYellow
 Write-Host "Author: " -NoNewline
 Write-Host "@Amd64fox" -ForegroundColor DarkYellow
-Write-Host "*****************" -ForegroundColor DarkYellow
+Write-Host "*****************"`n -ForegroundColor DarkYellow
 
 
 $SpotifyexePatch = "$env:APPDATA\Spotify\Spotify.exe"
@@ -185,6 +185,12 @@ Write-Host 'Downloading and install Spotify'
 Write-Host 'Please wait...'`n
 
 
+
+
+
+
+
+
 try {
 
     Start-BitsTransfer -Source  $result2.Matches.Value[0] -Destination "$PWD\SpotifySetup.exe"  -DisplayName "Downloading Spotify" -Description "$vernew "
@@ -214,8 +220,31 @@ If ($ch -eq 'r' -and $test_Spotifyexe) {
 
 
 
+# Correcting the error if the spotify installer was launched from the administrator
 
-Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup
+[System.Security.Principal.WindowsPrincipal] $principal = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+$isUserAdmin = $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
+
+
+if ($isUserAdmin) {
+    Write-Host 'Startup detected with administrator rights'`n
+    $apppath = 'powershell.exe'
+    $taskname = 'Spotify install'
+    $action = New-ScheduledTaskAction -Execute $apppath -Argument "-NoLogo -NoProfile -Command & `'$PWD\SpotifySetup.exe`'" 
+    $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date)
+    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -WakeToRun
+    Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskname -Settings $settings -Force | Write-Verbose
+    Start-ScheduledTask -TaskName $taskname
+    Start-Sleep -Seconds 2
+    Unregister-ScheduledTask -TaskName $taskname -Confirm:$false
+    Start-Sleep -Seconds 2
+    wait-process -name SpotifySetup
+}
+else {
+
+    Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup
+}
+
 
 
 Stop-Process -Name Spotify
