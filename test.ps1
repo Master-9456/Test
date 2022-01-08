@@ -25,6 +25,14 @@ Stop-Process -Name SpotifyWebHelper
 if ($PSVersionTable.PSVersion.Major -ge 7) {
     Import-Module Appx -UseWindowsPowerShell
 }
+
+
+[System.Security.Principal.WindowsPrincipal] $principal = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+$isUserAdmin = $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
+
+if ($isUserAdmin) {
+    Write-Host 'Startup detected with administrator rights'`n
+}
 # Check version Windows
 $win_os = (get-itemproperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" -Name ProductName).ProductName
 $win11 = $win_os -match "\windows 11\b"
@@ -222,12 +230,7 @@ If ($ch -eq 'r' -and $test_Spotifyexe) {
 
 # Correcting the error if the spotify installer was launched from the administrator
 
-[System.Security.Principal.WindowsPrincipal] $principal = [System.Security.Principal.WindowsIdentity]::GetCurrent()
-$isUserAdmin = $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
-
-
 if ($isUserAdmin) {
-    Write-Host 'Startup detected with administrator rights'`n
     $apppath = 'powershell.exe'
     $taskname = 'Spotify install'
     $action = New-ScheduledTaskAction -Execute $apppath -Argument "-NoLogo -NoProfile -Command & `'$PWD\SpotifySetup.exe`'" 
