@@ -65,37 +65,42 @@ if ($win11 -or $win10 -or $win8_1 -or $win8) {
     }
 }
 
-
+# Unique directory name based on time
 Push-Location -LiteralPath $env:TEMP
-try {
-    # Unique directory name based on time
-    New-Item -Type Directory -Name "BlockTheSpot-$(Get-Date -UFormat '%Y-%m-%d_%H-%M-%S')" `
-  | Convert-Path `
-  | Set-Location
-}
-catch {
-    Write-Output $_
-    Read-Host 'Press any key to exit...'
-    exit
-}
+New-Item -Type Directory -Name "BlockTheSpot-$(Get-Date -UFormat '%Y-%m-%d_%H-%M-%S')" | Convert-Path | Set-Location
 
 
 Write-Host 'Downloading latest patch BTS...'`n
 
 $webClient = New-Object -TypeName System.Net.WebClient
 try {
+    $webClient.DownloadFile(
+        # Remote file URL
+        "https://github.com/mrpond/BlockTheSpot/releases/latest/download/chrome_elf.zip",
+        # Local file path
+        "$PWD\chrome_elf.zip"
+        )
+}
+catch [System.Management.Automation.MethodInvocationException]{
+   Write-Host "Error" -ForegroundColor RED
+$Error[0].Exception
+
+Write-Host "Will re-request in 5 seconds..."`n
+Start-Sleep -Milliseconds 5000 
+     try {
 
     $webClient.DownloadFile(
         # Remote file URL
-        'https://github.com/mrpond/BlockTheSpot/releases/latest/download/chrome_elf.zip',
+        "https://github.com/mrpond/BlockTheSpot/releases/latest/download/chrome_elf.zip",
         # Local file path
         "$PWD\chrome_elf.zip"
-    )
+        )
 }
-catch {
-    Write-Output $_
-    Read-Host "An error occurred while downloading the chrome_elf.zip file`nPress any key to exit..."
-    Start-Sleep
+catch [System.Management.Automation.MethodInvocationException]{
+ Write-Host "Error again, script stopped" -ForegroundColor RED
+$Error[0].Exception
+ exit
+}
 }
 
 Expand-Archive -Force -LiteralPath "$PWD\chrome_elf.zip" -DestinationPath $PWD
