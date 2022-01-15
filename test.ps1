@@ -76,36 +76,37 @@ $webClient = New-Object -TypeName System.Net.WebClient
 try {
     $webClient.DownloadFile(
         # Remote file URL
-        "https://github.com/mrpond/BlockTheSpot/releases/lat66est/download/chrome_elf.zip",
+        "https://github.com/mrpond/BlockTheSpot/relea55ses/latest/download/chrome_elf.zip",
         # Local file path
         "$PWD\chrome_elf.zip"
+    )
+}
+catch [System.Management.Automation.MethodInvocationException] {
+    Write-Host "Error" -ForegroundColor RED
+    $Error[0].Exception
+
+    Write-Host "Will re-request in 5 seconds..."`n
+    Start-Sleep -Milliseconds 5000 
+    try {
+
+        $webClient.DownloadFile(
+            # Remote file URL
+            "https://github.com/mrpond/BlockTheSpot/relea55ses/latest/download/chrome_elf.zip",
+            # Local file path
+            "$PWD\chrome_elf.zip"
         )
-}
-catch [System.Management.Automation.MethodInvocationException]{
-   Write-Host "Error" -ForegroundColor RED
-$Error[0].Exception
-
-Write-Host "Will re-request in 5 seconds..."`n
-Start-Sleep -Milliseconds 5000 
-     try {
-
-    $webClient.DownloadFile(
-        # Remote file URL
-        "https://github.com/mrpond/BlockTheSpot/releases/lat66est/download/chrome_elf.zip",
-        # Local file path
-        "$PWD\chrome_elf.zip"
-        )
-}
-catch [System.Management.Automation.MethodInvocationException]{
- Write-Host "Error again, script stopped" -ForegroundColor RED
-$Error[0].Exception
-
-$tempDirectory = $PWD
-Pop-Location
-Start-Sleep -Milliseconds 200
-Remove-Item -Recurse -LiteralPath $tempDirectory
- exit
-}
+    }
+    catch [System.Management.Automation.MethodInvocationException] {
+        Write-Host "Error again, script stopped" -ForegroundColor RED
+        $Error[0].Exception
+        Write-Output $_
+        Write-Host "Try to check your internet connection and run the installation again."
+        $tempDirectory = $PWD
+        Pop-Location
+        Start-Sleep -Milliseconds 200
+        Remove-Item -Recurse -LiteralPath $tempDirectory 
+        exit
+    }
 }
 
 Expand-Archive -Force -LiteralPath "$PWD\chrome_elf.zip" -DestinationPath $PWD
