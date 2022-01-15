@@ -100,7 +100,7 @@ catch [System.Management.Automation.MethodInvocationException] {
         Write-Host "Error again, script stopped" -ForegroundColor RED
         $Error[0].Exception
         Write-Host ""
-        Write-Host "Try to check your internet connection and run the installation again."
+        Write-Host "Try to check your internet connection and run the installation again."`n
         $tempDirectory = $PWD
         Pop-Location
         Start-Sleep -Milliseconds 200
