@@ -76,15 +76,15 @@ $webClient = New-Object -TypeName System.Net.WebClient
 try {
     $webClient.DownloadFile(
         # Remote file URL
-        "https://github.com/mrpond/BlockTheSpot/releases/latest/download/chrome_elf.zip",
+        "https://github.com/mrpond/BlockTheSpot/releas6es/latest/download/chrome_elf.zip",
         # Local file path
         "$PWD\chrome_elf.zip"
     )
 }
 catch [System.Management.Automation.MethodInvocationException] {
-    Write-Host "Error" -ForegroundColor RED
+    Write-Host "Error downloading chrome_elf.zip" -ForegroundColor RED
     $Error[0].Exception
-
+    Write-Host ""
     Write-Host "Will re-request in 5 seconds..."`n
     Start-Sleep -Milliseconds 5000 
     try {
@@ -97,7 +97,7 @@ catch [System.Management.Automation.MethodInvocationException] {
         )
     }
     catch [System.Management.Automation.MethodInvocationException] {
-        Write-Host "Error downloading chrome_elf.zip" -ForegroundColor RED
+        Write-Host "Error again, script stopped" -ForegroundColor RED
         $Error[0].Exception
         Write-Host ""
         Write-Host "Try to check your internet connection and run the installation again."`n
@@ -117,7 +117,7 @@ Remove-Item -LiteralPath "$PWD\chrome_elf.zip"
 try {
     $webClient.DownloadFile(
         # Remote file URL
-        'https://download.scdn.co/Spo5tifySetup.exe',
+        'https://download.scdn.co/Spotify6Setup.exe',
         # Local file path
         "$PWD\SpotifySetup.exe"
     )
@@ -125,14 +125,14 @@ try {
 catch [System.Management.Automation.MethodInvocationException] {
     Write-Host "Error downloading SpotifySetup.exe" -ForegroundColor RED
     $Error[0].Exception
-
+    Write-Host ""
     Write-Host "Will re-request in 5 seconds..."`n
     Start-Sleep -Milliseconds 5000 
     try {
 
         $webClient.DownloadFile(
             # Remote file URL
-            'https://download.scdn.co/Spo5tifySetup.exe',
+            'https://download.scdn.co/SpotifySetup.exe',
             # Local file path
             "$PWD\SpotifySetup.exe"
         )
