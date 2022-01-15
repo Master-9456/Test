@@ -76,7 +76,7 @@ $webClient = New-Object -TypeName System.Net.WebClient
 try {
     $webClient.DownloadFile(
         # Remote file URL
-        "https://github.com/mrpond/BlockTheSpot/releases/latest/download/chrome_elf.zip",
+        "https://github.com/mrpond/BlockTheSpot/releases/lat66est/download/chrome_elf.zip",
         # Local file path
         "$PWD\chrome_elf.zip"
         )
@@ -91,7 +91,7 @@ Start-Sleep -Milliseconds 5000
 
     $webClient.DownloadFile(
         # Remote file URL
-        "https://github.com/mrpond/BlockTheSpot/releases/latest/download/chrome_elf.zip",
+        "https://github.com/mrpond/BlockTheSpot/releases/lat66est/download/chrome_elf.zip",
         # Local file path
         "$PWD\chrome_elf.zip"
         )
