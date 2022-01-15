@@ -117,15 +117,37 @@ Remove-Item -LiteralPath "$PWD\chrome_elf.zip"
 try {
     $webClient.DownloadFile(
         # Remote file URL
-        'https://download.scdn.co/SpotifySetup.exe',
+        'https://download.scdn.co/Spo5tifySetup.exe',
         # Local file path
         "$PWD\SpotifySetup.exe"
     )
 }
-catch {
-    Write-Output $_
-    Read-Host "An error occurred while downloading the SpotifySetup.exe file`nPress any key to exit..."
-    exit
+catch [System.Management.Automation.MethodInvocationException] {
+    Write-Host "Error" -ForegroundColor RED
+    $Error[0].Exception
+
+    Write-Host "Will re-request in 5 seconds..."`n
+    Start-Sleep -Milliseconds 5000 
+    try {
+
+        $webClient.DownloadFile(
+            # Remote file URL
+            'https://download.scdn.co/Spo5tifySetup.exe',
+            # Local file path
+            "$PWD\SpotifySetup.exe"
+        )
+    }
+    catch [System.Management.Automation.MethodInvocationException] {
+        Write-Host "Error again, script stopped" -ForegroundColor RED
+        $Error[0].Exception
+        Write-Host ""
+        Write-Host "Try to check your internet connection and run the installation again."`n
+        $tempDirectory = $PWD
+        Pop-Location
+        Start-Sleep -Milliseconds 200
+        Remove-Item -Recurse -LiteralPath $tempDirectory 
+        exit
+    }
 }
 
 
