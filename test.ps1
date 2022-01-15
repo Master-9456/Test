@@ -100,9 +100,10 @@ catch [System.Management.Automation.MethodInvocationException]{
  Write-Host "Error again, script stopped" -ForegroundColor RED
 $Error[0].Exception
 
+$tempDirectory = $PWD
 Pop-Location
 Start-Sleep -Milliseconds 200
-Remove-Item -Recurse -LiteralPath $PWD 
+Remove-Item -Recurse -LiteralPath $tempDirectory
  exit
 }
 }
