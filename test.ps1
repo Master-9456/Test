@@ -97,7 +97,7 @@ catch [System.Management.Automation.MethodInvocationException] {
         )
     }
     catch [System.Management.Automation.MethodInvocationException] {
-        Write-Host "Error again, script stopped" -ForegroundColor RED
+        Write-Host "Error downloading chrome_elf.zip" -ForegroundColor RED
         $Error[0].Exception
         Write-Host ""
         Write-Host "Try to check your internet connection and run the installation again."`n
@@ -123,7 +123,7 @@ try {
     )
 }
 catch [System.Management.Automation.MethodInvocationException] {
-    Write-Host "Error" -ForegroundColor RED
+    Write-Host "Error downloading SpotifySetup.exe" -ForegroundColor RED
     $Error[0].Exception
 
     Write-Host "Will re-request in 5 seconds..."`n
