@@ -99,6 +99,10 @@ Start-Sleep -Milliseconds 5000
 catch [System.Management.Automation.MethodInvocationException]{
  Write-Host "Error again, script stopped" -ForegroundColor RED
 $Error[0].Exception
+
+Pop-Location
+Start-Sleep -Milliseconds 200
+Remove-Item -Recurse -LiteralPath $PWD 
  exit
 }
 }
