@@ -76,7 +76,7 @@ $webClient = New-Object -TypeName System.Net.WebClient
 try {
     $webClient.DownloadFile(
         # Remote file URL
-        "https://github.com/mrpond/BlockTheSpot/releas6es/latest/download/chrome_elf.zip",
+        "https://github.com/mrpond/BlockTheSpot/releases/latest/download/chrome_elf.zip",
         # Local file path
         "$PWD\chrome_elf.zip"
     )
@@ -117,7 +117,7 @@ Remove-Item -LiteralPath "$PWD\chrome_elf.zip"
 try {
     $webClient.DownloadFile(
         # Remote file URL
-        'https://download.scdn.co/Spotify6Setup.exe',
+        'https://download.scdn.co/SpotifySetup.exe',
         # Local file path
         "$PWD\SpotifySetup.exe"
     )
