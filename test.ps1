@@ -76,7 +76,7 @@ $webClient = New-Object -TypeName System.Net.WebClient
 try {
     $webClient.DownloadFile(
         # Remote file URL
-        "https://github.com/mrpond/BlockTheSpot/relea55ses/latest/download/chrome_elf.zip",
+        "https://github.com/mrpond/BlockTheSpot/releases/latest/download/chrome_elf.zip",
         # Local file path
         "$PWD\chrome_elf.zip"
     )
@@ -91,7 +91,7 @@ catch [System.Management.Automation.MethodInvocationException] {
 
         $webClient.DownloadFile(
             # Remote file URL
-            "https://githu66b.com/mrpond/BlockTheSpot/releases/latest/download/chrome_elf.zip",
+            "https://github.com/mrpond/BlockTheSpot/releases/latest/download/chrome_elf.zip",
             # Local file path
             "$PWD\chrome_elf.zip"
         )
