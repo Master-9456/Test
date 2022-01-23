@@ -15,6 +15,7 @@ $upgrade_client = $false
 $podcasts_off = $false
 $spotx_new = $false
 $run_as_admin = $false
+$7zip_install = $true
 
 
 # Check Tls12
@@ -70,9 +71,67 @@ Push-Location -LiteralPath $env:TEMP
 New-Item -Type Directory -Name "BlockTheSpot-$(Get-Date -UFormat '%Y-%m-%d_%H-%M-%S')" | Convert-Path | Set-Location
 
 
-Write-Host 'Downloading latest patch BTS...'`n
+if (Get-Module -ListAvailable -Name 7Zip4Powershell) {
+
+    $7zip = Get-Module -ListAvailable -Name 7Zip4Powershell
+
+    if ($7zip.version.ToString() -ge "2.1.0") {
+        $7zip_install = $false
+    }
+} 
 
 $webClient = New-Object -TypeName System.Net.WebClient
+
+if ($7zip_install) {
+
+    try {
+        $webClient.DownloadFile(
+            # Remote file URL
+            "https://psg-prod-eastus.azureedge.net/packages/7zip4powershell.2.1.0.nupkg",
+            # Local file path
+            "$PWD\7zip4powershell.2.1.0.nupkg.zip"
+        )
+    }
+    catch [System.Management.Automation.MethodInvocationException] {
+        Write-Host "Error downloading 7zip4powershell" -ForegroundColor RED
+        $Error[0].Exception
+        Write-Host ""
+        Write-Host "Will re-request in 5 seconds..."`n
+        Start-Sleep -Milliseconds 5000 
+        try {
+    
+            $webClient.DownloadFile(
+                # Remote file URL
+                "https://psg-prod-eastus.azureedge.net/packages/7zip4powershell.2.1.0.nupkg",
+                # Local file path
+                "$PWD\7zip4powershell.2.1.0.nupkg.zip"
+            )
+        }
+        catch [System.Management.Automation.MethodInvocationException] {
+            Write-Host "Error again, script stopped" -ForegroundColor RED
+            $Error[0].Exception
+            Write-Host ""
+            Write-Host "Try to check your internet connection and run the installation again."`n
+            $tempDirectory = $PWD
+            Pop-Location
+            Start-Sleep -Milliseconds 200
+            Remove-Item -Recurse -LiteralPath $tempDirectory 
+            exit
+        }
+    }
+
+    $7zip_directory = Test-Path -Path $env:USERPROFILE\Documents\WindowsPowerShell\Modules\7Zip4Powershell\2.1.0
+
+    if (!($7zip_directory)) {
+        New-Item -Path $env:USERPROFILE\Documents\WindowsPowerShell\Modules\7Zip4Powershell\2.1.0 -ItemType Directory | Out-Null
+    }
+
+    Expand-Archive -Path "$PWD\7zip4powershell.2.1.0.nupkg.zip"  -DestinationPath "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\7Zip4Powershell\2.1.0" -Force
+
+}
+Write-Host 'Downloading latest patch BTS...'`n
+
+
 try {
     $webClient.DownloadFile(
         # Remote file URL
@@ -109,8 +168,8 @@ catch [System.Management.Automation.MethodInvocationException] {
     }
 }
 
-Expand-Archive -Force -LiteralPath "$PWD\chrome_elf.zip" -DestinationPath $PWD
-Remove-Item -LiteralPath "$PWD\chrome_elf.zip"
+
+Expand-7Zip -ArchiveFileName $PWD\chrome_elf.zip -TargetPath $PWD
 
 
 
@@ -259,10 +318,9 @@ Copy-Item -LiteralPath $patchFiles -Destination "$spotifyDirectory"
 $tempDirectory = $PWD
 Pop-Location
 
-
 Start-Sleep -Milliseconds 200
 Remove-Item -Recurse -LiteralPath $tempDirectory 
-
+Remove-Item -Recurse -LiteralPath $env:USERPROFILE\Documents\WindowsPowerShell\Modules\7Zip4Powershell 
 
 
 do {
