@@ -579,7 +579,7 @@ If (Test-Path $xpui_spa_patch) {
 }
 
     # json
-    $zip.Entries | Where-Object FullName -like '*ru.json' | ForEach-Object {
+    $zip.Entries | Where-Object FullName -like '*.json' | ForEach-Object {
         $readerjson = New-Object System.IO.StreamReader($_.Open())
         $xpuiContents_json = $readerjson.ReadToEnd()
         $readerjson.Close()
