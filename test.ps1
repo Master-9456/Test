@@ -1,9 +1,9 @@
-# Ignore errors from `Stop-Process`
+# Игнорировать ошибки из `Stop-Process`
 $PSDefaultParameterValues['Stop-Process:ErrorAction'] = [System.Management.Automation.ActionPreference]::SilentlyContinue
 
 
 Write-Host "*****************"
-Write-Host "Author: " -NoNewline
+Write-Host "Автор: " -NoNewline
 Write-Host "@Amd64fox" -ForegroundColor DarkYellow
 Write-Host "*****************"`n
 
@@ -15,21 +15,20 @@ $upgrade_client = $false
 $podcasts_off = $false
 $spotx_new = $false
 $run_as_admin = $false
-$7zip_install = $true
 
 
-# Check Tls12
+# чек сертификата Tls12
 $tsl_check = [Net.ServicePointManager]::SecurityProtocol 
 if (!($tsl_check -match '^tls12$' )) {
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 }
 
-# Checking startup rights
+# Проверка прав запуска
 [System.Security.Principal.WindowsPrincipal] $principal = [System.Security.Principal.WindowsIdentity]::GetCurrent()
 $isUserAdmin = $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
 
 if ($isUserAdmin) {
-    Write-Host 'Startup detected with administrator rights'`n
+    Write-Host 'Обнаружен запуск с правами администратора'`n
     $run_as_admin = $true
 }
 
@@ -40,7 +39,7 @@ Stop-Process -Name SpotifyWebHelper
 if ($PSVersionTable.PSVersion.Major -ge 7) {
     Import-Module Appx -UseWindowsPowerShell
 }
-# Check version Windows
+# Проверка версии Windows
 $win_os = (get-itemproperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" -Name ProductName).ProductName
 $win11 = $win_os -match "\windows 11\b"
 $win10 = $win_os -match "\windows 10\b"
@@ -51,87 +50,29 @@ $win8 = $win_os -match "\windows 8\b"
 if ($win11 -or $win10 -or $win8_1 -or $win8) {
 
 
-    # Remove Spotify Windows Store If Any
+    # Удалить Spotify Windows Store если он есть
     if (Get-AppxPackage -Name SpotifyAB.SpotifyMusic) {
-        Write-Host 'The Microsoft Store version of Spotify has been detected which is not supported.'`n
-        $ch = Read-Host -Prompt "Uninstall Spotify Windows Store edition (Y/N) "
+        Write-Host 'Обнаружена версия Spotify из Microsoft Store, которая не поддерживается.'`n
+        $ch = Read-Host -Prompt "Хотите удалить Spotify Microsoft Store ? (Y/N) "
         if ($ch -eq 'y') {
-            Write-Host 'Uninstalling Spotify.'`n
+            Write-Host 'Удаление Spotify.'`n
             Get-AppxPackage -Name SpotifyAB.SpotifyMusic | Remove-AppxPackage
         }
         else {
-            Read-Host "Exiting...`nPress any key to exit..."
+            Read-Host "Завершение работы...`nНажмите любую клавишу для выхода..." 
             exit
         }
     }
 }
 
-# Unique directory name based on time
+# Создаем уникальное имя каталога на основе времени
 Push-Location -LiteralPath $env:TEMP
 New-Item -Type Directory -Name "BlockTheSpot-$(Get-Date -UFormat '%Y-%m-%d_%H-%M-%S')" | Convert-Path | Set-Location
 
 
-if (Get-Module -ListAvailable -Name 7Zip4Powershell) {
-
-    $7zip = Get-Module -ListAvailable -Name 7Zip4Powershell
-
-    if ($7zip.version.ToString() -ge "2.1.0") {
-        $7zip_install = $false
-    }
-} 
+Write-Host 'Загружаю последний патч BTS...'`n
 
 $webClient = New-Object -TypeName System.Net.WebClient
-
-if ($7zip_install) {
-
-    try {
-        $webClient.DownloadFile(
-            # Remote file URL
-            "https://psg-prod-eastus.azureedge.net/packages/7zip4powershell.2.1.0.nupkg",
-            # Local file path
-            "$PWD\7zip4powershell.2.1.0.nupkg.zip"
-        )
-    }
-    catch [System.Management.Automation.MethodInvocationException] {
-        Write-Host "Error downloading 7zip4powershell" -ForegroundColor RED
-        $Error[0].Exception
-        Write-Host ""
-        Write-Host "Will re-request in 5 seconds..."`n
-        Start-Sleep -Milliseconds 5000 
-        try {
-    
-            $webClient.DownloadFile(
-                # Remote file URL
-                "https://psg-prod-eastus.azureedge.net/packages/7zip4powershell.2.1.0.nupkg",
-                # Local file path
-                "$PWD\7zip4powershell.2.1.0.nupkg.zip"
-            )
-        }
-        catch [System.Management.Automation.MethodInvocationException] {
-            Write-Host "Error again, script stopped" -ForegroundColor RED
-            $Error[0].Exception
-            Write-Host ""
-            Write-Host "Try to check your internet connection and run the installation again."`n
-            $tempDirectory = $PWD
-            Pop-Location
-            Start-Sleep -Milliseconds 200
-            Remove-Item -Recurse -LiteralPath $tempDirectory 
-            exit
-        }
-    }
-
-    $7zip_directory = Test-Path -Path $env:USERPROFILE\Documents\WindowsPowerShell\Modules\7Zip4Powershell\2.1.0
-
-    if (!($7zip_directory)) {
-        New-Item -Path $env:USERPROFILE\Documents\WindowsPowerShell\Modules\7Zip4Powershell\2.1.0 -ItemType Directory | Out-Null
-    }
-
-    Expand-Archive -Path "$PWD\7zip4powershell.2.1.0.nupkg.zip"  -DestinationPath "$env:USERPROFILE\Documents\WindowsPowerShell\Modules\7Zip4Powershell\2.1.0" -Force
-
-}
-Write-Host 'Downloading latest patch BTS...'`n
-
-
 try {
     $webClient.DownloadFile(
         # Remote file URL
@@ -141,10 +82,10 @@ try {
     )
 }
 catch [System.Management.Automation.MethodInvocationException] {
-    Write-Host "Error downloading chrome_elf.zip" -ForegroundColor RED
+    Write-Host "Ошибка загрузки chrome_elf.zip" -ForegroundColor RED
     $Error[0].Exception
     Write-Host ""
-    Write-Host "Will re-request in 5 seconds..."`n
+    Write-Host "Повторный запрос через 5 секунд..."`n
     Start-Sleep -Milliseconds 5000 
     try {
 
@@ -156,10 +97,10 @@ catch [System.Management.Automation.MethodInvocationException] {
         )
     }
     catch [System.Management.Automation.MethodInvocationException] {
-        Write-Host "Error again, script stopped" -ForegroundColor RED
+        Write-Host "Опять ошибка, скрипт остановлен" -ForegroundColor RED
         $Error[0].Exception
         Write-Host ""
-        Write-Host "Try to check your internet connection and run the installation again."`n
+        Write-Host "Попробуйте проверить подключение к интернету и снова запустить установку."`n
         $tempDirectory = $PWD
         Pop-Location
         Start-Sleep -Milliseconds 200
@@ -168,8 +109,8 @@ catch [System.Management.Automation.MethodInvocationException] {
     }
 }
 
-
-Expand-7Zip -ArchiveFileName $PWD\chrome_elf.zip -TargetPath $PWD
+Expand-Archive -Force -LiteralPath "$PWD\chrome_elf.zip" -DestinationPath $PWD
+Remove-Item -LiteralPath "$PWD\chrome_elf.zip"
 
 
 
@@ -182,10 +123,10 @@ try {
     )
 }
 catch [System.Management.Automation.MethodInvocationException] {
-    Write-Host "Error downloading SpotifySetup.exe" -ForegroundColor RED
+    Write-Host "Ошибка загрузки SpotifySetup.exe" -ForegroundColor RED
     $Error[0].Exception
     Write-Host ""
-    Write-Host "Will re-request in 5 seconds..."`n
+    Write-Host "Повторный запрос через 5 секунд..."`n
     Start-Sleep -Milliseconds 5000 
     try {
 
@@ -197,10 +138,10 @@ catch [System.Management.Automation.MethodInvocationException] {
         )
     }
     catch [System.Management.Automation.MethodInvocationException] {
-        Write-Host "Error again, script stopped" -ForegroundColor RED
+        Write-Host "Опять ошибка, скрипт остановлен" -ForegroundColor RED
         $Error[0].Exception
         Write-Host ""
-        Write-Host "Try to check your internet connection and run the installation again."`n
+        Write-Host "Попробуйте проверить подключение к интернету и снова запустить установку."`n
         $tempDirectory = $PWD
         Pop-Location
         Start-Sleep -Milliseconds 200
@@ -217,12 +158,12 @@ if ($spotifyInstalled) {
 
 
 
-    # Check last version Spotify online
+    # Проверка последней версии Spotify онлайн
     $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
     $online_version = $version_client_check -split '.\w\w\w\w\w\w\w\w\w'
 
 
-    # Check last version Spotify ofline
+    # Проверка последней версии Spotify офлайн
     $ofline_version = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
 
 
@@ -230,8 +171,8 @@ if ($spotifyInstalled) {
 
 
         do {
-            $ch = Read-Host -Prompt "Your Spotify $ofline_version version is outdated, it is recommended to upgrade to $online_version `nWant to update ? (Y/N)"
-            Write-Host ""
+            $ch = Read-Host -Prompt "Ваша версия Spotify $ofline_version устарела, рекомендуется обновиться до $online_version `nОбновить ? (Y/N)"
+            Write-Output $_
             if (!($ch -eq 'n' -or $ch -eq 'y')) {
 
                 Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
@@ -252,19 +193,19 @@ if ($spotifyInstalled) {
 }
 
 
-# If there is no client or it is outdated, then install
+# Если клиента нет или он устарел, то начинаем установку
 
 if (-not $spotifyInstalled -or $upgrade_client) {
 
     $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
     $version_client = $version_client_check -split '.\w\w\w\w\w\w\w\w\w'
 
-    Write-Host "Downloading and installing Spotify " -NoNewline
+    Write-Host "Загружаю и устанавливаю Spotify " -NoNewline
     Write-Host  $version_client -ForegroundColor Green
-    Write-Host "Please wait..."`n
+    Write-Host "Пожалуйста подождите......"`n
 
 
-    # Correcting the error if the spotify installer was launched from the administrator
+    # Исправление ошибки, если установщик Spotify был запущен от администратора
 
     if ($run_as_admin) {
         $apppath = 'powershell.exe'
@@ -288,15 +229,15 @@ if (-not $spotifyInstalled -or $upgrade_client) {
     Stop-Process -Name SpotifyFullSetup 
 
 
-    $ErrorActionPreference = 'SilentlyContinue'  # extinguishes light mistakes
+    $ErrorActionPreference = 'SilentlyContinue'  # # Команда гасит легкие ошибки
 
-    # Update backup chrome_elf.dll
+    # Обновить резервную копию chrome_elf.dll
     if (Test-Path -LiteralPath $chrome_elf_bak) {
         Remove-item $spotifyDirectory/chrome_elf_bak.dll
         Move-Item $chrome_elf $chrome_elf_bak 
     }
 
-    # Remove spotify installer
+    # Удалите установщик Spotify
     if (test-path "$env:LOCALAPPDATA\Microsoft\Windows\Temporary Internet Files\") {
         get-childitem -path "$env:LOCALAPPDATA\Microsoft\Windows\Temporary Internet Files\" -Recurse -Force -Filter  "SpotifyFullSetup*" | remove-item  -Force
     }
@@ -306,30 +247,31 @@ if (-not $spotifyInstalled -or $upgrade_client) {
 }
 
 
-# Create backup chrome_elf.dll
+# Создать резервную копию chrome_elf.dll
 if (!(Test-Path -LiteralPath $chrome_elf_bak)) {
     Move-Item $chrome_elf $chrome_elf_bak 
 }
 
-Write-Host 'Patching Spotify...'`n
+Write-Host 'Модифицирую Spotify...'`n
 $patchFiles = "$PWD\chrome_elf.dll", "$PWD\config.ini"
 Copy-Item -LiteralPath $patchFiles -Destination "$spotifyDirectory"
 
 $tempDirectory = $PWD
 Pop-Location
 
+
 Start-Sleep -Milliseconds 200
 Remove-Item -Recurse -LiteralPath $tempDirectory 
-Remove-Item -Recurse -LiteralPath $env:USERPROFILE\Documents\WindowsPowerShell\Modules\7Zip4Powershell 
+
 
 
 do {
-    $ch = Read-Host -Prompt "Want to turn off podcasts ? (Y/N)"
+    $ch = Read-Host -Prompt "Хотите отключить подкасты ? (Y/N)"
     Write-Host ""
     if (!($ch -eq 'n' -or $ch -eq 'y')) {
     
-        Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
-        Write-Host "enter again through..." -NoNewline
+        Write-Host "Ой, некорректное значение, " -ForegroundColor Red -NoNewline
+        Write-Host "повторите ввод через..." -NoNewline
         Start-Sleep -Milliseconds 1000
         Write-Host "3" -NoNewline
         Start-Sleep -Milliseconds 1000
@@ -344,13 +286,13 @@ while ($ch -notmatch '^y$|^n$')
 if ($ch -eq 'y') { $podcasts_off = $true }
 
 
-# Modify files
+# Мофифицируем файлы 
 
 $xpui_spa_patch = "$env:APPDATA\Spotify\Apps\xpui.spa"
 $xpui_js_patch = "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
 
 If (Test-Path $xpui_js_patch) {
-    Write-Host "Spicetify detected"`n 
+    Write-Host "Обнаружен Spicetify"`n
 
     $xpui_js = Get-Content $xpui_js_patch -Raw
         
@@ -361,7 +303,7 @@ If (Test-Path $xpui_js_patch) {
 
 
 
-    # Disable Podcast
+    # Отключить подкасты
     if ($Podcasts_off) {
         $xpui_js = $xpui_js `
             -replace '"album,playlist,artist,show,station,episode"', '"album,playlist,artist,station"' -replace ',this[.]enableShows=[a-z]', ""
@@ -399,7 +341,7 @@ If (Test-Path $xpui_js_patch) {
 
 If (Test-Path $xpui_spa_patch) {
 
-    # Make a backup copy of xpui.spa if it is original
+    # Делаем резервную копию xpui.spa если он оригинальный
 
     Add-Type -Assembly 'System.IO.Compression.FileSystem'
     $zip = [System.IO.Compression.ZipFile]::Open($xpui_spa_patch, 'update')
@@ -428,7 +370,7 @@ If (Test-Path $xpui_spa_patch) {
 
 
 
-    # Disable Podcast
+    # Отключить подкасты
     if ($podcasts_off) {
         $xpuiContents = $xpuiContents `
             -replace '"album,playlist,artist,show,station,episode"', '"album,playlist,artist,station"' -replace ',this[.]enableShows=[a-z]', ""
@@ -456,7 +398,9 @@ If (Test-Path $xpui_spa_patch) {
         <# With this enabled, clients will check whether tracks have lyrics available #>`
         -replace '(With this enabled, clients will check whether tracks have lyrics available",default:)(!1)', '$1!0' `
         <# Enables new playlist creation flow #>`
-        -replace '(Enables new playlist creation flow in Web Player and DesktopX",default:)(!1)', '$1!0'
+        -replace '(Enables new playlist creation flow in Web Player and DesktopX",default:)(!1)', '$1!0' `
+        <# Enable Enhance Playlist UI and functionality #>`
+        -replace '(Enable Enhance Playlist UI and functionality",default:)(!1)', '$1!0'
 
 
         
@@ -475,15 +419,35 @@ If (Test-Path $xpui_spa_patch) {
     $reader = New-Object System.IO.StreamReader($entry_vendor_xpui.Open())
     $xpuiContents_vendor = $reader.ReadToEnd()
     $reader.Close()
-
+    
     $xpuiContents_vendor = $xpuiContents_vendor `
         <# Disable Sentry" #> -replace "prototype\.bindClient=function\(\w+\)\{", '${0}return;'
-
+    
     # Rewrite it to the zip
     $writer = New-Object System.IO.StreamWriter($entry_vendor_xpui.Open())
     $writer.BaseStream.SetLength(0)
     $writer.Write($xpuiContents_vendor)
     $writer.Close()
+
+
+
+
+    $zip.Entries | Where-Object FullName -like '*.js' | ForEach-Object {
+        $readerjs = New-Object System.IO.StreamReader($_.Open())
+        $xpuiContents_js = $readerjs.ReadToEnd()
+        $readerjs.Close()
+
+        # NEW JS
+        $xpuiContents_js = $xpuiContents_js `
+            -replace "[/][/][#] sourceMappingURL=.*[.]map", "" `
+            -replace "\r?\n(?!\(1|\d)", ""
+
+        $writer = New-Object System.IO.StreamWriter($_.Open())
+        $writer.BaseStream.SetLength(0)
+        $writer.Write($xpuiContents_js)
+        $writer.Close()
+    }
+
 
 
     # *.Css
@@ -505,19 +469,138 @@ If (Test-Path $xpui_spa_patch) {
             -replace "\[lang=ar\].+?\{.+?\}", "" `
             -replace "html\[dir=rtl\].+?\{.+?\}", "" `
             -replace "html\[lang=ar\].+?\{.+?\}", "" `
-            -replace "\[dir=rtl\].+?\{.+?\}", ""
+            -replace "\[dir=rtl\].+?\{.+?\}", "" `
+            # minification
+            -replace "[/]\*([^*]|[\r\n]|(\*([^/]|[\r\n])))*\*[/]", "" `
+            -replace "[/][/]#\s.*", "" `
+            -replace "\r?\n(?!\(1|\d)", ""
     
         $writer = New-Object System.IO.StreamWriter($_.Open())
         $writer.BaseStream.SetLength(0)
         $writer.Write($xpuiContents_css)
         $writer.Close()
 
-    }    
+    }
+    
+
+    # *.Html
+    $zip.Entries | Where-Object FullName -like '*.html' | ForEach-Object {
+        $readerhtml = New-Object System.IO.StreamReader($_.Open())
+        $xpuiContents_html = $readerhtml.ReadToEnd()
+        $readerhtml.Close()
+
+        # файлы html, сокращение размера
+        $xpuiContents_html = $xpuiContents_html `
+            -replace '<li><a href="#6eef7">zlib<\/a><\/li>\n(.|\n)*<\/p><!-- END CONTAINER DEPS LICENSES -->(<\/div>)', '$2' `
+            -replace "	", "" -replace "  ", "" -replace "(?m)(^\s*\r?\n)", "" -replace "\r?\n(?!\(1|\d)", ""
+    
+        $writer = New-Object System.IO.StreamWriter($_.Open())
+        $writer.BaseStream.SetLength(0)
+        $writer.Write($xpuiContents_html)
+        $writer.Close()
+    }
+
+
+    # Доперевод файла ru.json
+    $zip.Entries | Where-Object FullName -like '*ru.json' | ForEach-Object {
+        $readerjson = New-Object System.IO.StreamReader($_.Open())
+        $xpuiContents_json = $readerjson.ReadToEnd()
+        $readerjson.Close()
+
+    
+    $xpuiContents_json = $xpuiContents_json `
+    -replace '"one": "Enhanced with [{]0[}] recommended song."', '"one": "Добавлена {0} рекомендованная песня."' `
+    -replace '"few": "Enhanced with [{]0[}] recommended songs."', '"few": "Добавлено {0} рекомендованные песни."' `
+    -replace '"many": "Enhanced with [{]0[}] recommended songs."', '"many": "Добавлено {0} рекомендованных песен."' `
+    -replace '"other": "Enhanced with [{]0[}] recommended songs."', '"other": "Добавлено {0} рекомендованные песни."' `
+    -replace '"To Enhance this playlist, you.ll need to go online."', '"Чтобы улучшить этот плейлист, вам нужно подключиться к интернету."' `
+    -replace '"Song Radio"', '"Радио по треку"' `
+    -replace '"Album Radio"', '"Радио по альбому"' `
+    -replace '"Artist Radio"', '"Радио по исполнителю"' `
+    -replace '"Radio",', '"Радио",' `
+    -replace '"Your Location"', '"Ваше местоположение"' `
+    -replace '"We couldn.t find concerts in your location."', '"Мы не смогли найти концерты в вашем регионе."' `
+    -replace '"We couldn.t find concerts in [{]0[}]."', '"Мы не смогли найти концерты в {0}."' `
+    -replace '"Download error"', '"Ошибка загрузки"' `
+    -replace '"Layout"', '"Расположение"' `
+    -replace '"Confirm your age"', '"Подтвердите свой возраст"' `
+    -replace '"Get Spotify Premium"', '"Получите Premium Spotify"' `
+    -replace '"Subscribe"', '"Подписаться"' `
+    -replace '"%price%\/month after. Terms and conditions apply. One month free not available for users who have already tried Premium."', '"%price%/месяц спустя. Принять условия. Один месяц бесплатно, недоступно для пользователей, которые уже попробовали Premium."' `
+    -replace '"Enjoy ad-free music listening, offline listening, and more. Cancel anytime."', '"Наслаждайтесь прослушиванием музыки без рекламы, прослушиванием в офлайн режиме и многим другим. Отменить можно в любое время."' `
+    -replace '"Sort by"', '"Сортировка по"' `
+    -replace '"Filter by"', '"Фильтр по"' `
+    -replace '"Lyrics provided by [{]0[}]"', '"Тексты песен предоставлены {0}"' `
+    -replace '"Edit details"', '"Редактировать детали"' `
+    -replace '"Decrease navigation bar width"', '"Уменьшить ширину панели навигации"' `
+    -replace '"Increase navigation bar width"', '"Увеличить ширину панели навигации"' `
+    -replace '"Add to another playlist"', '"Добавить в другой плейлист"' `
+    -replace '"Offline storage location"', '"Оффлайн-хранилище"' `
+    -replace '"Change location"', '"Изменить расположение"' `
+    -replace '"Line breaks aren.t supported in the description."', '"В описании не поддерживаются разрывы строк."' `
+    -replace '"HTML isn.t supported in playlist description."', '"HTML не поддерживается в описании плейлиста."' `
+    -replace '"Press save to keep changes you.ve made."', '"Нажмите «Сохранить», чтобы сохранить внесенные изменения."' `
+    -replace '"No internet connection found. Changes to description and image will not be saved."', '"Подключение к интернету не найдено. Изменения в описании и изображении не будут сохранены."' `
+    -replace '"Image too large. Please select an image below 4MB."', '"Изображение слишком большое. Пожалуйста, выберите изображение размером менее 4 МБ."' `
+    -replace '"Image too small. Images must be at least [{]0[}]x[{]1[}]."', '"Изображение слишком маленькое. Изображения должны быть не менее {0}x{1}."' `
+    -replace '"Failed to upload image. Please try again."', '"Не удалось загрузить изображение. Пожалуйста, попробуйте снова."' `
+    -replace '"Playlist name is required."', '"Имя плейлиста обязательно."' `
+    -replace '"Failed to save playlist changes. Please try again."', '"Не удалось сохранить изменения в плейлисте. Пожалуйста, попробуйте снова."' `
+    -replace '"Description"', '"Описание"' `
+    -replace '"Add an optional description"', '"Добавьте дополнительное описание"' `
+    -replace '"Change photo"', '"Сменить изображение"' `
+    -replace '"Remove photo"', '"Удалить изображение"' `
+    -replace '"Name"', '"Имя"' `
+    -replace '"Add a name"', '"Добавить имя"' `
+    -replace '"Change speed"', '"Изменение скорости"' `
+    -replace '"You need to be at least 19 years old to listen to explicit content marked with"', '"Вам должно быть не менее 19 лет, чтобы слушать непристойный контент, помеченный значком"' `
+    -replace '"Continue"', '"Продолжить"' `
+    -replace '"Add to this playlist"', '"Добавить в этот плейлист"' `
+    -replace '"Retrying in [{]0[}]..."', '"Повторная попытка в {0}..."' `
+    -replace '"Couldn.t connect to Spotify."', '"Не удалось подключиться к Spotify."' `
+    -replace '"Reconnecting..."', '"Повторное подключение..."' `
+    -replace '"No connection"', '"Нет соединения"' `
+    -replace '"Character counter"', '"Счетчик символов"' `
+    -replace '"Toggle lightsaber hilt. Current is [{]0[}]."', '"Переключить рукоять светового меча. Текущий {0}."' `
+    -replace '"Song not available"', '"Песня недоступна"' `
+    -replace '"The song you.re trying to listen to is not available in HiFi at this time."', '"Песня, которую вы пытаетесь прослушать, в настоящее время недоступна в HiFi."' `
+    -replace '"Current audio quality:"', '"Текущее качество звука:"' `
+    -replace '"Network connection"', '"Подключение к сети"' `
+    -replace '"Good"', '"Хорошее"' `
+    -replace '"Poor"', '"Плохое"' `
+    -replace '"Yes"', '"Да"' `
+    -replace '"No"', '"Нет"' `
+    -replace '"Go to playlist"', '"Перейти к плейлисту"' `
+
+    $writer = New-Object System.IO.StreamWriter($_.Open())
+    $writer.BaseStream.SetLength(0)
+    $writer.Write($xpuiContents_json)
+    $writer.Close()
+
+}
+
+    # json
+    $zip.Entries | Where-Object FullName -like '*ru.json' | ForEach-Object {
+        $readerjson = New-Object System.IO.StreamReader($_.Open())
+        $xpuiContents_json = $readerjson.ReadToEnd()
+        $readerjson.Close()
+
+    
+    $xpuiContents_json = $xpuiContents_json `
+                -replace "  ", "" -replace "    ", "" -replace '": ', '":' -replace "\r?\n(?!\(1|\d)", "" 
+
+                $writer = New-Object System.IO.StreamWriter($_.Open())
+                $writer.BaseStream.SetLength(0)
+                $writer.Write($xpuiContents_json)
+                $writer.Close()
+            
+            }
+
     $zip.Dispose()   
 }
 
 
-# If the default Dekstop folder does not exist, then try to find it through the registry.
+# Если папки по умолчанию Dekstop не существует, то попытаться найти её через реестр.
 $ErrorActionPreference = 'SilentlyContinue' 
 
 if (Test-Path "$env:USERPROFILE\Desktop") {  
@@ -534,7 +617,7 @@ if (!(Test-Path "$env:USERPROFILE\Desktop")) {
     
 }
 
-# Shortcut bug
+# Испраление бага ярлыка на рабочем столе
 $ErrorActionPreference = 'SilentlyContinue' 
 
 If (!(Test-Path $env:USERPROFILE\Desktop\Spotify.lnk)) {
@@ -550,7 +633,7 @@ If (!(Test-Path $env:USERPROFILE\Desktop\Spotify.lnk)) {
 }
 
 
-# Block updates
+# Блокировка обновлений
 
 $ErrorActionPreference = 'SilentlyContinue'
 
@@ -561,12 +644,12 @@ $Check_folder_file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update | S
 $folder_update_access = Get-Acl $env:LOCALAPPDATA\Spotify\Update
 
 do {
-    $ch = Read-Host -Prompt "Want to block updates ? (Y/N)"
+    $ch = Read-Host -Prompt "Хотите заблокировать обновления ? (Y/N)"
     Write-Host ""
     if (!($ch -eq 'n' -or $ch -eq 'y' -or $ch -eq 'u')) {
     
-        Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
-        Write-Host "enter again through..." -NoNewline
+        Write-Host "Ой, некорректное значение, " -ForegroundColor Red -NoNewline
+        Write-Host "повторите ввод через..." -NoNewline
         Start-Sleep -Milliseconds 1000
         Write-Host "3" -NoNewline
         Start-Sleep -Milliseconds 1000
@@ -582,13 +665,13 @@ while ($ch -notmatch '^y$|^n$')
 
 if ($ch -eq 'y') {
 
-    # If there was a client installation
+    # Если была установка клиента 
     if (!($update_directory)) {
 
-        # Create Spotify folder in Localappdata
+        # Создать папку Spotify в Local
         New-Item -Path $env:LOCALAPPDATA -Name "Spotify" -ItemType "directory" | Out-Null
 
-        # Create Update file
+        #Создать файл Update
         New-Item -Path $env:LOCALAPPDATA\Spotify\ -Name "Update" -ItemType "file" -Value "STOPIT" | Out-Null
         $file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update
         $file.Attributes = "ReadOnly", "System"
@@ -606,14 +689,14 @@ if ($ch -eq 'y') {
 
     }
 
-    # If the client has already been
+    # Если клиент уже был
     If ($update_directory) {
 
 
-        # Delete the Update folder if it exists
+        # Удалить папку Update если она есть
         if ($Check_folder_file -match '\bDirectory\b') {  
 
-            # If the rights of the Update folder are blocked, then unblock 
+            # Если у папки Update заблокированы права то разблокировать 
             if ($folder_update_access.AccessToString -match 'Deny') {
 
         ($ACL = Get-Acl $env:LOCALAPPDATA\Spotify\Update).access | ForEach-Object {
@@ -624,7 +707,7 @@ if ($ch -eq 'y') {
             Remove-item $env:LOCALAPPDATA\Spotify\Update -Recurse -Force
         } 
 
-        # Create Update file if it doesn't exist
+        # Создать файл Update если его нет
         if (!($Check_folder_file -match '\bSystem\b' -and $Check_folder_file -match '\bReadOnly\b')) {  
             New-Item -Path $env:LOCALAPPDATA\Spotify\ -Name "Update" -ItemType "file" -Value "STOPIT" | Out-Null
             $file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update
@@ -647,14 +730,14 @@ if ($ch -eq 'y') {
 
 
 
-# automatic cache clearing
+# Автоматическая очистка кеша
 
 do {
-    $ch = Read-Host -Prompt "Want to set up automatic cache cleanup? (Y/N)"
+    $ch = Read-Host -Prompt "Хотите установить автоматическую очистку кеша ? (Y/N)"
     Write-Host ""
     if (!($ch -eq 'n' -or $ch -eq 'y')) {
-        Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
-        Write-Host "enter again through..." -NoNewline
+        Write-Host "Ой, некорректное значение, " -ForegroundColor Red -NoNewline
+        Write-Host "повторите ввод через..." -NoNewline
         Start-Sleep -Milliseconds 1000
         Write-Host "3" -NoNewline
         Start-Sleep -Milliseconds 1000
@@ -683,7 +766,7 @@ if ($ch -eq 'y') {
     Start-Sleep -Milliseconds 200
 
     # cache-spotify.ps1
-    $webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/SpotX/main/Cache/cache-spotify.ps1', "$env:APPDATA\Spotify\cache-spotify.ps1")
+    $webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/SpotX/main/Cache/cache_spotify_ru.ps1', "$env:APPDATA\Spotify\cache-spotify.ps1")
 
     # Spotify.vbs
     $webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/SpotX/main/Cache/Spotify.vbs', "$env:APPDATA\Spotify\Spotify.vbs")
@@ -702,12 +785,12 @@ if ($ch -eq 'y') {
 
 
     do {
-        $ch = Read-Host -Prompt "Cache files that have not been used for more than XX days will be deleted.
-    Enter the number of days from 1 to 100"
+        $ch = Read-Host -Prompt "Файлы кэша, которые не использовались более XX дней, будут удалены.
+    Пожалуйста, введите количество дней от 1 до 100"
         Write-Host ""
         if (!($ch -match "^[1-9][0-9]?$|^100$")) {
-            Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
-            Write-Host "enter again through..." -NoNewline
+            Write-Host "Ой, некорректное значение, " -ForegroundColor Red -NoNewline
+            Write-Host "повторите ввод через..." -NoNewline
 		
             Start-Sleep -Milliseconds 1000
             Write-Host "3" -NoNewline
@@ -729,10 +812,10 @@ if ($ch -eq 'y') {
         $contentcache_spotify_ps1 = [System.IO.File]::ReadAllText("$env:APPDATA\Spotify\cache-spotify.ps1")
         $contentcache_spotify_ps1 = $contentcache_spotify_ps1.Trim()
         [System.IO.File]::WriteAllText("$env:APPDATA\Spotify\cache-spotify.ps1", $contentcache_spotify_ps1)
-        Write-Host "installation completed"`n -ForegroundColor Green
+        Write-Host "Установка завершена"`n -ForegroundColor Green
         exit
     }
 }
 
-Write-Host "installation completed"`n -ForegroundColor Green
+Write-Host "Установка завершена"`n -ForegroundColor Green
 exit
