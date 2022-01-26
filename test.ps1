@@ -405,7 +405,9 @@ If (Test-Path $xpui_js_patch) {
         <# With this enabled, clients will check whether tracks have lyrics available #>`
         -replace '(With this enabled, clients will check whether tracks have lyrics available",default:)(!1)', '$1!0' `
         <# Enables new playlist creation flow #>`
-        -replace '(Enables new playlist creation flow in Web Player and DesktopX",default:)(!1)', '$1!0'
+        -replace '(Enables new playlist creation flow in Web Player and DesktopX",default:)(!1)', '$1!0' `
+        <# Enable Enhance Playlist UI and functionality #>`
+        -replace '(Enable Enhance Playlist UI and functionality",default:)(!1)', '$1!0'
 
     $writer = New-Object System.IO.StreamWriter -ArgumentList $xpui_js_patch
     $writer.BaseStream.SetLength(0)
