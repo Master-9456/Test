@@ -438,6 +438,15 @@ If (Test-Path $xpui_spa_patch) {
 
 
 
+    # Удалить надпись о новой версии
+    if ($block_update) {
+        
+        $xpuiContents = $xpuiContents `
+            -replace "sp://desktop/v1/upgrade/status", ""
+
+    }
+
+
     # Отключить подкасты
     if ($podcasts_off) {
         $xpuiContents = $xpuiContents `
