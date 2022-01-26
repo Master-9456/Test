@@ -412,9 +412,10 @@ If (Test-Path $xpui_js_patch) {
     [System.IO.File]::WriteAllText($xpui_js_patch, $contentjs)
 
 
-    $xpui_ru_json_patch = "$env:APPDATA\Spotify\Apps\xpui\i18n\ru.json"
-    $xpui_ru = Get-Content $xpui_ru_json_patch -Raw
-
+    $file_ru = get-item $env:APPDATA\Spotify\Apps\xpui\i18n\ru.json
+    $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $file_ru
+    $xpui_ru = $reader.ReadToEnd()
+    $reader.Close()
 
     $xpui_ru = $xpui_ru `
         -replace '"one": "Enhanced with [{]0[}] recommended song."', '"one": "Добавлен {0} рекомендованный трек."' `
@@ -481,10 +482,10 @@ If (Test-Path $xpui_js_patch) {
         -replace '"Go to playlist"', '"Перейти к плейлисту"' `
 
 
-    Set-Content -Path $xpui_ru_json_patch -Force -Value $xpui_ru -Encoding Unicode
-    $contentru = [System.IO.File]::ReadAllText($xpui_ru_json_patch)
-    $contentru = $contentru.Trim()
-    [System.IO.File]::WriteAllText($xpui_ru_json_patch, $contentru)
+    $writer = New-Object System.IO.StreamWriter -ArgumentList $file_ru
+    $writer.BaseStream.SetLength(0)
+    $writer.Write($xpui_ru)
+    $writer.Close()  
 
 
 }  
@@ -814,8 +815,8 @@ if ($block_update) {
 
         #Создать файл Update
         New-Item -Path $env:LOCALAPPDATA\Spotify\ -Name "Update" -ItemType "file" -Value "STOPIT" | Out-Null
-        $file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update
-        $file.Attributes = "ReadOnly", "System"
+        $file_upd = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update
+        $file_upd.Attributes = "ReadOnly", "System"
       
         # Если оба файлав мигратора существуют то .bak удалить, а .exe переименовать в .bak
         If ($migrator_exe -and $migrator_bak) {
@@ -851,8 +852,8 @@ if ($block_update) {
         # Создать файл Update если его нет
         if (!($Check_folder_file -match '\bSystem\b' -and $Check_folder_file -match '\bReadOnly\b')) {  
             New-Item -Path $env:LOCALAPPDATA\Spotify\ -Name "Update" -ItemType "file" -Value "STOPIT" | Out-Null
-            $file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update
-            $file.Attributes = "ReadOnly", "System"
+            $file_upd = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update
+            $file_upd.Attributes = "ReadOnly", "System"
     
   
         }
