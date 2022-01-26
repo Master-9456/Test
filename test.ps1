@@ -470,7 +470,6 @@ If (Test-Path $xpui_spa_patch) {
             -replace "html\[dir=rtl\].+?\{.+?\}", "" `
             -replace "html\[lang=ar\].+?\{.+?\}", "" `
             -replace "\[dir=rtl\].+?\{.+?\}", "" `
-            # minification
             -replace "[/]\*([^*]|[\r\n]|(\*([^/]|[\r\n])))*\*[/]", "" `
             -replace "[/][/]#\s.*", "" `
             -replace "\r?\n(?!\(1|\d)", ""
