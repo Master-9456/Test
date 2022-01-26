@@ -255,17 +255,6 @@ if (!(Test-Path -LiteralPath $chrome_elf_bak)) {
 }
 
 
-$patchFiles = "$PWD\chrome_elf.dll", "$PWD\config.ini"
-Copy-Item -LiteralPath $patchFiles -Destination "$spotifyDirectory"
-
-$tempDirectory = $PWD
-Pop-Location
-
-
-Start-Sleep -Milliseconds 200
-Remove-Item -Recurse -LiteralPath $tempDirectory 
-
-
 
 do {
     $ch = Read-Host -Prompt "Хотите отключить подкасты ? (Y/N)"
@@ -356,6 +345,16 @@ if ($ch -eq 'y') {
 Write-Host 'Модифицирую Spotify...'`n
 
 # Мофифицируем файлы 
+
+$patchFiles = "$PWD\chrome_elf.dll", "$PWD\config.ini"
+Copy-Item -LiteralPath $patchFiles -Destination "$spotifyDirectory"
+
+$tempDirectory = $PWD
+Pop-Location
+
+
+Start-Sleep -Milliseconds 200
+Remove-Item -Recurse -LiteralPath $tempDirectory 
 
 $xpui_spa_patch = "$env:APPDATA\Spotify\Apps\xpui.spa"
 $xpui_js_patch = "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
