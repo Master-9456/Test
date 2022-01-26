@@ -15,6 +15,8 @@ $upgrade_client = $false
 $podcasts_off = $false
 $spotx_new = $false
 $run_as_admin = $false
+$block_update = $false
+$cache_install = $false
 
 
 # чек сертификата Tls12
@@ -286,6 +288,72 @@ while ($ch -notmatch '^y$|^n$')
 if ($ch -eq 'y') { $podcasts_off = $true }
 
 
+do {
+    $ch = Read-Host -Prompt "Хотите заблокировать обновления ? (Y/N)"
+    Write-Host ""
+    if (!($ch -eq 'n' -or $ch -eq 'y')) {
+    
+        Write-Host "Ой, некорректное значение, " -ForegroundColor Red -NoNewline
+        Write-Host "повторите ввод через..." -NoNewline
+        Start-Sleep -Milliseconds 1000
+        Write-Host "3" -NoNewline
+        Start-Sleep -Milliseconds 1000
+        Write-Host ".2" -NoNewline
+        Start-Sleep -Milliseconds 1000
+        Write-Host ".1"
+        Start-Sleep -Milliseconds 1000     
+        Clear-Host
+    }
+}
+while ($ch -notmatch '^y$|^n$')
+
+if ($ch -eq 'y') { $block_update = $true }
+
+do {
+    $ch = Read-Host -Prompt "Хотите установить автоматическую очистку кеша ? (Y/N)"
+    Write-Host ""
+    if (!($ch -eq 'n' -or $ch -eq 'y')) {
+        Write-Host "Ой, некорректное значение, " -ForegroundColor Red -NoNewline
+        Write-Host "повторите ввод через..." -NoNewline
+        Start-Sleep -Milliseconds 1000
+        Write-Host "3" -NoNewline
+        Start-Sleep -Milliseconds 1000
+        Write-Host ".2" -NoNewline
+        Start-Sleep -Milliseconds 1000
+        Write-Host ".1"
+        Start-Sleep -Milliseconds 1000     
+        Clear-Host
+    }
+}
+while ($ch -notmatch '^y$|^n$')
+if ($ch -eq 'y') {
+    $cache_install = $true 
+
+    do {
+        $ch = Read-Host -Prompt "Файлы кэша, которые не использовались более XX дней, будут удалены.
+    Пожалуйста, введите количество дней от 1 до 100"
+        Write-Host ""
+        if (!($ch -match "^[1-9][0-9]?$|^100$")) {
+            Write-Host "Ой, некорректное значение, " -ForegroundColor Red -NoNewline
+            Write-Host "повторите ввод через..." -NoNewline
+		
+            Start-Sleep -Milliseconds 1000
+            Write-Host "3" -NoNewline
+            Start-Sleep -Milliseconds 1000
+            Write-Host ".2" -NoNewline
+            Start-Sleep -Milliseconds 1000
+            Write-Host ".1"
+            Start-Sleep -Milliseconds 1000     
+            Clear-Host
+        }
+    }
+    while ($ch -notmatch '^[1-9][0-9]?$|^100$')
+
+    if ($ch -match "^[1-9][0-9]?$|^100$") { $number_days = $ch }
+
+}
+
+
 # Мофифицируем файлы 
 
 $xpui_spa_patch = "$env:APPDATA\Spotify\Apps\xpui.spa"
@@ -507,76 +575,76 @@ If (Test-Path $xpui_spa_patch) {
         $readerjson.Close()
 
     
-    $xpuiContents_json = $xpuiContents_json `
-    -replace '"one": "Enhanced with [{]0[}] recommended song."', '"one": "Добавлена {0} рекомендованная песня."' `
-    -replace '"few": "Enhanced with [{]0[}] recommended songs."', '"few": "Добавлено {0} рекомендованные песни."' `
-    -replace '"many": "Enhanced with [{]0[}] recommended songs."', '"many": "Добавлено {0} рекомендованных песен."' `
-    -replace '"other": "Enhanced with [{]0[}] recommended songs."', '"other": "Добавлено {0} рекомендованные песни."' `
-    -replace '"To Enhance this playlist, you.ll need to go online."', '"Чтобы улучшить этот плейлист, вам нужно подключиться к интернету."' `
-    -replace '"Song Radio"', '"Радио по треку"' `
-    -replace '"Album Radio"', '"Радио по альбому"' `
-    -replace '"Artist Radio"', '"Радио по исполнителю"' `
-    -replace '"Radio",', '"Радио",' `
-    -replace '"Your Location"', '"Ваше местоположение"' `
-    -replace '"We couldn.t find concerts in your location."', '"Мы не смогли найти концерты в вашем регионе."' `
-    -replace '"We couldn.t find concerts in [{]0[}]."', '"Мы не смогли найти концерты в {0}."' `
-    -replace '"Download error"', '"Ошибка загрузки"' `
-    -replace '"Layout"', '"Расположение"' `
-    -replace '"Confirm your age"', '"Подтвердите свой возраст"' `
-    -replace '"Get Spotify Premium"', '"Получите Premium Spotify"' `
-    -replace '"Subscribe"', '"Подписаться"' `
-    -replace '"%price%\/month after. Terms and conditions apply. One month free not available for users who have already tried Premium."', '"%price%/месяц спустя. Принять условия. Один месяц бесплатно, недоступно для пользователей, которые уже попробовали Premium."' `
-    -replace '"Enjoy ad-free music listening, offline listening, and more. Cancel anytime."', '"Наслаждайтесь прослушиванием музыки без рекламы, прослушиванием в офлайн режиме и многим другим. Отменить можно в любое время."' `
-    -replace '"Sort by"', '"Сортировка по"' `
-    -replace '"Filter by"', '"Фильтр по"' `
-    -replace '"Lyrics provided by [{]0[}]"', '"Тексты песен предоставлены {0}"' `
-    -replace '"Edit details"', '"Редактировать детали"' `
-    -replace '"Decrease navigation bar width"', '"Уменьшить ширину панели навигации"' `
-    -replace '"Increase navigation bar width"', '"Увеличить ширину панели навигации"' `
-    -replace '"Add to another playlist"', '"Добавить в другой плейлист"' `
-    -replace '"Offline storage location"', '"Оффлайн-хранилище"' `
-    -replace '"Change location"', '"Изменить расположение"' `
-    -replace '"Line breaks aren.t supported in the description."', '"В описании не поддерживаются разрывы строк."' `
-    -replace '"HTML isn.t supported in playlist description."', '"HTML не поддерживается в описании плейлиста."' `
-    -replace '"Press save to keep changes you.ve made."', '"Нажмите «Сохранить», чтобы сохранить внесенные изменения."' `
-    -replace '"No internet connection found. Changes to description and image will not be saved."', '"Подключение к интернету не найдено. Изменения в описании и изображении не будут сохранены."' `
-    -replace '"Image too large. Please select an image below 4MB."', '"Изображение слишком большое. Пожалуйста, выберите изображение размером менее 4 МБ."' `
-    -replace '"Image too small. Images must be at least [{]0[}]x[{]1[}]."', '"Изображение слишком маленькое. Изображения должны быть не менее {0}x{1}."' `
-    -replace '"Failed to upload image. Please try again."', '"Не удалось загрузить изображение. Пожалуйста, попробуйте снова."' `
-    -replace '"Playlist name is required."', '"Имя плейлиста обязательно."' `
-    -replace '"Failed to save playlist changes. Please try again."', '"Не удалось сохранить изменения в плейлисте. Пожалуйста, попробуйте снова."' `
-    -replace '"Description"', '"Описание"' `
-    -replace '"Add an optional description"', '"Добавьте дополнительное описание"' `
-    -replace '"Change photo"', '"Сменить изображение"' `
-    -replace '"Remove photo"', '"Удалить изображение"' `
-    -replace '"Name"', '"Имя"' `
-    -replace '"Add a name"', '"Добавить имя"' `
-    -replace '"Change speed"', '"Изменение скорости"' `
-    -replace '"You need to be at least 19 years old to listen to explicit content marked with"', '"Вам должно быть не менее 19 лет, чтобы слушать непристойный контент, помеченный значком"' `
-    -replace '"Continue"', '"Продолжить"' `
-    -replace '"Add to this playlist"', '"Добавить в этот плейлист"' `
-    -replace '"Retrying in [{]0[}]..."', '"Повторная попытка в {0}..."' `
-    -replace '"Couldn.t connect to Spotify."', '"Не удалось подключиться к Spotify."' `
-    -replace '"Reconnecting..."', '"Повторное подключение..."' `
-    -replace '"No connection"', '"Нет соединения"' `
-    -replace '"Character counter"', '"Счетчик символов"' `
-    -replace '"Toggle lightsaber hilt. Current is [{]0[}]."', '"Переключить рукоять светового меча. Текущий {0}."' `
-    -replace '"Song not available"', '"Песня недоступна"' `
-    -replace '"The song you.re trying to listen to is not available in HiFi at this time."', '"Песня, которую вы пытаетесь прослушать, в настоящее время недоступна в HiFi."' `
-    -replace '"Current audio quality:"', '"Текущее качество звука:"' `
-    -replace '"Network connection"', '"Подключение к сети"' `
-    -replace '"Good"', '"Хорошее"' `
-    -replace '"Poor"', '"Плохое"' `
-    -replace '"Yes"', '"Да"' `
-    -replace '"No"', '"Нет"' `
-    -replace '"Go to playlist"', '"Перейти к плейлисту"' `
+        $xpuiContents_json = $xpuiContents_json `
+            -replace '"one": "Enhanced with [{]0[}] recommended song."', '"one": "Добавлен {0} рекомендованный трек."' `
+            -replace '"few": "Enhanced with [{]0[}] recommended songs."', '"few": "Добавлено {0} рекомендованных трека."' `
+            -replace '"many": "Enhanced with [{]0[}] recommended songs."', '"many": "Добавлено {0} рекомендованных треков."' `
+            -replace '"other": "Enhanced with [{]0[}] recommended songs."', '"other": "Добавлено {0} рекомендованных трека."' `
+            -replace '"To Enhance this playlist, you.ll need to go online."', '"Чтобы улучшить этот плейлист, вам нужно подключиться к интернету."' `
+            -replace '"Song Radio"', '"Радио по треку"' `
+            -replace '"Album Radio"', '"Радио по альбому"' `
+            -replace '"Artist Radio"', '"Радио по исполнителю"' `
+            -replace '"Radio",', '"Радио",' `
+            -replace '"Your Location"', '"Ваше местоположение"' `
+            -replace '"We couldn.t find concerts in your location."', '"Мы не смогли найти концерты в вашем регионе."' `
+            -replace '"We couldn.t find concerts in [{]0[}]."', '"Мы не смогли найти концерты в {0}."' `
+            -replace '"Download error"', '"Ошибка загрузки"' `
+            -replace '"Layout"', '"Расположение"' `
+            -replace '"Confirm your age"', '"Подтвердите свой возраст"' `
+            -replace '"Get Spotify Premium"', '"Получите Premium Spotify"' `
+            -replace '"Subscribe"', '"Подписаться"' `
+            -replace '"%price%\/month after. Terms and conditions apply. One month free not available for users who have already tried Premium."', '"%price%/месяц спустя. Принять условия. Один месяц бесплатно, недоступно для пользователей, которые уже попробовали Premium."' `
+            -replace '"Enjoy ad-free music listening, offline listening, and more. Cancel anytime."', '"Наслаждайтесь прослушиванием музыки без рекламы, прослушиванием в офлайн режиме и многим другим. Отменить можно в любое время."' `
+            -replace '"Sort by"', '"Сортировка по"' `
+            -replace '"Filter by"', '"Фильтр по"' `
+            -replace '"Lyrics provided by [{]0[}]"', '"Тексты песен предоставлены {0}"' `
+            -replace '"Edit details"', '"Редактировать детали"' `
+            -replace '"Decrease navigation bar width"', '"Уменьшить ширину панели навигации"' `
+            -replace '"Increase navigation bar width"', '"Увеличить ширину панели навигации"' `
+            -replace '"Add to another playlist"', '"Добавить в другой плейлист"' `
+            -replace '"Offline storage location"', '"Оффлайн-хранилище"' `
+            -replace '"Change location"', '"Изменить расположение"' `
+            -replace '"Line breaks aren.t supported in the description."', '"В описании не поддерживаются разрывы строк."' `
+            -replace '"HTML isn.t supported in playlist description."', '"HTML не поддерживается в описании плейлиста."' `
+            -replace '"Press save to keep changes you.ve made."', '"Нажмите «Сохранить», чтобы сохранить внесенные изменения."' `
+            -replace '"No internet connection found. Changes to description and image will not be saved."', '"Подключение к интернету не найдено. Изменения в описании и изображении не будут сохранены."' `
+            -replace '"Image too large. Please select an image below 4MB."', '"Изображение слишком большое. Пожалуйста, выберите изображение размером менее 4 МБ."' `
+            -replace '"Image too small. Images must be at least [{]0[}]x[{]1[}]."', '"Изображение слишком маленькое. Изображения должны быть не менее {0}x{1}."' `
+            -replace '"Failed to upload image. Please try again."', '"Не удалось загрузить изображение. Пожалуйста, попробуйте снова."' `
+            -replace '"Playlist name is required."', '"Имя плейлиста обязательно."' `
+            -replace '"Failed to save playlist changes. Please try again."', '"Не удалось сохранить изменения в плейлисте. Пожалуйста, попробуйте снова."' `
+            -replace '"Description"', '"Описание"' `
+            -replace '"Add an optional description"', '"Добавьте дополнительное описание"' `
+            -replace '"Change photo"', '"Сменить изображение"' `
+            -replace '"Remove photo"', '"Удалить изображение"' `
+            -replace '"Name"', '"Имя"' `
+            -replace '"Add a name"', '"Добавить имя"' `
+            -replace '"Change speed"', '"Изменение скорости"' `
+            -replace '"You need to be at least 19 years old to listen to explicit content marked with"', '"Вам должно быть не менее 19 лет, чтобы слушать непристойный контент, помеченный значком"' `
+            -replace '"Continue"', '"Продолжить"' `
+            -replace '"Add to this playlist"', '"Добавить в этот плейлист"' `
+            -replace '"Retrying in [{]0[}]..."', '"Повторная попытка в {0}..."' `
+            -replace '"Couldn.t connect to Spotify."', '"Не удалось подключиться к Spotify."' `
+            -replace '"Reconnecting..."', '"Повторное подключение..."' `
+            -replace '"No connection"', '"Нет соединения"' `
+            -replace '"Character counter"', '"Счетчик символов"' `
+            -replace '"Toggle lightsaber hilt. Current is [{]0[}]."', '"Переключить рукоять светового меча. Текущий {0}."' `
+            -replace '"Song not available"', '"Песня недоступна"' `
+            -replace '"The song you.re trying to listen to is not available in HiFi at this time."', '"Песня, которую вы пытаетесь прослушать, в настоящее время недоступна в HiFi."' `
+            -replace '"Current audio quality:"', '"Текущее качество звука:"' `
+            -replace '"Network connection"', '"Подключение к сети"' `
+            -replace '"Good"', '"Хорошее"' `
+            -replace '"Poor"', '"Плохое"' `
+            -replace '"Yes"', '"Да"' `
+            -replace '"No"', '"Нет"' `
+            -replace '"Go to playlist"', '"Перейти к плейлисту"' `
 
-    $writer = New-Object System.IO.StreamWriter($_.Open())
-    $writer.BaseStream.SetLength(0)
-    $writer.Write($xpuiContents_json)
-    $writer.Close()
+        $writer = New-Object System.IO.StreamWriter($_.Open())
+        $writer.BaseStream.SetLength(0)
+        $writer.Write($xpuiContents_json)
+        $writer.Close()
 
-}
+    }
 
     # json
     $zip.Entries | Where-Object FullName -like '*.json' | ForEach-Object {
@@ -585,15 +653,15 @@ If (Test-Path $xpui_spa_patch) {
         $readerjson.Close()
 
     
-    $xpuiContents_json = $xpuiContents_json `
-                -replace "  ", "" -replace "    ", "" -replace '": ', '":' -replace "\r?\n(?!\(1|\d)", "" 
+        $xpuiContents_json = $xpuiContents_json `
+            -replace "  ", "" -replace "    ", "" -replace '": ', '":' -replace "\r?\n(?!\(1|\d)", "" 
 
-                $writer = New-Object System.IO.StreamWriter($_.Open())
-                $writer.BaseStream.SetLength(0)
-                $writer.Write($xpuiContents_json)
-                $writer.Close()
+        $writer = New-Object System.IO.StreamWriter($_.Open())
+        $writer.BaseStream.SetLength(0)
+        $writer.Write($xpuiContents_json)
+        $writer.Close()
             
-            }
+    }
 
     $zip.Dispose()   
 }
@@ -642,27 +710,9 @@ $migrator_exe = Test-Path -Path $env:APPDATA\Spotify\SpotifyMigrator.exe
 $Check_folder_file = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update | Select-Object Attributes 
 $folder_update_access = Get-Acl $env:LOCALAPPDATA\Spotify\Update
 
-do {
-    $ch = Read-Host -Prompt "Хотите заблокировать обновления ? (Y/N)"
-    Write-Host ""
-    if (!($ch -eq 'n' -or $ch -eq 'y' -or $ch -eq 'u')) {
-    
-        Write-Host "Ой, некорректное значение, " -ForegroundColor Red -NoNewline
-        Write-Host "повторите ввод через..." -NoNewline
-        Start-Sleep -Milliseconds 1000
-        Write-Host "3" -NoNewline
-        Start-Sleep -Milliseconds 1000
-        Write-Host ".2" -NoNewline
-        Start-Sleep -Milliseconds 1000
-        Write-Host ".1"
-        Start-Sleep -Milliseconds 1000     
-        Clear-Host
-    }
-}
-while ($ch -notmatch '^y$|^n$')
 
 
-if ($ch -eq 'y') {
+if ($block_update) {
 
     # Если была установка клиента 
     if (!($update_directory)) {
@@ -731,27 +781,8 @@ if ($ch -eq 'y') {
 
 # Автоматическая очистка кеша
 
-do {
-    $ch = Read-Host -Prompt "Хотите установить автоматическую очистку кеша ? (Y/N)"
-    Write-Host ""
-    if (!($ch -eq 'n' -or $ch -eq 'y')) {
-        Write-Host "Ой, некорректное значение, " -ForegroundColor Red -NoNewline
-        Write-Host "повторите ввод через..." -NoNewline
-        Start-Sleep -Milliseconds 1000
-        Write-Host "3" -NoNewline
-        Start-Sleep -Milliseconds 1000
-        Write-Host ".2" -NoNewline
-        Start-Sleep -Milliseconds 1000
-        Write-Host ".1"
-        Start-Sleep -Milliseconds 1000     
-        Clear-Host
-    }
-}
-while ($ch -notmatch '^y$|^n$')
 
-
-
-if ($ch -eq 'y') {
+if ($cache_install) {
 
     $test_cache_spotify_ps = Test-Path -Path $env:APPDATA\Spotify\cache-spotify.ps1
     $test_spotify_vbs = Test-Path -Path $env:APPDATA\Spotify\Spotify.vbs
@@ -783,30 +814,9 @@ if ($ch -eq 'y') {
     $Shortcut2.Save()
 
 
-    do {
-        $ch = Read-Host -Prompt "Файлы кэша, которые не использовались более XX дней, будут удалены.
-    Пожалуйста, введите количество дней от 1 до 100"
-        Write-Host ""
-        if (!($ch -match "^[1-9][0-9]?$|^100$")) {
-            Write-Host "Ой, некорректное значение, " -ForegroundColor Red -NoNewline
-            Write-Host "повторите ввод через..." -NoNewline
-		
-            Start-Sleep -Milliseconds 1000
-            Write-Host "3" -NoNewline
-            Start-Sleep -Milliseconds 1000
-            Write-Host ".2" -NoNewline
-            Start-Sleep -Milliseconds 1000
-            Write-Host ".1"
-            Start-Sleep -Milliseconds 1000     
-            Clear-Host
-        }
-    }
-    while ($ch -notmatch '^[1-9][0-9]?$|^100$')
-
-
-    if ($ch -match "^[1-9][0-9]?$|^100$") {
+    if ($number_days -match "^[1-9][0-9]?$|^100$") {
         $file_cache_spotify_ps1 = Get-Content $env:APPDATA\Spotify\cache-spotify.ps1 -Raw
-        $new_file_cache_spotify_ps1 = $file_cache_spotify_ps1 -replace '-7', - $ch
+        $new_file_cache_spotify_ps1 = $file_cache_spotify_ps1 -replace '-7', - $number_days
         Set-Content -Path $env:APPDATA\Spotify\cache-spotify.ps1 -Force -Value $new_file_cache_spotify_ps1
         $contentcache_spotify_ps1 = [System.IO.File]::ReadAllText("$env:APPDATA\Spotify\cache-spotify.ps1")
         $contentcache_spotify_ps1 = $contentcache_spotify_ps1.Trim()
