@@ -254,7 +254,7 @@ if (!(Test-Path -LiteralPath $chrome_elf_bak)) {
     Move-Item $chrome_elf $chrome_elf_bak 
 }
 
-Write-Host 'Модифицирую Spotify...'`n
+
 $patchFiles = "$PWD\chrome_elf.dll", "$PWD\config.ini"
 Copy-Item -LiteralPath $patchFiles -Destination "$spotifyDirectory"
 
@@ -353,6 +353,7 @@ if ($ch -eq 'y') {
 
 }
 
+Write-Host 'Модифицирую Spotify...'`n
 
 # Мофифицируем файлы 
 
