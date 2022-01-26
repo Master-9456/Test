@@ -481,7 +481,7 @@ If (Test-Path $xpui_js_patch) {
         -replace '"Go to playlist"', '"Перейти к плейлисту"' `
 
 
-    Set-Content -Path $xpui_ru_json_patch -Force -Value $xpui_ru
+    Set-Content -Path $xpui_ru_json_patch -Force -Value $xpui_ru -Encoding UTF8
     $contentru = [System.IO.File]::ReadAllText($xpui_ru_json_patch)
     $contentru = $contentru.Trim()
     [System.IO.File]::WriteAllText($xpui_ru_json_patch, $contentru)
