@@ -362,7 +362,9 @@ $xpui_js_patch = "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
 If (Test-Path $xpui_js_patch) {
     Write-Host "Обнаружен Spicetify"`n
 
-    $xpui_js = Get-Content $xpui_js_patch -Raw
+    $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $xpui_js_patch
+    $xpui_js = $reader.ReadToEnd()
+    $reader.Close()
         
     If (!($xpui_js -match 'patched by spotx')) {
         $spotx_new = $true
@@ -405,11 +407,11 @@ If (Test-Path $xpui_js_patch) {
         <# Enables new playlist creation flow #>`
         -replace '(Enables new playlist creation flow in Web Player and DesktopX",default:)(!1)', '$1!0'
 
-    Set-Content -Path $xpui_js_patch -Force -Value $xpui_js
-    if ($spotx_new) { add-content -Path $xpui_js_patch -Value '// Patched by SpotX' -passthru | Out-Null }
-    $contentjs = [System.IO.File]::ReadAllText($xpui_js_patch)
-    $contentjs = $contentjs.Trim()
-    [System.IO.File]::WriteAllText($xpui_js_patch, $contentjs)
+    $writer = New-Object System.IO.StreamWriter -ArgumentList $xpui_js_patch
+    $writer.BaseStream.SetLength(0)
+    $writer.Write($xpui_js)
+    if ($spotx_new) { $writer.Write([System.Environment]::NewLine + '// Patched by SpotX') }
+    $writer.Close()  
 
 
     $file_ru = get-item $env:APPDATA\Spotify\Apps\xpui\i18n\ru.json
