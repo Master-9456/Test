@@ -401,7 +401,7 @@ If (Test-Path $xpui_js_patch) {
         -replace '([a-z]{1}[.]{1}toLowerCase[(]{1}[)]{2}[}]{1}[,]{1}[a-z]{1}[=]{1}[a-z]{1}[=]{1}[>]{1}[{]{1}var [a-z]{1}[,]{1}[a-z]{1}[,]{1}[a-z]{1}[;]{1}return)(["]{1}premium["]{1})', '$1"free"' `
         <# Disabling a playlist sponsor #>`
         -replace "allSponsorships", "" `
-        <# Del lang #>`
+        <# Remove all languages except Eng and Rus #>`
         -replace '(JSON.parse\(.{)("en":"English \(English\)".*\(Vietnamese\)"})', '$1"en":"English (English)","ru":"Русский (Russian)"}' `
         <# Show "Made For You" entry point in the left sidebar #>`
         -replace '(Show "Made For You" entry point in the left sidebar.,default:)(!1)', '$1!0' `
@@ -584,6 +584,8 @@ If (Test-Path $xpui_spa_patch) {
         -replace '([a-z]{1}[.]{1}toLowerCase[(]{1}[)]{2}[}]{1}[,]{1}[a-z]{1}[=]{1}[a-z]{1}[=]{1}[>]{1}[{]{1}var [a-z]{1}[,]{1}[a-z]{1}[,]{1}[a-z]{1}[;]{1}return)(["]{1}premium["]{1})', '$1"free"' `
         <# Disabling a playlist sponsor #>`
         -replace "allSponsorships", "" `
+        <# Remove all languages except Eng and Rus #>`
+        -replace '(JSON.parse\(.{)("en":"English \(English\)".*\(Vietnamese\)"})', '$1"en":"English (English)","ru":"Русский (Russian)"}' `
         <# Disable Logging #>`
         -replace "sp://logging/v3/\w+", "" `
         <# Show "Made For You" entry point in the left sidebar #>`
