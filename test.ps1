@@ -353,6 +353,7 @@ $tempDirectory = $PWD
 Pop-Location
 
 
+
 Start-Sleep -Milliseconds 200
 Remove-Item -Recurse -LiteralPath $tempDirectory 
 
@@ -361,6 +362,14 @@ $xpui_js_patch = "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
 
 If (Test-Path $xpui_js_patch) {
     Write-Host "Обнаружен Spicetify"`n
+
+
+    # Удалить все файлы кроме "en", "ru" и "__longest"
+
+    $patch_lang = "$env:APPDATA\Spotify\Apps\xpui\i18n"
+
+    Remove-Item $patch_lang -Exclude *en*, *ru*, *__longest* -Recurse
+
 
     $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $xpui_js_patch
     $xpui_js = $reader.ReadToEnd()
@@ -392,6 +401,8 @@ If (Test-Path $xpui_js_patch) {
         -replace '([a-z]{1}[.]{1}toLowerCase[(]{1}[)]{2}[}]{1}[,]{1}[a-z]{1}[=]{1}[a-z]{1}[=]{1}[>]{1}[{]{1}var [a-z]{1}[,]{1}[a-z]{1}[,]{1}[a-z]{1}[;]{1}return)(["]{1}premium["]{1})', '$1"free"' `
         <# Disabling a playlist sponsor #>`
         -replace "allSponsorships", "" `
+        <# Del lang #>`
+        -replace '(JSON.parse\(.{)("en":"English \(English\)".*\(Vietnamese\)"})', '$1"en":"English (English)","ru":"Русский (Russian)"}' `
         <# Show "Made For You" entry point in the left sidebar #>`
         -replace '(Show "Made For You" entry point in the left sidebar.,default:)(!1)', '$1!0' `
         <# Enables the 2021 icons redraw #>`
@@ -512,6 +523,31 @@ If (Test-Path $xpui_spa_patch) {
         Copy-Item $xpui_spa_patch $env:APPDATA\Spotify\Apps\xpui.bak
     }
     else { $zip.Dispose() }
+
+
+    [Reflection.Assembly]::LoadWithPartialName('System.IO.Compression')
+
+    
+    $files = 'af.json', 'am.json', 'ar.json', 'az.json', 'bg.json', 'bho.json', 'bn.json', `
+        'cs.json', 'da.json', 'de.json', 'el.json', 'es-419.json', 'es.json', 'et.json', 'fa.json', `
+        'fi.json', 'fil.json', 'fr-CA.json', 'fr.json', 'gu.json', 'he.json', 'hi.json', 'hu.json', `
+        'id.json', 'is.json', 'it.json', 'ja.json', 'kn.json', 'ko.json', 'lt.json', 'lv.json', `
+        'ml.json', 'mr.json', 'ms.json', 'nb.json', 'ne.json', 'nl.json', 'or.json', 'pa-IN.json', `
+        'pl.json', 'pt-BR.json', 'pt-PT.json', 'ro.json', 'sk.json', 'sl.json', 'sr.json', 'sv.json', `
+        'sw.json' , 'ta.json' , 'te.json' , 'th.json' , 'tr.json' , 'uk.json' , 'ur.json' , 'vi.json', `
+        'zh-CN.json', 'zh-TW.json' , 'zu.json' , 'pa-PK.json' , 'hr.json'
+
+    $stream = New-Object IO.FileStream($xpui_spa_patch, [IO.FileMode]::Open)
+    $mode = [IO.Compression.ZipArchiveMode]::Update
+    $zip_xpui = New-Object IO.Compression.ZipArchive($stream, $mode)
+
+    ($zip_xpui.Entries | Where-Object { $files -contains $_.Name }) | ForEach-Object { $_.Delete() }
+
+    $zip_xpui.Dispose()
+    $stream.Close()
+    $stream.Dispose()
+
+
     
     Add-Type -Assembly 'System.IO.Compression.FileSystem'
     $zip = [System.IO.Compression.ZipFile]::Open($xpui_spa_patch, 'update')
@@ -763,6 +799,13 @@ If (Test-Path $xpui_spa_patch) {
     $zip.Dispose()   
 }
 
+
+
+# Удалить все файлы кроме "en" и "ru" 
+
+$patch_lang = "$spotifyDirectory\locales"
+
+Remove-Item $patch_lang -Exclude *en*, *ru* -Recurse
 
 # Если папки по умолчанию Dekstop не существует, то попытаться найти её через реестр.
 $ErrorActionPreference = 'SilentlyContinue' 
