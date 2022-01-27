@@ -525,7 +525,7 @@ If (Test-Path $xpui_spa_patch) {
     else { $zip.Dispose() }
 
 
-    [Reflection.Assembly]::LoadWithPartialName('System.IO.Compression')
+    [Reflection.Assembly]::LoadWithPartialName('System.IO.Compression') | Out-Null
 
     
     $files = 'af.json', 'am.json', 'ar.json', 'az.json', 'bg.json', 'bho.json', 'bn.json', `
