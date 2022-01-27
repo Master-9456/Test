@@ -471,7 +471,7 @@ If (Test-Path $xpui_js_patch) {
         -replace '"Playlist name is required."', '"Имя плейлиста обязательно."' `
         -replace '"Failed to save playlist changes. Please try again."', '"Не удалось сохранить изменения в плейлисте. Пожалуйста, попробуйте снова."' `
         -replace '"Description"', '"Описание"' `
-        -replace '"Add an optional description"', '"Добавьте дополнительное описание"' `
+        -replace '"Add an optional description"', '"Добавь интересное описание"' `
         -replace '"Change photo"', '"Сменить изображение"' `
         -replace '"Remove photo"', '"Удалить изображение"' `
         -replace '"Name"', '"Имя"' `
@@ -749,7 +749,7 @@ If (Test-Path $xpui_spa_patch) {
             -replace '"Playlist name is required."', '"Имя плейлиста обязательно."' `
             -replace '"Failed to save playlist changes. Please try again."', '"Не удалось сохранить изменения в плейлисте. Пожалуйста, попробуйте снова."' `
             -replace '"Description"', '"Описание"' `
-            -replace '"Add an optional description"', '"Добавьте дополнительное описание"' `
+            -replace '"Add an optional description"', '"Добавь интересное описание"' `
             -replace '"Change photo"', '"Сменить изображение"' `
             -replace '"Remove photo"', '"Удалить изображение"' `
             -replace '"Name"', '"Имя"' `
