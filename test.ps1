@@ -239,7 +239,7 @@ if (-not $spotifyInstalled -or $upgrade_client) {
         Move-Item $chrome_elf $chrome_elf_bak 
     }
 
-    # Remove spotify installer
+    # Remove Spotify installer
     if (test-path "$env:LOCALAPPDATA\Microsoft\Windows\Temporary Internet Files\") {
         get-childitem -path "$env:LOCALAPPDATA\Microsoft\Windows\Temporary Internet Files\" -Recurse -Force -Filter  "SpotifyFullSetup*" | remove-item  -Force
     }
@@ -419,7 +419,7 @@ If (Test-Path $xpui_js_patch) {
     $writer.Close()  
 
 
-    # licenses.html file, size reduction
+    # licenses.html minification
     $file_licenses = "$env:APPDATA\Spotify\Apps\xpui\licenses.html"
     
     $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $file_licenses
@@ -545,7 +545,7 @@ If (Test-Path $xpui_spa_patch) {
         $xpuiContents_js = $readerjs.ReadToEnd()
         $readerjs.Close()
 
-        # js files, size reduction
+        # js minification
         $xpuiContents_js = $xpuiContents_js `
             -replace "[/][/][#] sourceMappingURL=.*[.]map", "" `
             -replace "\r?\n(?!\(1|\d)", ""
@@ -578,7 +578,7 @@ If (Test-Path $xpui_spa_patch) {
             -replace "html\[dir=rtl\].+?\{.+?\}", "" `
             -replace "html\[lang=ar\].+?\{.+?\}", "" `
             -replace "\[dir=rtl\].+?\{.+?\}", "" `
-            <# Size reduction #>`
+            <# css minification #>`
             -replace "[/]\*([^*]|[\r\n]|(\*([^/]|[\r\n])))*\*[/]", "" `
             -replace "[/][/]#\s.*", "" `
             -replace "\r?\n(?!\(1|\d)", ""
@@ -595,7 +595,7 @@ If (Test-Path $xpui_spa_patch) {
         $xpuiContents_html = $readerhtml.ReadToEnd()
         $readerhtml.Close()
 
-        # html files, size reduction
+        # html minification
         $xpuiContents_html = $xpuiContents_html `
             -replace '<li><a href="#6eef7">zlib<\/a><\/li>\n(.|\n)*<\/p><!-- END CONTAINER DEPS LICENSES -->(<\/div>)', '$2' `
             -replace "	", "" -replace "  ", "" -replace "(?m)(^\s*\r?\n)", "" -replace "\r?\n(?!\(1|\d)", ""
@@ -611,7 +611,7 @@ If (Test-Path $xpui_spa_patch) {
         $xpuiContents_json = $readerjson.ReadToEnd()
         $readerjson.Close()
 
-    
+        # json minification
         $xpuiContents_json = $xpuiContents_json `
             -replace "  ", "" -replace "    ", "" -replace '": ', '":' -replace "\r?\n(?!\(1|\d)", "" 
 
