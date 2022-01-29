@@ -342,9 +342,9 @@ if ($ch -eq 'y') {
 
 }
 
-Write-Host 'Модифицирую Spotify...'`n
+Write-Host 'Patching Spotify...'`n
 
-# Мофифицируем файлы 
+# Patching files
 
 $patchFiles = "$PWD\chrome_elf.dll", "$PWD\config.ini"
 Copy-Item -LiteralPath $patchFiles -Destination "$spotifyDirectory"
@@ -375,7 +375,7 @@ If (Test-Path $xpui_js_patch) {
     }
 
 
-    # Удалить надпись о новой версии
+    # Remove the inscription about the new version from the "About" window
     if ($block_update) {
         
         $xpui_js = $xpui_js `
@@ -418,6 +418,26 @@ If (Test-Path $xpui_js_patch) {
     if ($spotx_new) { $writer.Write([System.Environment]::NewLine + '// Patched by SpotX') }
     $writer.Close()  
 
+
+    # licenses.html file, size reduction
+    $zip.Entries | Where-Object FullName -like '*.html' | ForEach-Object {
+        $readerhtml = New-Object System.IO.StreamReader($_.Open())
+        $xpuiContents_html = $readerhtml.ReadToEnd()
+        $readerhtml.Close()
+    
+        
+        $xpuiContents_html = $xpuiContents_html `
+            -replace '<li><a href="#6eef7">zlib<\/a><\/li>\n(.|\n)*<\/p><!-- END CONTAINER DEPS LICENSES -->(<\/div>)', '$2' 
+        
+        $writer = New-Object System.IO.StreamWriter($_.Open())
+        $writer.BaseStream.SetLength(0)
+        $writer.Write($xpuiContents_html)
+        $writer.Close()
+    }
+
+
+
+
 }  
 
 
@@ -452,7 +472,7 @@ If (Test-Path $xpui_spa_patch) {
 
 
 
-    # Удалить надпись о новой версии
+    # Remove the inscription about the new version from the "About" window
     if ($block_update) {
         
         $xpuiContents = $xpuiContents `
@@ -461,7 +481,7 @@ If (Test-Path $xpui_spa_patch) {
     }
 
 
-    # Отключить подкасты
+    # Turn off podcasts
     if ($podcasts_off) {
         $xpuiContents = $xpuiContents `
             -replace '"album,playlist,artist,show,station,episode"', '"album,playlist,artist,station"' -replace ',this[.]enableShows=[a-z]', ""
@@ -528,7 +548,7 @@ If (Test-Path $xpui_spa_patch) {
         $xpuiContents_js = $readerjs.ReadToEnd()
         $readerjs.Close()
 
-        # NEW JS
+        # js files, size reduction
         $xpuiContents_js = $xpuiContents_js `
             -replace "[/][/][#] sourceMappingURL=.*[.]map", "" `
             -replace "\r?\n(?!\(1|\d)", ""
@@ -561,6 +581,7 @@ If (Test-Path $xpui_spa_patch) {
             -replace "html\[dir=rtl\].+?\{.+?\}", "" `
             -replace "html\[lang=ar\].+?\{.+?\}", "" `
             -replace "\[dir=rtl\].+?\{.+?\}", "" `
+            <# Size reduction #>`
             -replace "[/]\*([^*]|[\r\n]|(\*([^/]|[\r\n])))*\*[/]", "" `
             -replace "[/][/]#\s.*", "" `
             -replace "\r?\n(?!\(1|\d)", ""
@@ -577,7 +598,7 @@ If (Test-Path $xpui_spa_patch) {
         $xpuiContents_html = $readerhtml.ReadToEnd()
         $readerhtml.Close()
 
-        # файлы html, сокращение размера
+        # html files, size reduction
         $xpuiContents_html = $xpuiContents_html `
             -replace '<li><a href="#6eef7">zlib<\/a><\/li>\n(.|\n)*<\/p><!-- END CONTAINER DEPS LICENSES -->(<\/div>)', '$2' `
             -replace "	", "" -replace "  ", "" -replace "(?m)(^\s*\r?\n)", "" -replace "\r?\n(?!\(1|\d)", ""
