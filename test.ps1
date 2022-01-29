@@ -430,7 +430,7 @@ If (Test-Path $xpui_js_patch) {
     $xpuiContents_html = $xpuiContents_html `
         -replace '<li><a href="#6eef7">zlib<\/a><\/li>\n(.|\n)*<\/p><!-- END CONTAINER DEPS LICENSES -->(<\/div>)', '$2' 
         
-    $writer = New-Object System.IO.StreamWriter($_.Open())
+    $writer = New-Object System.IO.StreamWriter -ArgumentList $file_licenses
     $writer.BaseStream.SetLength(0)
     $writer.Write($xpuiContents_html)
     $writer.Close()
