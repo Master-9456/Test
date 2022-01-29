@@ -420,7 +420,8 @@ If (Test-Path $xpui_js_patch) {
 
 
     # licenses.html file, size reduction
-    $file_licenses = get-item $env:APPDATA\Spotify\Apps\xpui\licenses.html
+    $file_licenses = "$env:APPDATA\Spotify\Apps\xpui\licenses.html"
+    
     $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $file_licenses
     $xpuiContents_html = $reader.ReadToEnd()
     $reader.Close()
