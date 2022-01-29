@@ -420,23 +420,19 @@ If (Test-Path $xpui_js_patch) {
 
 
     # licenses.html file, size reduction
-    $zip.Entries | Where-Object FullName -like '*.html' | ForEach-Object {
-        $readerhtml = New-Object System.IO.StreamReader($_.Open())
-        $xpuiContents_html = $readerhtml.ReadToEnd()
-        $readerhtml.Close()
+    $file_licenses = get-item $env:APPDATA\Spotify\Apps\xpui\licenses.html
+    $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $file_licenses
+    $xpuiContents_html = $reader.ReadToEnd()
+    $reader.Close()
     
         
-        $xpuiContents_html = $xpuiContents_html `
-            -replace '<li><a href="#6eef7">zlib<\/a><\/li>\n(.|\n)*<\/p><!-- END CONTAINER DEPS LICENSES -->(<\/div>)', '$2' 
+    $xpuiContents_html = $xpuiContents_html `
+        -replace '<li><a href="#6eef7">zlib<\/a><\/li>\n(.|\n)*<\/p><!-- END CONTAINER DEPS LICENSES -->(<\/div>)', '$2' 
         
-        $writer = New-Object System.IO.StreamWriter($_.Open())
-        $writer.BaseStream.SetLength(0)
-        $writer.Write($xpuiContents_html)
-        $writer.Close()
-    }
-
-
-
+    $writer = New-Object System.IO.StreamWriter($_.Open())
+    $writer.BaseStream.SetLength(0)
+    $writer.Write($xpuiContents_html)
+    $writer.Close()
 
 }  
 
