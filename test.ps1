@@ -561,9 +561,11 @@ Remove-Item -Recurse -LiteralPath $tempDirectory
 
 $xpui_spa_patch = "$env:APPDATA\Spotify\Apps\xpui.spa"
 $xpui_js_patch = "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
+$spa_test = -LiteralPath "$env:APPDATA\Spotify\Apps\xpui.spa"
+$js_test = -LiteralPath "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
 
 
-if (Test-Path -LiteralPath $xpui_js_patch -and Test-Path -LiteralPath $xpui_spa_patch) {
+if ($spa_test -and $js_test) {
     Write-Host "Ошибка" -ForegroundColor Red
     Write-Host "Расположение файлов Spotify нарушено, удалите клиент и снова запустите скрипт."
     Write-Host "Выполнение остановлено."
