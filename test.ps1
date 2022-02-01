@@ -563,10 +563,10 @@ $xpui_spa_patch = "$env:APPDATA\Spotify\Apps\xpui.spa"
 $xpui_js_patch = "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
 
 
-if (Test-Path $xpui_js_patch -and Test-Path $xpui_spa_patch) {
+if (Test-Path -LiteralPath $xpui_js_patch -and Test-Path -LiteralPath $xpui_spa_patch) {
     Write-Host "Ошибка" -ForegroundColor Red
-    Write-Host "Расположение файлов Spotify нарушено, удалите клиент и снова запустите скрипт"
-    Write-Host "Выполнение остановлено"
+    Write-Host "Расположение файлов Spotify нарушено, удалите клиент и снова запустите скрипт."
+    Write-Host "Выполнение остановлено."
     exit
 }
 
