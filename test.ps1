@@ -241,13 +241,6 @@ if (-not $spotifyInstalled -or $upgrade_client) {
 
 
     $ErrorActionPreference = 'SilentlyContinue'  # Команда гасит легкие ошибки
-
-    # Обновить резервную копию chrome_elf.dll
-    if (Test-Path -LiteralPath $chrome_elf_bak) {
-        Remove-item $spotifyDirectory/chrome_elf_bak.dll
-        Move-Item $chrome_elf $chrome_elf_bak 
-    }
-
     # Удалите установщик Spotify
     if (test-path "$env:LOCALAPPDATA\Microsoft\Windows\Temporary Internet Files\") {
         get-childitem -path "$env:LOCALAPPDATA\Microsoft\Windows\Temporary Internet Files\" -Recurse -Force -Filter  "SpotifyFullSetup*" | remove-item  -Force
