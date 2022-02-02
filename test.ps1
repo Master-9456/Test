@@ -1,7 +1,5 @@
 # Игнорировать ошибки из `Stop-Process`
-$PSDefaultParameterValues['Stop-Process:ErrorAction'] = [System.Management.Automation.ActionPreference]::SilentlyContinue 
-
-"123"
+$PSDefaultParameterValues['Stop-Process:ErrorAction'] = [System.Management.Automation.ActionPreference]::SilentlyContinue
 
 Write-Host "*****************"
 Write-Host "Автор: " -NoNewline
