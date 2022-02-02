@@ -1,9 +1,9 @@
-# Игнорировать ошибки из `Stop-Process`
+# Ignore errors from `Stop-Process`
 $PSDefaultParameterValues['Stop-Process:ErrorAction'] = [System.Management.Automation.ActionPreference]::SilentlyContinue
 
 
 Write-Host "*****************"
-Write-Host "Автор: " -NoNewline
+Write-Host "Author: " -NoNewline
 Write-Host "@Amd64fox" -ForegroundColor DarkYellow
 Write-Host "*****************"`n
 
@@ -19,18 +19,18 @@ $block_update = $false
 $cache_install = $false
 
 
-# чек сертификата Tls12
+# Check Tls12
 $tsl_check = [Net.ServicePointManager]::SecurityProtocol 
 if (!($tsl_check -match '^tls12$' )) {
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 }
 
-# Проверка прав запуска
+# Checking startup rights
 [System.Security.Principal.WindowsPrincipal] $principal = [System.Security.Principal.WindowsIdentity]::GetCurrent()
 $isUserAdmin = $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
 
 if ($isUserAdmin) {
-    Write-Host 'Обнаружен запуск с правами администратора'`n
+    Write-Host 'Startup detected with administrator rights'`n
     $run_as_admin = $true
 }
 
@@ -41,7 +41,7 @@ Stop-Process -Name SpotifyWebHelper
 if ($PSVersionTable.PSVersion.Major -ge 7) {
     Import-Module Appx -UseWindowsPowerShell
 }
-# Проверка версии Windows
+# Check version Windows
 $win_os = (get-itemproperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" -Name ProductName).ProductName
 $win11 = $win_os -match "\windows 11\b"
 $win10 = $win_os -match "\windows 10\b"
@@ -52,27 +52,27 @@ $win8 = $win_os -match "\windows 8\b"
 if ($win11 -or $win10 -or $win8_1 -or $win8) {
 
 
-    # Удалить Spotify Windows Store если он есть
+    # Remove Spotify Windows Store If Any
     if (Get-AppxPackage -Name SpotifyAB.SpotifyMusic) {
-        Write-Host 'Обнаружена версия Spotify из Microsoft Store, которая не поддерживается.'`n
-        $ch = Read-Host -Prompt "Хотите удалить Spotify Microsoft Store ? (Y/N) "
+        Write-Host 'The Microsoft Store version of Spotify has been detected which is not supported.'`n
+        $ch = Read-Host -Prompt "Uninstall Spotify Windows Store edition (Y/N) "
         if ($ch -eq 'y') {
-            Write-Host 'Удаление Spotify.'`n
+            Write-Host 'Uninstalling Spotify.'`n
             Get-AppxPackage -Name SpotifyAB.SpotifyMusic | Remove-AppxPackage
         }
         else {
-            Read-Host "Завершение работы...`nНажмите любую клавишу для выхода..." 
+            Read-Host "Exiting...`nPress any key to exit..."
             exit
         }
     }
 }
 
-# Создаем уникальное имя каталога на основе времени
+# Unique directory name based on time
 Push-Location -LiteralPath $env:TEMP
 New-Item -Type Directory -Name "BlockTheSpot-$(Get-Date -UFormat '%Y-%m-%d_%H-%M-%S')" | Convert-Path | Set-Location
 
 
-Write-Host 'Загружаю последний патч BTS...'`n
+Write-Host 'Downloading latest patch BTS...'`n
 
 $webClient = New-Object -TypeName System.Net.WebClient
 try {
@@ -84,10 +84,10 @@ try {
     )
 }
 catch [System.Management.Automation.MethodInvocationException] {
-    Write-Host "Ошибка загрузки chrome_elf.zip" -ForegroundColor RED
+    Write-Host "Error downloading chrome_elf.zip" -ForegroundColor RED
     $Error[0].Exception
     Write-Host ""
-    Write-Host "Повторный запрос через 5 секунд..."`n
+    Write-Host "Will re-request in 5 seconds..."`n
     Start-Sleep -Milliseconds 5000 
     try {
 
@@ -99,10 +99,10 @@ catch [System.Management.Automation.MethodInvocationException] {
         )
     }
     catch [System.Management.Automation.MethodInvocationException] {
-        Write-Host "Опять ошибка, скрипт остановлен" -ForegroundColor RED
+        Write-Host "Error again, script stopped" -ForegroundColor RED
         $Error[0].Exception
         Write-Host ""
-        Write-Host "Попробуйте проверить подключение к интернету и снова запустить установку."`n
+        Write-Host "Try to check your internet connection and run the installation again."`n
         $tempDirectory = $PWD
         Pop-Location
         Start-Sleep -Milliseconds 200
@@ -125,10 +125,10 @@ try {
     )
 }
 catch [System.Management.Automation.MethodInvocationException] {
-    Write-Host "Ошибка загрузки SpotifySetup.exe" -ForegroundColor RED
+    Write-Host "Error downloading SpotifySetup.exe" -ForegroundColor RED
     $Error[0].Exception
     Write-Host ""
-    Write-Host "Повторный запрос через 5 секунд..."`n
+    Write-Host "Will re-request in 5 seconds..."`n
     Start-Sleep -Milliseconds 5000 
     try {
 
@@ -140,10 +140,10 @@ catch [System.Management.Automation.MethodInvocationException] {
         )
     }
     catch [System.Management.Automation.MethodInvocationException] {
-        Write-Host "Опять ошибка, скрипт остановлен" -ForegroundColor RED
+        Write-Host "Error again, script stopped" -ForegroundColor RED
         $Error[0].Exception
         Write-Host ""
-        Write-Host "Попробуйте проверить подключение к интернету и снова запустить установку."`n
+        Write-Host "Try to check your internet connection and run the installation again."`n
         $tempDirectory = $PWD
         Pop-Location
         Start-Sleep -Milliseconds 200
@@ -160,12 +160,12 @@ if ($spotifyInstalled) {
 
 
 
-    # Проверка последней версии Spotify онлайн
+    # Check last version Spotify online
     $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
     $online_version = $version_client_check -split '.\w\w\w\w\w\w\w\w\w'
 
 
-    # Проверка последней версии Spotify офлайн
+    # Check last version Spotify ofline
     $ofline_version = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
 
 
@@ -173,7 +173,7 @@ if ($spotifyInstalled) {
 
 
         do {
-            $ch = Read-Host -Prompt "Ваша версия Spotify $ofline_version устарела, рекомендуется обновиться до $online_version `nОбновить ? (Y/N)"
+            $ch = Read-Host -Prompt "Your Spotify $ofline_version version is outdated, it is recommended to upgrade to $online_version `nWant to update ? (Y/N)"
             Write-Host ""
             if (!($ch -eq 'n' -or $ch -eq 'y')) {
 
@@ -195,28 +195,28 @@ if ($spotifyInstalled) {
 }
 
 
-# Если клиента нет или он устарел, то начинаем установку/обновление
+# If there is no client or it is outdated, then install
 
 if (-not $spotifyInstalled -or $upgrade_client) {
 
     $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
     $version_client = $version_client_check -split '.\w\w\w\w\w\w\w\w\w'
 
-    Write-Host "Загружаю и устанавливаю Spotify " -NoNewline
+    Write-Host "Downloading and installing Spotify " -NoNewline
     Write-Host  $version_client -ForegroundColor Green
-    Write-Host "Пожалуйста подождите......"`n
+    Write-Host "Please wait..."`n
+
+
+    # Try deleting chrome_elf files if Spotify folder exists
     
-
-    # Попробовать удалить файлы chrome_elf если существует папка Spotify
-
     if (Test-Path -LiteralPath $spotifyDirectory) {
-        $ErrorActionPreference = 'SilentlyContinue'  # Команда гасит легкие ошибки
+        $ErrorActionPreference = 'SilentlyContinue'  # extinguishes light mistakes
         Stop-Process -Name Spotify 
         Start-Sleep -Seconds 1
         Remove-Item $spotifyDirectory -Include *chrome_elf* -Recurse -Force
     } 
 
-    # Исправление ошибки, если установщик Spotify был запущен от администратора
+    # Correcting the error if the spotify installer was launched from the administrator
 
     if ($run_as_admin) {
         $apppath = 'powershell.exe'
@@ -239,9 +239,9 @@ if (-not $spotifyInstalled -or $upgrade_client) {
     Stop-Process -Name SpotifyWebHelper 
     Stop-Process -Name SpotifyFullSetup 
 
+    $ErrorActionPreference = 'SilentlyContinue'  # extinguishes light mistakes
 
-    $ErrorActionPreference = 'SilentlyContinue'  # Команда гасит легкие ошибки
-    # Удалите установщик Spotify
+    # Remove Spotify installer
     if (test-path "$env:LOCALAPPDATA\Microsoft\Windows\Temporary Internet Files\") {
         get-childitem -path "$env:LOCALAPPDATA\Microsoft\Windows\Temporary Internet Files\" -Recurse -Force -Filter  "SpotifyFullSetup*" | remove-item  -Force
     }
@@ -250,9 +250,7 @@ if (-not $spotifyInstalled -or $upgrade_client) {
     }
 }
 
-
-# Создать резервную копию chrome_elf.dll
-
+# Create backup chrome_elf.dll
 
 if (!(Test-Path -LiteralPath $chrome_elf_bak)) {
     Move-Item $chrome_elf $chrome_elf_bak 
@@ -261,12 +259,12 @@ if (!(Test-Path -LiteralPath $chrome_elf_bak)) {
 
 
 do {
-    $ch = Read-Host -Prompt "Хотите отключить подкасты ? (Y/N)"
+    $ch = Read-Host -Prompt "Want to turn off podcasts ? (Y/N)"
     Write-Host ""
     if (!($ch -eq 'n' -or $ch -eq 'y')) {
     
-        Write-Host "Ой, некорректное значение, " -ForegroundColor Red -NoNewline
-        Write-Host "повторите ввод через..." -NoNewline
+        Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
+        Write-Host "enter again through..." -NoNewline
         Start-Sleep -Milliseconds 1000
         Write-Host "3" -NoNewline
         Start-Sleep -Milliseconds 1000
@@ -282,12 +280,12 @@ if ($ch -eq 'y') { $podcasts_off = $true }
 
 
 do {
-    $ch = Read-Host -Prompt "Хотите заблокировать обновления ? (Y/N)"
+    $ch = Read-Host -Prompt "Want to block updates ? (Y/N)"
     Write-Host ""
     if (!($ch -eq 'n' -or $ch -eq 'y')) {
     
-        Write-Host "Ой, некорректное значение, " -ForegroundColor Red -NoNewline
-        Write-Host "повторите ввод через..." -NoNewline
+        Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
+        Write-Host "enter again through..." -NoNewline
         Start-Sleep -Milliseconds 1000
         Write-Host "3" -NoNewline
         Start-Sleep -Milliseconds 1000
@@ -303,11 +301,11 @@ while ($ch -notmatch '^y$|^n$')
 if ($ch -eq 'y') { $block_update = $true }
 
 do {
-    $ch = Read-Host -Prompt "Хотите установить автоматическую очистку кеша ? (Y/N)"
+    $ch = Read-Host -Prompt "Want to set up automatic cache cleanup? (Y/N)"
     Write-Host ""
     if (!($ch -eq 'n' -or $ch -eq 'y')) {
-        Write-Host "Ой, некорректное значение, " -ForegroundColor Red -NoNewline
-        Write-Host "повторите ввод через..." -NoNewline
+        Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
+        Write-Host "enter again through..." -NoNewline
         Start-Sleep -Milliseconds 1000
         Write-Host "3" -NoNewline
         Start-Sleep -Milliseconds 1000
@@ -323,12 +321,12 @@ if ($ch -eq 'y') {
     $cache_install = $true 
 
     do {
-        $ch = Read-Host -Prompt "Файлы кэша, которые не использовались более XX дней, будут удалены.
-    Пожалуйста, введите количество дней от 1 до 100"
+        $ch = Read-Host -Prompt "Cache files that have not been used for more than XX days will be deleted.
+    Enter the number of days from 1 to 100"
         Write-Host ""
         if (!($ch -match "^[1-9][0-9]?$|^100$")) {
-            Write-Host "Ой, некорректное значение, " -ForegroundColor Red -NoNewline
-            Write-Host "повторите ввод через..." -NoNewline
+            Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
+            Write-Host "enter again through..." -NoNewline
 		
             Start-Sleep -Milliseconds 1000
             Write-Host "3" -NoNewline
@@ -348,40 +346,35 @@ if ($ch -eq 'y') {
 
 
 function OffUpdStatus {
-    # Удалить надпись о новой версии
+    # Remove the label about the new version
     $upgrade_status = "sp://desktop/v1/upgrade/status"
-    if ($xpui_js -match $upgrade_status) { $xpui_js = $xpui_js -replace $upgrade_status, "" } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$upgrade_status в xpui.js" }
+    if ($xpui_js -match $upgrade_status) { $xpui_js = $xpui_js -replace $upgrade_status, "" } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$upgrade_status in xpui.js" }
     $xpui_js
 }
 function OffPodcasts {
-    # Отключить подкасты
+    # Turn off podcasts
     $podcasts_off1 = '"album,playlist,artist,show,station,episode"', '"album,playlist,artist,station"'
     $podcasts_off2 = ',this[.]enableShows=[a-z]'
-    if ($xpui_js -match $podcasts_off1[0]) { $xpui_js = $xpui_js -replace $podcasts_off1[0], $podcasts_off1[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$podcasts_off1[0] в xpui.js" }
-    if ($xpui_js -match $podcasts_off2) { $xpui_js = $xpui_js -replace $podcasts_off2, "" } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$podcasts_off2 в xpui.js" }
+    if ($xpui_js -match $podcasts_off1[0]) { $xpui_js = $xpui_js -replace $podcasts_off1[0], $podcasts_off1[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$podcasts_off1[0] in xpui.js" }
+    if ($xpui_js -match $podcasts_off2) { $xpui_js = $xpui_js -replace $podcasts_off2, "" } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$podcasts_off2 in xpui.js" }
     $xpui_js
 }
 function OffAdsOnFullscreen {
-    # Удаление пустого рекламного блока
+    # Removing an empty block
     $empty_block_ad = 'adsEnabled:!0', 'adsEnabled:!1'
-    # Активация полноэкранного режима, а также удаление кнопки и меню "Перейти на Premium"
+    # Full screen mode activation and removing "Upgrade to premium" menu, upgrade button
     $full_screen_1 = '(session[,]{1}[a-z]{1}[=]{1}[a-z]{1}[=]{1}[>]{1}[{]{1}var [a-z]{1}[,]{1}[a-z]{1}[,]{1}[a-z]{1}[;]{1}[a-z]{6})(["]{1}free["]{1})', '$1"premium"'
     $full_screen_2 = '([a-z]{1}[.]{1}toLowerCase[(]{1}[)]{2}[}]{1}[,]{1}[a-z]{1}[=]{1}[a-z]{1}[=]{1}[>]{1}[{]{1}var [a-z]{1}[,]{1}[a-z]{1}[,]{1}[a-z]{1}[;]{1}return)(["]{1}premium["]{1})', '$1"free"'
-    # Отключиние спонсорской рекламы в некоторых плейлистах
+    # Disabling a playlist sponsor
     $playlist_ad_off = "allSponsorships"
-    if ($xpui_js -match $empty_block_ad[0]) { $xpui_js = $xpui_js -replace $empty_block_ad[0], $empty_block_ad[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$empty_block_ad[0] в xpui.js" }
-    if ($xpui_js -match $full_screen_1[0]) { $xpui_js = $xpui_js -replace $full_screen_1[0], $full_screen_1[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$full_screen_1[0] в xpui.js" }
-    if ($xpui_js -match $full_screen_2[0]) { $xpui_js = $xpui_js -replace $full_screen_2[0], $full_screen_2[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$full_screen_2[0] в xpui.js" }
-    if ($xpui_js -match $playlist_ad_off) { $xpui_js = $xpui_js -replace $playlist_ad_off, "" } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$playlist_ad_off в xpui.js" }
-    $xpui_js
-}
-function OffRujs {
-    # Удалить из xpui.js все языки кроме En и Ru
-    $rus_js = '(JSON.parse\(.{)("en":"English \(English\)".*\(Vietnamese\)"})', '$1"en":"English (English)","ru":"Русский (Russian)"}'
-    if ($xpui_js -match $rus_js[0]) { $xpui_js = $xpui_js -replace $rus_js[0], $rus_js[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$rus_js[0] в xpui.js" }
+    if ($xpui_js -match $empty_block_ad[0]) { $xpui_js = $xpui_js -replace $empty_block_ad[0], $empty_block_ad[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$empty_block_ad[0] in xpui.js" }
+    if ($xpui_js -match $full_screen_1[0]) { $xpui_js = $xpui_js -replace $full_screen_1[0], $full_screen_1[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$full_screen_1[0] in xpui.js" }
+    if ($xpui_js -match $full_screen_2[0]) { $xpui_js = $xpui_js -replace $full_screen_2[0], $full_screen_2[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$full_screen_2[0] in xpui.js" }
+    if ($xpui_js -match $playlist_ad_off) { $xpui_js = $xpui_js -replace $playlist_ad_off, "" } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$playlist_ad_off в xpui.js" }
     $xpui_js
 }
 function ExpFeature {
+    # Experimental Feature
     $exp_features1 = '(Show "Made For You" entry point in the left sidebar.,default:)(!1)', '$1!0' 
     $exp_features2 = '(Enables the 2021 icons redraw which loads a different font asset for rendering icon glyphs.",default:)(!1)', '$1!0' 
     $exp_features3 = '(Enable Liked Songs section on Artist page",default:)(!1)', '$1!0' 
@@ -390,167 +383,36 @@ function ExpFeature {
     $exp_features6 = '(With this enabled, clients will check whether tracks have lyrics available",default:)(!1)', '$1!0' 
     $exp_features7 = '(Enables new playlist creation flow in Web Player and DesktopX",default:)(!1)', '$1!0' 
     $exp_features8 = '(Enable Enhance Playlist UI and functionality",default:)(!1)', '$1!0' 
-    if ($xpui_js -match $exp_features1[0]) { $xpui_js = $xpui_js -replace $exp_features1[0], $exp_features1[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$exp_features1[0] в xpui.js" }
-    if ($xpui_js -match $exp_features2[0]) { $xpui_js = $xpui_js -replace $exp_features2[0], $exp_features2[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$exp_features2[0] в xpui.js" }
-    if ($xpui_js -match $exp_features3[0]) { $xpui_js = $xpui_js -replace $exp_features3[0], $exp_features3[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$exp_features3[0] в xpui.js" }
-    if ($xpui_js -match $exp_features4[0]) { $xpui_js = $xpui_js -replace $exp_features4[0], $exp_features4[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$exp_features4[0] в xpui.js" }
-    if ($xpui_js -match $exp_features5[0]) { $xpui_js = $xpui_js -replace $exp_features5[0], $exp_features5[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$exp_features5[0] в xpui.js" }
-    if ($xpui_js -match $exp_features6[0]) { $xpui_js = $xpui_js -replace $exp_features6[0], $exp_features6[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$exp_features6[0] в xpui.js" }
-    if ($xpui_js -match $exp_features7[0]) { $xpui_js = $xpui_js -replace $exp_features7[0], $exp_features7[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$exp_features7[0] в xpui.js" }
-    if ($xpui_js -match $exp_features8[0]) { $xpui_js = $xpui_js -replace $exp_features8[0], $exp_features8[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$exp_features8[0] в xpui.js" }
+    if ($xpui_js -match $exp_features1[0]) { $xpui_js = $xpui_js -replace $exp_features1[0], $exp_features1[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features1[0] in xpui.js" }
+    if ($xpui_js -match $exp_features2[0]) { $xpui_js = $xpui_js -replace $exp_features2[0], $exp_features2[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features2[0] in xpui.js" }
+    if ($xpui_js -match $exp_features3[0]) { $xpui_js = $xpui_js -replace $exp_features3[0], $exp_features3[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features3[0] in xpui.js" }
+    if ($xpui_js -match $exp_features4[0]) { $xpui_js = $xpui_js -replace $exp_features4[0], $exp_features4[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features4[0] in xpui.js" }
+    if ($xpui_js -match $exp_features5[0]) { $xpui_js = $xpui_js -replace $exp_features5[0], $exp_features5[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features5[0] in xpui.js" }
+    if ($xpui_js -match $exp_features6[0]) { $xpui_js = $xpui_js -replace $exp_features6[0], $exp_features6[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features6[0] in xpui.js" }
+    if ($xpui_js -match $exp_features7[0]) { $xpui_js = $xpui_js -replace $exp_features7[0], $exp_features7[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features7[0] in xpui.js" }
+    if ($xpui_js -match $exp_features8[0]) { $xpui_js = $xpui_js -replace $exp_features8[0], $exp_features8[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features8[0] in xpui.js" }
     $xpui_js
 }
 
 function ContentsHtml {
-
-    # Минификация html
+    # licenses.html minification
     
     $html_lic_min1 = '<li><a href="#6eef7">zlib<\/a><\/li>\n(.|\n)*<\/p><!-- END CONTAINER DEPS LICENSES -->(<\/div>)'
     $html_lic_min2 = "	"
     $html_lic_min3 = "  "
     $html_lic_min4 = "(?m)(^\s*\r?\n)"
     $html_lic_min5 = "\r?\n(?!\(1|\d)"
-    if ($xpuiContents_html -match $html_lic_min1) { $xpuiContents_html = $xpuiContents_html -replace $html_lic_min1, '$2' } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$html_lic_min1 в licenses.html" }
-    if ($xpuiContents_html -match $html_lic_min2) { $xpuiContents_html = $xpuiContents_html -replace $html_lic_min2, "" } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$html_lic_min2 в licenses.html" }
-    if ($xpuiContents_html -match $html_lic_min3) { $xpuiContents_html = $xpuiContents_html -replace $html_lic_min3, "" } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$html_lic_min3 в licenses.html" }
-    if ($xpuiContents_html -match $html_lic_min4) { $xpuiContents_html = $xpuiContents_html -replace $html_lic_min4, "" } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$html_lic_min4 в licenses.html" }
-    if ($xpuiContents_html -match $html_lic_min5) { $xpuiContents_html = $xpuiContents_html -replace $html_lic_min5, "" } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$html_lic_min5 в licenses.html" }
+    if ($xpuiContents_html -match $html_lic_min1) { $xpuiContents_html = $xpuiContents_html -replace $html_lic_min1, '$2' } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$html_lic_min1 в licenses.html" }
+    if ($xpuiContents_html -match $html_lic_min2) { $xpuiContents_html = $xpuiContents_html -replace $html_lic_min2, "" } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$html_lic_min2 в licenses.html" }
+    if ($xpuiContents_html -match $html_lic_min3) { $xpuiContents_html = $xpuiContents_html -replace $html_lic_min3, "" } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$html_lic_min3 в licenses.html" }
+    if ($xpuiContents_html -match $html_lic_min4) { $xpuiContents_html = $xpuiContents_html -replace $html_lic_min4, "" } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$html_lic_min4 в licenses.html" }
+    if ($xpuiContents_html -match $html_lic_min5) { $xpuiContents_html = $xpuiContents_html -replace $html_lic_min5, "" } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$html_lic_min5 в licenses.html" }
     $xpuiContents_html
 }
 
-function RuTranslate {
-    $ru_translate1 = '"one": "Enhanced with [{]0[}] recommended song."', '"one": "Добавлен {0} рекомендованный трек."' 
-    $ru_translate2 = '"few": "Enhanced with [{]0[}] recommended songs."', '"few": "Добавлено {0} рекомендованных трека."' 
-    $ru_translate3 = '"many": "Enhanced with [{]0[}] recommended songs."', '"many": "Добавлено {0} рекомендованных треков."' 
-    $ru_translate4 = '"other": "Enhanced with [{]0[}] recommended songs."', '"other": "Добавлено {0} рекомендованных трека."' 
-    $ru_translate5 = '"To Enhance this playlist, you.ll need to go online."', '"Чтобы улучшить этот плейлист, вам нужно подключиться к интернету."' 
-    $ru_translate6 = '"Song Radio"', '"Радио по треку"' 
-    $ru_translate7 = '"Album Radio"', '"Радио по альбому"' 
-    $ru_translate8 = '"Artist Radio"', '"Радио по исполнителю"' 
-    $ru_translate9 = '"We couldn.t find concerts in your location."', '"Мы не смогли найти концерты в вашем регионе."' 
-    $ru_translate10 = '"We couldn.t find concerts in [{]0[}]."', '"Мы не смогли найти концерты в {0}."' 
-    $ru_translate11 = '"Download error"', '"Ошибка загрузки"' 
-    $ru_translate12 = '"Layout"', '"Расположение"' 
-    $ru_translate13 = '"Confirm your age"', '"Подтвердите свой возраст"' 
-    $ru_translate14 = '"Get Spotify Premium"', '"Получите Premium Spotify"' 
-    $ru_translate15 = '"Subscribe"', '"Подписаться"' 
-    $ru_translate16 = '"%price%\/month after. Terms and conditions apply. One month free not available for users who have already tried Premium."', '"%price%/месяц спустя. Принять условия. Один месяц бесплатно, недоступно для пользователей, которые уже попробовали Premium."' 
-    $ru_translate17 = '"Enjoy ad-free music listening, offline listening, and more. Cancel anytime."', '"Наслаждайтесь прослушиванием музыки без рекламы, прослушиванием в офлайн режиме и многим другим. Отменить можно в любое время."' 
-    $ru_translate18 = '"Sort by"', '"Сортировка"' 
-    $ru_translate19 = '"Filter by"', '"Фильтр"' 
-    $ru_translate20 = '"Lyrics provided by [{]0[}]"', '"Тексты песен предоставлены {0}"' 
-    $ru_translate21 = '"Edit details"', '"Изменение сведений о плейлисте"' 
-    $ru_translate22 = '"Decrease navigation bar width"', '"Уменьшить ширину панели навигации"' 
-    $ru_translate23 = '"Increase navigation bar width"', '"Увеличить ширину панели навигации"' 
-    $ru_translate24 = '"Add to another playlist"', '"Добавить в другой плейлист"' 
-    $ru_translate25 = '"Offline storage location"', '"Хранилище скачанных треков"' 
-    $ru_translate26 = '"Change location"', '"Изменить место"' 
-    $ru_translate27 = '"Line breaks aren.t supported in the description."', '"В описании не поддерживаются разрывы строк."' 
-    $ru_translate28 = '"HTML isn.t supported in playlist description."', '"HTML не поддерживается в описании плейлиста."' 
-    $ru_translate29 = '"Press save to keep changes you.ve made."', '"Нажмите «Сохранить», чтобы сохранить внесенные изменения."' 
-    $ru_translate30 = '"No internet connection found. Changes to description and image will not be saved."', '"Подключение к интернету не найдено. Изменения в описании и изображении не будут сохранены."' 
-    $ru_translate31 = '"Image too large. Please select an image below 4MB."', '"Изображение слишком большое. Пожалуйста, выберите изображение размером менее 4 МБ."' 
-    $ru_translate32 = '"Image too small. Images must be at least [{]0[}]x[{]1[}]."', '"Изображение слишком маленькое. Изображения должны быть не менее {0}x{1}."' 
-    $ru_translate33 = '"Failed to upload image. Please try again."', '"Не удалось загрузить изображение. Пожалуйста, попробуйте снова."' 
-    $ru_translate34 = '"Playlist name is required."', '"Имя плейлиста обязательно."' 
-    $ru_translate35 = '"Failed to save playlist changes. Please try again."', '"Не удалось сохранить изменения в плейлисте. Пожалуйста, попробуйте снова."' 
-    $ru_translate36 = '"Description"', '"Описание"' 
-    $ru_translate37 = '"Add an optional description"', '"Добавь интересное описание"' 
-    $ru_translate38 = '"Change photo"', '"Сменить изображение"' 
-    $ru_translate39 = '"Remove photo"', '"Удалить изображение"' 
-    $ru_translate40 = '"Name"', '"Имя"' 
-    $ru_translate41 = '"Add a name"', '"Название плейлиста"' 
-    $ru_translate42 = '"Change speed"', '"Изменение скорости"' 
-    $ru_translate43 = '"You need to be at least 19 years old to listen to explicit content marked with"', '"Вам должно быть не менее 19 лет, чтобы слушать непристойный контент, помеченный значком"' 
-    $ru_translate44 = '"Continue"', '"Продолжить"' 
-    $ru_translate45 = '"Add to this playlist"', '"Добавить в этот плейлист"' 
-    $ru_translate46 = '"Retrying in [{]0[}]..."', '"Повторная попытка в {0}..."' 
-    $ru_translate47 = '"Couldn.t connect to Spotify."', '"Не удалось подключиться к Spotify."' 
-    $ru_translate48 = '"Reconnecting..."', '"Повторное подключение..."' 
-    $ru_translate49 = '"No connection"', '"Нет соединения"' 
-    $ru_translate50 = '"Character counter"', '"Счетчик символов"' 
-    $ru_translate51 = '"Toggle lightsaber hilt. Current is [{]0[}]."', '"Переключить рукоять светового меча. Текущий {0}."' 
-    $ru_translate52 = '"Song not available"', '"Песня недоступна"' 
-    $ru_translate53 = '"The song you.re trying to listen to is not available in HiFi at this time."', '"Песня, которую вы пытаетесь прослушать, в настоящее время недоступна в HiFi."' 
-    $ru_translate54 = '"Current audio quality:"', '"Текущее качество звука:"' 
-    $ru_translate55 = '"Network connection"', '"Подключение к сети"' 
-    $ru_translate56 = '"Good"', '"Хорошее"' 
-    $ru_translate57 = '"Poor"', '"Плохое"' 
-    $ru_translate58 = '"Yes"', '"Да"' 
-    $ru_translate59 = '"No"', '"Нет"' 
-    $ru_translate60 = '"Go to playlist"', '"Перейти к плейлисту"'
-    $ru_translate61 = '"Radio",', '"Радио",' 
-    $ru_translate62 = '"Your Location"', '"Ваше местоположение"'  
+Write-Host 'Patching Spotify...'`n
 
-    if ($xpui_ru -match $ru_translate1[0]) { $xpui_ru = $xpui_ru -replace $ru_translate1[0], $ru_translate1[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate1[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate2[0]) { $xpui_ru = $xpui_ru -replace $ru_translate2[0], $ru_translate2[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate2[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate3[0]) { $xpui_ru = $xpui_ru -replace $ru_translate3[0], $ru_translate3[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate3[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate4[0]) { $xpui_ru = $xpui_ru -replace $ru_translate4[0], $ru_translate4[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate4[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate5[0]) { $xpui_ru = $xpui_ru -replace $ru_translate5[0], $ru_translate5[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate5[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate6[0]) { $xpui_ru = $xpui_ru -replace $ru_translate6[0], $ru_translate6[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate6[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate7[0]) { $xpui_ru = $xpui_ru -replace $ru_translate7[0], $ru_translate7[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate7[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate8[0]) { $xpui_ru = $xpui_ru -replace $ru_translate8[0], $ru_translate8[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate8[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate9[0]) { $xpui_ru = $xpui_ru -replace $ru_translate9[0], $ru_translate9[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate9[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate10[0]) { $xpui_ru = $xpui_ru -replace $ru_translate10[0], $ru_translate10[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate10[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate11[0]) { $xpui_ru = $xpui_ru -replace $ru_translate11[0], $ru_translate11[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate11[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate12[0]) { $xpui_ru = $xpui_ru -replace $ru_translate12[0], $ru_translate12[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate12[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate13[0]) { $xpui_ru = $xpui_ru -replace $ru_translate13[0], $ru_translate13[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate13[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate14[0]) { $xpui_ru = $xpui_ru -replace $ru_translate14[0], $ru_translate14[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate14[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate15[0]) { $xpui_ru = $xpui_ru -replace $ru_translate15[0], $ru_translate15[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate15[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate16[0]) { $xpui_ru = $xpui_ru -replace $ru_translate16[0], $ru_translate16[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate16[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate17[0]) { $xpui_ru = $xpui_ru -replace $ru_translate17[0], $ru_translate17[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate17[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate18[0]) { $xpui_ru = $xpui_ru -replace $ru_translate18[0], $ru_translate18[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate18[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate19[0]) { $xpui_ru = $xpui_ru -replace $ru_translate19[0], $ru_translate19[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate19[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate20[0]) { $xpui_ru = $xpui_ru -replace $ru_translate20[0], $ru_translate20[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate20[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate21[0]) { $xpui_ru = $xpui_ru -replace $ru_translate21[0], $ru_translate21[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate21[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate22[0]) { $xpui_ru = $xpui_ru -replace $ru_translate22[0], $ru_translate22[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate22[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate23[0]) { $xpui_ru = $xpui_ru -replace $ru_translate23[0], $ru_translate23[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate23[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate24[0]) { $xpui_ru = $xpui_ru -replace $ru_translate24[0], $ru_translate24[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate24[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate25[0]) { $xpui_ru = $xpui_ru -replace $ru_translate25[0], $ru_translate25[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate25[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate26[0]) { $xpui_ru = $xpui_ru -replace $ru_translate26[0], $ru_translate26[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate26[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate27[0]) { $xpui_ru = $xpui_ru -replace $ru_translate27[0], $ru_translate27[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate27[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate28[0]) { $xpui_ru = $xpui_ru -replace $ru_translate28[0], $ru_translate28[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate28[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate29[0]) { $xpui_ru = $xpui_ru -replace $ru_translate29[0], $ru_translate29[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate29[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate30[0]) { $xpui_ru = $xpui_ru -replace $ru_translate30[0], $ru_translate30[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate30[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate31[0]) { $xpui_ru = $xpui_ru -replace $ru_translate31[0], $ru_translate31[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate31[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate32[0]) { $xpui_ru = $xpui_ru -replace $ru_translate32[0], $ru_translate32[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate32[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate33[0]) { $xpui_ru = $xpui_ru -replace $ru_translate33[0], $ru_translate33[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate33[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate34[0]) { $xpui_ru = $xpui_ru -replace $ru_translate34[0], $ru_translate34[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate34[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate35[0]) { $xpui_ru = $xpui_ru -replace $ru_translate35[0], $ru_translate35[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate35[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate36[0]) { $xpui_ru = $xpui_ru -replace $ru_translate36[0], $ru_translate36[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate36[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate37[0]) { $xpui_ru = $xpui_ru -replace $ru_translate37[0], $ru_translate37[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate37[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate38[0]) { $xpui_ru = $xpui_ru -replace $ru_translate38[0], $ru_translate38[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate38[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate39[0]) { $xpui_ru = $xpui_ru -replace $ru_translate39[0], $ru_translate39[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate39[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate40[0]) { $xpui_ru = $xpui_ru -replace $ru_translate40[0], $ru_translate40[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate40[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate41[0]) { $xpui_ru = $xpui_ru -replace $ru_translate41[0], $ru_translate41[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate41[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate42[0]) { $xpui_ru = $xpui_ru -replace $ru_translate42[0], $ru_translate42[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate42[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate43[0]) { $xpui_ru = $xpui_ru -replace $ru_translate43[0], $ru_translate43[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate43[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate44[0]) { $xpui_ru = $xpui_ru -replace $ru_translate44[0], $ru_translate44[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate44[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate45[0]) { $xpui_ru = $xpui_ru -replace $ru_translate45[0], $ru_translate45[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate45[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate46[0]) { $xpui_ru = $xpui_ru -replace $ru_translate46[0], $ru_translate46[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate46[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate47[0]) { $xpui_ru = $xpui_ru -replace $ru_translate47[0], $ru_translate47[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate47[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate48[0]) { $xpui_ru = $xpui_ru -replace $ru_translate48[0], $ru_translate48[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate48[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate49[0]) { $xpui_ru = $xpui_ru -replace $ru_translate49[0], $ru_translate49[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate49[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate50[0]) { $xpui_ru = $xpui_ru -replace $ru_translate50[0], $ru_translate50[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate50[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate51[0]) { $xpui_ru = $xpui_ru -replace $ru_translate51[0], $ru_translate51[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate51[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate52[0]) { $xpui_ru = $xpui_ru -replace $ru_translate52[0], $ru_translate52[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate52[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate53[0]) { $xpui_ru = $xpui_ru -replace $ru_translate53[0], $ru_translate53[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate53[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate54[0]) { $xpui_ru = $xpui_ru -replace $ru_translate54[0], $ru_translate54[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate54[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate55[0]) { $xpui_ru = $xpui_ru -replace $ru_translate55[0], $ru_translate55[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate55[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate56[0]) { $xpui_ru = $xpui_ru -replace $ru_translate56[0], $ru_translate56[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate56[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate57[0]) { $xpui_ru = $xpui_ru -replace $ru_translate57[0], $ru_translate57[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate57[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate58[0]) { $xpui_ru = $xpui_ru -replace $ru_translate58[0], $ru_translate58[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate58[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate59[0]) { $xpui_ru = $xpui_ru -replace $ru_translate59[0], $ru_translate59[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate59[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate60[0]) { $xpui_ru = $xpui_ru -replace $ru_translate60[0], $ru_translate60[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate60[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate61[0]) { $xpui_ru = $xpui_ru -replace $ru_translate61[0], $ru_translate61[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate61[0] в ru.json" }
-    if ($xpui_ru -match $ru_translate62[0]) { $xpui_ru = $xpui_ru -replace $ru_translate62[0], $ru_translate62[1] } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$ru_translate62[0] в ru.json" }
-    $xpui_ru
-}
-
-
-Write-Host 'Модифицирую Spotify...'`n
-
-# Модифицируем файлы
+# Patching files
 
 $patchFiles = "$PWD\chrome_elf.dll", "$PWD\config.ini"
 Copy-Item -LiteralPath $patchFiles -Destination "$spotifyDirectory"
@@ -558,32 +420,28 @@ Copy-Item -LiteralPath $patchFiles -Destination "$spotifyDirectory"
 $tempDirectory = $PWD
 Pop-Location
 
+
+
 Start-Sleep -Milliseconds 200
 Remove-Item -Recurse -LiteralPath $tempDirectory 
 
 $xpui_spa_patch = "$env:APPDATA\Spotify\Apps\xpui.spa"
 $xpui_js_patch = "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
-$spa_test = Test-Path -LiteralPath "$env:APPDATA\Spotify\Apps\xpui.spa"
-$js_test = Test-Path -LiteralPath "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
 
+$test_spa = Test-Path -Path $env:APPDATA\Spotify\Apps\xpui.spa
+$test_js = Test-Path -Path $env:APPDATA\Spotify\Apps\xpui\xpui.js
 
-if ($spa_test -and $js_test) {
-    Write-Host "Ошибка" -ForegroundColor Red
-    Write-Host "Расположение файлов Spotify нарушено, удалите клиент и снова запустите скрипт."
-    Write-Host "Выполнение остановлено."
+if ($test_spa -and $test_js) {
+    Write-Host "Error" -ForegroundColor Red
+    Write-Host "The location of Spotify files is broken, uninstall the client and run the script again."
+    Write-Host "The script is stopped."
     exit
 }
 
-
 if (Test-Path $xpui_js_patch) {
-    Write-Host "Обнаружен Spicetify"`n
+    Write-Host "Spicetify detected"`n
 
 
-    # Удалить все файлы кроме "en", "ru" и "__longest"
-
-    $patch_lang = "$env:APPDATA\Spotify\Apps\xpui\i18n"
-
-    Remove-Item $patch_lang -Exclude *en*, *ru*, *__longest* -Recurse
 
 
     $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $xpui_js_patch
@@ -596,20 +454,17 @@ if (Test-Path $xpui_js_patch) {
     }
 
 
-    # Удалить надпись о новой версии
+    # Remove the label about the new version
     if ($block_update) { $xpui_js = OffUpdStatus }
 
-    # Отключить подкасты
+    # Turn off podcasts
     if ($Podcasts_off) { $xpui_js = OffPodcasts }
     
-    # Активация полноэкранного режима, а также удаление кнопки и меню "Перейти на Premium", отключиние спонсорской рекламы в некоторых плейлистах, удаление пустого рекламного блока.
+    # Full screen mode activation and removing "Upgrade to premium" menu, upgrade button, disabling a playlist sponsor
     $xpui_js = OffAdsOnFullscreen
        
-    # Экспереметальные функции
+    # Experimental Feature
     $xpui_js = ExpFeature
-
-    # Удалить из xpui.js все языки кроме En и Ru
-    $xpui_js = OffRujs
 
     $writer = New-Object System.IO.StreamWriter -ArgumentList $xpui_js_patch
     $writer.BaseStream.SetLength(0)
@@ -617,18 +472,8 @@ if (Test-Path $xpui_js_patch) {
     if ($spotx_new) { $writer.Write([System.Environment]::NewLine + '// Patched by SpotX') }
     $writer.Close()  
 
-    # Russian Translate
-    $file_ru = get-item $env:APPDATA\Spotify\Apps\xpui\i18n\ru.json
-    $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $file_ru
-    $xpui_ru = $reader.ReadToEnd()
-    $reader.Close()
-    $xpui_ru = RuTranslate
-    $writer = New-Object System.IO.StreamWriter -ArgumentList $file_ru
-    $writer.BaseStream.SetLength(0)
-    $writer.Write($xpui_ru)
-    $writer.Close()  
 
-    # Минификация licenses.html
+    # licenses.html minification
     $file_licenses = get-item $env:APPDATA\Spotify\Apps\xpui\licenses.html
     $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList $file_licenses
     $xpuiContents_html = $reader.ReadToEnd()
@@ -638,12 +483,13 @@ if (Test-Path $xpui_js_patch) {
     $writer.BaseStream.SetLength(0)
     $writer.Write($xpuiContents_html)
     $writer.Close()
+
 }  
 
 
 If (Test-Path $xpui_spa_patch) {
 
-    # Делаем резервную копию xpui.spa если он оригинальный
+    # Make a backup copy of xpui.spa if it is original
 
     Add-Type -Assembly 'System.IO.Compression.FileSystem'
     $zip = [System.IO.Compression.ZipFile]::Open($xpui_spa_patch, 'update')
@@ -658,31 +504,6 @@ If (Test-Path $xpui_spa_patch) {
         Copy-Item $xpui_spa_patch $env:APPDATA\Spotify\Apps\xpui.bak
     }
     else { $zip.Dispose() }
-
-
-    [Reflection.Assembly]::LoadWithPartialName('System.IO.Compression') | Out-Null
-
-    
-    $files = 'af.json', 'am.json', 'ar.json', 'az.json', 'bg.json', 'bho.json', 'bn.json', `
-        'cs.json', 'da.json', 'de.json', 'el.json', 'es-419.json', 'es.json', 'et.json', 'fa.json', `
-        'fi.json', 'fil.json', 'fr-CA.json', 'fr.json', 'gu.json', 'he.json', 'hi.json', 'hu.json', `
-        'id.json', 'is.json', 'it.json', 'ja.json', 'kn.json', 'ko.json', 'lt.json', 'lv.json', `
-        'ml.json', 'mr.json', 'ms.json', 'nb.json', 'ne.json', 'nl.json', 'or.json', 'pa-IN.json', `
-        'pl.json', 'pt-BR.json', 'pt-PT.json', 'ro.json', 'sk.json', 'sl.json', 'sr.json', 'sv.json', `
-        'sw.json' , 'ta.json' , 'te.json' , 'th.json' , 'tr.json' , 'uk.json' , 'ur.json' , 'vi.json', `
-        'zh-CN.json', 'zh-TW.json' , 'zu.json' , 'pa-PK.json' , 'hr.json'
-
-    $stream = New-Object IO.FileStream($xpui_spa_patch, [IO.FileMode]::Open)
-    $mode = [IO.Compression.ZipArchiveMode]::Update
-    $zip_xpui = New-Object IO.Compression.ZipArchive($stream, $mode)
-
-    ($zip_xpui.Entries | Where-Object { $files -contains $_.Name }) | ForEach-Object { $_.Delete() }
-
-    $zip_xpui.Dispose()
-    $stream.Close()
-    $stream.Dispose()
-
-
     
     Add-Type -Assembly 'System.IO.Compression.FileSystem'
     $zip = [System.IO.Compression.ZipFile]::Open($xpui_spa_patch, 'update')
@@ -694,24 +515,20 @@ If (Test-Path $xpui_spa_patch) {
     $reader.Close()
 
 
-    # Удалить надпись о новой версии в окне "О приложении"
+    # Remove the label about the new version
     if ($block_update) { $xpui_js = OffUpdStatus }
 
 
-    # Отключить подкасты
+    # Turn off podcasts
     if ($podcasts_off) { $xpui_js = OffPodcasts }
     
 
-    # Активация полноэкранного режима, а также удаление кнопки и меню "Перейти на Premium", отключиние спонсорской рекламы в некоторых плейлистах, удаление пустого рекламного блока.
+    # Full screen mode activation and removing "Upgrade to premium" menu, upgrade button, disabling a playlist sponsor
     $xpui_js = OffAdsOnFullscreen
        
-    # Экспереметальные функции
+    # Experimental Feature
     $xpui_js = ExpFeature
-
-    # Удалить из xpui.js все языки кроме En и Ru
-    $xpui_js = OffRujs
-        
-
+   
     $writer = New-Object System.IO.StreamWriter($entry_xpui.Open())
     $writer.BaseStream.SetLength(0)
     $writer.Write($xpui_js)
@@ -724,6 +541,7 @@ If (Test-Path $xpui_spa_patch) {
     $reader = New-Object System.IO.StreamReader($entry_vendor_xpui.Open())
     $xpuiContents_vendor = $reader.ReadToEnd()
     $reader.Close()
+
     $xpuiContents_vendor = $xpuiContents_vendor `
         <# Disable Sentry" #> -replace "prototype\.bindClient=function\(\w+\)\{", '${0}return;'
     $writer = New-Object System.IO.StreamWriter($entry_vendor_xpui.Open())
@@ -733,7 +551,7 @@ If (Test-Path $xpui_spa_patch) {
 
 
 
-    # минификация js 
+    # js minification
     $zip.Entries | Where-Object FullName -like '*.js' | ForEach-Object {
         $readerjs = New-Object System.IO.StreamReader($_.Open())
         $xpuiContents_js = $readerjs.ReadToEnd()
@@ -770,7 +588,7 @@ If (Test-Path $xpui_spa_patch) {
             -replace "html\[dir=rtl\].+?\{.+?\}", "" `
             -replace "html\[lang=ar\].+?\{.+?\}", "" `
             -replace "\[dir=rtl\].+?\{.+?\}", "" `
-            <# минификация css #>`
+            <# Css minification #>`
             -replace "[/]\*([^*]|[\r\n]|(\*([^/]|[\r\n])))*\*[/]", "" `
             -replace "[/][/]#\s.*", "" `
             -replace "\r?\n(?!\(1|\d)", ""
@@ -783,7 +601,7 @@ If (Test-Path $xpui_spa_patch) {
     }
     
 
-    # Минификация licenses.html
+    # licenses.html minification
     $zip.Entries | Where-Object FullName -like '*licenses.html' | ForEach-Object {
         $reader = New-Object System.IO.StreamReader($_.Open())
         $xpuiContents_html = $reader.ReadToEnd()
@@ -795,7 +613,7 @@ If (Test-Path $xpui_spa_patch) {
         $writer.Close()
     }
 
-    # Минификация blank.html
+    # blank.html minification
     $entry_blank_html = $zip.GetEntry('blank.html')
     $reader = New-Object System.IO.StreamReader($entry_blank_html.Open())
     $xpuiContents_html_blank = $reader.ReadToEnd()
@@ -804,9 +622,9 @@ If (Test-Path $xpui_spa_patch) {
     $html_min1 = "  "
     $html_min2 = "(?m)(^\s*\r?\n)"
     $html_min3 = "\r?\n(?!\(1|\d)"
-    if ($xpuiContents_html_blank -match $html_min1) { $xpuiContents_html_blank = $xpuiContents_html_blank -replace $html_min1, "" } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$html_min1 в html" }
-    if ($xpuiContents_html_blank -match $html_min2) { $xpuiContents_html_blank = $xpuiContents_html_blank -replace $html_min2, "" } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$html_min2 в html" }
-    if ($xpuiContents_html_blank -match $html_min3) { $xpuiContents_html_blank = $xpuiContents_html_blank -replace $html_min3, "" } else { Write-Host "Не нашел " -ForegroundColor red -NoNewline; Write-Host "переменную `$html_min3 в html" }
+    if ($xpuiContents_html_blank -match $html_min1) { $xpuiContents_html_blank = $xpuiContents_html_blank -replace $html_min1, "" } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$html_min1 in html" }
+    if ($xpuiContents_html_blank -match $html_min2) { $xpuiContents_html_blank = $xpuiContents_html_blank -replace $html_min2, "" } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$html_min2 in html" }
+    if ($xpuiContents_html_blank -match $html_min3) { $xpuiContents_html_blank = $xpuiContents_html_blank -replace $html_min3, "" } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$html_min3 in html" }
 
     $xpuiContents_html_blank = $xpuiContents_html_blank
     $writer = New-Object System.IO.StreamWriter($entry_blank_html.Open())
@@ -814,29 +632,13 @@ If (Test-Path $xpui_spa_patch) {
     $writer.Write($xpuiContents_html_blank)
     $writer.Close()
     
-
-    # Доперевод файла ru.json
-    $zip.Entries | Where-Object FullName -like '*ru.json' | ForEach-Object {
-        $readerjson = New-Object System.IO.StreamReader($_.Open())
-        $xpui_ru = $readerjson.ReadToEnd()
-        $readerjson.Close()
-
-    
-        $xpui_ru = RuTranslate
-
-        $writer = New-Object System.IO.StreamWriter($_.Open())
-        $writer.BaseStream.SetLength(0)
-        $writer.Write($xpui_ru)
-        $writer.Close()
-    }
-
-    # json
+    # Json
     $zip.Entries | Where-Object FullName -like '*.json' | ForEach-Object {
         $readerjson = New-Object System.IO.StreamReader($_.Open())
         $xpuiContents_json = $readerjson.ReadToEnd()
         $readerjson.Close()
 
-        # json минификация
+        # Json minification
         $xpuiContents_json = $xpuiContents_json `
             -replace "  ", "" -replace "    ", "" -replace '": ', '":' -replace "\r?\n(?!\(1|\d)", "" 
 
@@ -846,19 +648,11 @@ If (Test-Path $xpui_spa_patch) {
         $writer.Close()
             
     }
-
     $zip.Dispose()   
 }
 
 
-
-# Удалить все файлы кроме "en" и "ru" 
-
-$patch_lang = "$spotifyDirectory\locales"
-
-Remove-Item $patch_lang -Exclude *en*, *ru* -Recurse
-
-# Если папки по умолчанию Dekstop не существует, то попытаться найти её через реестр.
+# If the default Dekstop folder does not exist, then try to find it through the registry.
 $ErrorActionPreference = 'SilentlyContinue' 
 
 if (Test-Path "$env:USERPROFILE\Desktop") {  
@@ -875,7 +669,7 @@ if (!(Test-Path "$env:USERPROFILE\Desktop")) {
     
 }
 
-# Испраление бага ярлыка на рабочем столе
+# Shortcut bug
 $ErrorActionPreference = 'SilentlyContinue' 
 
 If (!(Test-Path $env:USERPROFILE\Desktop\Spotify.lnk)) {
@@ -891,7 +685,7 @@ If (!(Test-Path $env:USERPROFILE\Desktop\Spotify.lnk)) {
 }
 
 
-# Блокировка обновлений
+# Block updates
 
 $ErrorActionPreference = 'SilentlyContinue'
 
@@ -905,13 +699,13 @@ $folder_update_access = Get-Acl $env:LOCALAPPDATA\Spotify\Update
 
 if ($block_update) {
 
-    # Если была установка клиента 
+    # If there was a client installation 
     if (!($update_directory)) {
 
-        # Создать папку Spotify в Local
+        # Create Spotify folder in Localappdata
         New-Item -Path $env:LOCALAPPDATA -Name "Spotify" -ItemType "directory" | Out-Null
 
-        # Создать файл Update
+        # Create Update file
         New-Item -Path $env:LOCALAPPDATA\Spotify\ -Name "Update" -ItemType "file" -Value "STOPIT" | Out-Null
         $file_upd = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update
         $file_upd.Attributes = "ReadOnly", "System"
@@ -929,14 +723,14 @@ if ($block_update) {
 
     }
 
-    # Если клиент уже был
+    # If the client has already been
     If ($update_directory) {
 
 
-        # Удалить папку Update если она есть
+        # Delete the Update folder if it exists
         if ($Check_folder_file -match '\bDirectory\b') {  
 
-            # Если у папки Update заблокированы права то разблокировать 
+            # If the rights of the Update folder are blocked, then unblock 
             if ($folder_update_access.AccessToString -match 'Deny') {
 
         ($ACL = Get-Acl $env:LOCALAPPDATA\Spotify\Update).access | ForEach-Object {
@@ -947,7 +741,7 @@ if ($block_update) {
             Remove-item $env:LOCALAPPDATA\Spotify\Update -Recurse -Force
         } 
 
-        # Создать файл Update если его нет
+        # Create Update file if it doesn't exist
         if (!($Check_folder_file -match '\bSystem\b' -and $Check_folder_file -match '\bReadOnly\b')) {  
             New-Item -Path $env:LOCALAPPDATA\Spotify\ -Name "Update" -ItemType "file" -Value "STOPIT" | Out-Null
             $file_upd = Get-ItemProperty -Path $env:LOCALAPPDATA\Spotify\Update
@@ -970,7 +764,7 @@ if ($block_update) {
 
 
 
-# Автоматическая очистка кеша
+# automatic cache clearing
 
 
 if ($cache_install) {
@@ -987,7 +781,7 @@ if ($cache_install) {
     Start-Sleep -Milliseconds 200
 
     # cache-spotify.ps1
-    $webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/SpotX/main/Cache/cache_spotify_ru.ps1', "$env:APPDATA\Spotify\cache-spotify.ps1")
+    $webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/SpotX/main/Cache/cache-spotify.ps1', "$env:APPDATA\Spotify\cache-spotify.ps1")
 
     # Spotify.vbs
     $webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/SpotX/main/Cache/Spotify.vbs', "$env:APPDATA\Spotify\Spotify.vbs")
@@ -1012,10 +806,10 @@ if ($cache_install) {
         $contentcache_spotify_ps1 = [System.IO.File]::ReadAllText("$env:APPDATA\Spotify\cache-spotify.ps1")
         $contentcache_spotify_ps1 = $contentcache_spotify_ps1.Trim()
         [System.IO.File]::WriteAllText("$env:APPDATA\Spotify\cache-spotify.ps1", $contentcache_spotify_ps1)
-        Write-Host "Установка завершена"`n -ForegroundColor Green
+        Write-Host "installation completed"`n -ForegroundColor Green
         exit
     }
 }
 
-Write-Host "Установка завершена"`n -ForegroundColor Green
+Write-Host "installation completed"`n -ForegroundColor Green
 exit
