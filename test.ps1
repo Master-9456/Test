@@ -213,7 +213,7 @@ if (-not $spotifyInstalled -or $upgrade_client) {
         $ErrorActionPreference = 'SilentlyContinue'  # Команда гасит легкие ошибки
         Stop-Process -Name Spotify 
         Start-Sleep -Seconds 1
-        Remove-Item $spotifyDirectory *chrome_elf* -Recurse -Force
+        Remove-Item $spotifyDirectory -Include *chrome_elf* -Recurse -Force
     } 
 
     # Исправление ошибки, если установщик Spotify был запущен от администратора
