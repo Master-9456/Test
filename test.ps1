@@ -561,8 +561,8 @@ Remove-Item -Recurse -LiteralPath $tempDirectory
 
 $xpui_spa_patch = "$env:APPDATA\Spotify\Apps\xpui.spa"
 $xpui_js_patch = "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
-$spa_test = -LiteralPath "$env:APPDATA\Spotify\Apps\xpui.spa"
-$js_test = -LiteralPath "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
+$spa_test = Test-Path -LiteralPath "$env:APPDATA\Spotify\Apps\xpui.spa"
+$js_test = Test-Path -LiteralPath "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
 
 
 if ($spa_test -and $js_test) {
