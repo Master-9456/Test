@@ -960,7 +960,7 @@ if ($cache_install) {
     # Spotify.lnk
     $source2 = "$env:APPDATA\Spotify\cache\Spotify.vbs"
     $target2 = "$desktop_folder\Spotify.lnk"
-    $WorkingDir2 = "$env:APPDATA\Spotify\cache"
+    $WorkingDir2 = "$env:APPDATA\Spotify"
     $WshShell2 = New-Object -comObject WScript.Shell
     $Shortcut2 = $WshShell2.CreateShortcut($target2)
     $Shortcut2.WorkingDirectory = $WorkingDir2
@@ -976,6 +976,24 @@ if ($cache_install) {
         $contentcache_spotify_ps1 = [System.IO.File]::ReadAllText("$env:APPDATA\Spotify\cache\cache-spotify.ps1")
         $contentcache_spotify_ps1 = $contentcache_spotify_ps1.Trim()
         [System.IO.File]::WriteAllText("$env:APPDATA\Spotify\cache\cache-spotify.ps1", $contentcache_spotify_ps1)
+
+        $infile = "$env:APPDATA\Spotify\cache\cache-spotify.ps1"
+        $outfile = "$env:APPDATA\Spotify\cache\cache-spotify2.ps1"
+
+        $sr = New-Object System.IO.StreamReader($infile) 
+        $sw = New-Object System.IO.StreamWriter($outfile, $false, [System.Text.Encoding]::Default)
+        $sw.Write($sr.ReadToEnd())
+        $sw.Close()
+        $sr.Close() 
+        $sw.Dispose()
+        $sr.Dispose()
+
+        Start-Sleep -Milliseconds 200
+
+        Remove-item $infile -Recurse -Force
+        Rename-Item -path $outfile -NewName $infile
+
+
         Write-Host "Установка завершена"`n -ForegroundColor Green
         exit
     }
