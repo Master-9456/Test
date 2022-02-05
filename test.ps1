@@ -950,17 +950,17 @@ if ($cache_install) {
     # cache-spotify.ps1
     $webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/Test/main/Cache/cache_spotify_ru.ps1', "$env:APPDATA\Spotify\cache\cache-spotify.ps1")
 
-    # Spotify.vbs
-    $webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/Test/main/Cache/Spotify.vbs', "$env:APPDATA\Spotify\cache\Spotify.vbs")
+    # hide_window.vbs
+    $webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/Test/main/Cache/hide_window.vbs', "$env:APPDATA\Spotify\cache\hide_window.vbs")
     
     # run_ps.bat
     $webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/Test/main/Cache/run_ps.bat', "$env:APPDATA\Spotify\cache\run_ps.bat")
 
 
     # Spotify.lnk
-    $source2 = "$env:APPDATA\Spotify\cache\Spotify.vbs"
+    $source2 = "$env:APPDATA\Spotify\cache\hide_window.vbs"
     $target2 = "$desktop_folder\Spotify.lnk"
-    $WorkingDir2 = "$env:APPDATA\Spotify"
+    $WorkingDir2 = "$env:APPDATA\Spotify\cache\"
     $WshShell2 = New-Object -comObject WScript.Shell
     $Shortcut2 = $WshShell2.CreateShortcut($target2)
     $Shortcut2.WorkingDirectory = $WorkingDir2
