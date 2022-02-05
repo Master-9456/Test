@@ -942,9 +942,6 @@ if ($cache_install) {
         Remove-item $env:APPDATA\Spotify\cache -Recurse -Force
     }
     
-    If (Test-Path $env:USERPROFILE\Desktop\Spotify.lnk) {
-        Remove-item $desktop_folder\Spotify.lnk -Recurse -Force
-    }
     Start-Sleep -Milliseconds 200
 
 
