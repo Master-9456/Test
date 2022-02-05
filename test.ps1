@@ -955,6 +955,9 @@ if ($cache_install) {
     
     Start-Sleep -Milliseconds 200
 
+
+    New-Item -Path $env:LOCALAPPDATA\Spotify\ -Name "cache" -ItemType "directory" | Out-Null
+
     # cache-spotify.ps1
     $webClient.DownloadFile('https://raw.githubusercontent.com/amd64fox/Test/main/Cache/cache_spotify_ru.ps1', "$env:APPDATA\Spotify\cache\cache-spotify.ps1")
 
