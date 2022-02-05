@@ -936,23 +936,15 @@ if ($block_update) {
 
 if ($cache_install) {
 
-    $test_cache_spotify_ps = Test-Path -Path $env:APPDATA\Spotify\cache-spotify.ps1
-    $test_spotify_vbs = Test-Path -Path $env:APPDATA\Spotify\Spotify.vbs
     $test_cache_folder = Test-Path -Path $env:APPDATA\Spotify\cache
 
-    if ($test_cache_spotify_ps) {
-        Remove-item $env:APPDATA\Spotify\cache-spotify.ps1 -Recurse -Force
-    }
-    if ($test_spotify_vbs) {
-        Remove-item $env:APPDATA\Spotify\Spotify.vbs -Recurse -Force
-    }
-    
     if ($test_cache_folder) {
-    
         Remove-item $env:APPDATA\Spotify\cache -Recurse -Force
     }
     
-    
+    If (Test-Path $env:USERPROFILE\Desktop\Spotify.lnk) {
+        Remove-item $desktop_folder\Spotify.lnk -Recurse -Force
+    }
     Start-Sleep -Milliseconds 200
 
 
