@@ -14,7 +14,8 @@ $day = 7 # Количество дней после которых кеш счи
 # Очищает папку \Data если найдет устаревший кеш
 try{
 If (!(Test-Path -Path $env:LOCALAPPDATA\Spotify\Data)) {
- "$(Get-Date -uformat ‘%D %T’) Папка Local\Spotify\Data не найдена" | Out-File log.txt -append	
+ "$(Get-Date -uformat ‘%D %T’) Папка Local\Spotify\Data не найдена" | Out-File log.txt -append
+ exit	
 }
 $check = Get-ChildItem $env:LOCALAPPDATA\Spotify\Data -File -Recurse | Where-Object lastaccesstime -lt (get-date).AddDays(-$day)
 if($check.Length -ge 1){
