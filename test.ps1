@@ -960,7 +960,7 @@ if ($cache_install) {
     # Spotify.lnk
     $source2 = "$env:APPDATA\Spotify\cache\Spotify.vbs"
     $target2 = "$desktop_folder\Spotify.lnk"
-    $WorkingDir2 = "$env:APPDATA\Spotify"
+    $WorkingDir2 = "$env:APPDATA\Spotify\cache"
     $WshShell2 = New-Object -comObject WScript.Shell
     $Shortcut2 = $WshShell2.CreateShortcut($target2)
     $Shortcut2.WorkingDirectory = $WorkingDir2
