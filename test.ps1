@@ -204,12 +204,11 @@ if (-not $spotifyInstalled -or $upgrade_client) {
         Start-Sleep -Seconds 1
         Remove-Item $spotifyDirectory -Include *chrome_elf* -Recurse -Force
     } 
-
-
+    # Установка клиента
     Start-Process -FilePath explorer.exe -ArgumentList $PWD\SpotifySetup.exe
-    Start-Sleep -Seconds 2
+    while (-not (get-process | Where-Object {$_.ProcessName -eq 'SpotifySetup'})){}
     wait-process -name SpotifySetup
-
+   
     Stop-Process -Name Spotify 
     Stop-Process -Name SpotifyWebHelper 
     Stop-Process -Name SpotifyFullSetup 
