@@ -206,7 +206,9 @@ if (-not $spotifyInstalled -or $upgrade_client) {
     } 
 
 
-    Start-Process -FilePath explorer.exe -ArgumentList $PWD\SpotifySetup.exe; wait-process -name SpotifySetup
+    Start-Process -FilePath explorer.exe -ArgumentList $PWD\SpotifySetup.exe
+    Start-Sleep -Seconds 2
+    wait-process -name SpotifySetup
 
     Stop-Process -Name Spotify 
     Stop-Process -Name SpotifyWebHelper 
