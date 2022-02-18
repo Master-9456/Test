@@ -106,7 +106,7 @@ $zip = [System.IO.Compression.ZipFile]::Open("$PWD\chrome_elf.zip", 'read')
 $zip.Dispose()
 
 Remove-Item -LiteralPath "$PWD\chrome_elf.zip"
-
+$ch = Read-Host -Prompt "Pause"
 
 
 try {
