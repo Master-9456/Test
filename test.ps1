@@ -104,10 +104,7 @@ Add-Type -Assembly 'System.IO.Compression.FileSystem'
 $zip = [System.IO.Compression.ZipFile]::Open("$PWD\chrome_elf.zip", 'read')
 [System.IO.Compression.ZipFileExtensions]::ExtractToDirectory($zip, $PWD)
 $zip.Dispose()
-
 Remove-Item -LiteralPath "$PWD\chrome_elf.zip"
-$ch = Read-Host -Prompt "Pause"
-
 
 try {
     $webClient.DownloadFile(
